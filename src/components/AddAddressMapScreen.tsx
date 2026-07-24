@@ -238,15 +238,32 @@ export function AddAddressMapScreen({
                 onClick={() => setEditingAuto(true)}
                 className="flex w-full items-start gap-2 rounded-[14px] border border-border bg-background px-3 py-2.5 text-left"
               >
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span className="flex-1 text-sm text-foreground">
-                  {geocoding && !autoAddress
+                {geocoding ? (
+                  <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-primary" />
+                ) : (
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                )}
+                <span
+                  className={`flex-1 text-sm ${
+                    geocoding || (!autoAddress && !geocodeFailed)
+                      ? "text-muted-foreground"
+                      : geocodeFailed && !autoAddress
+                        ? "text-red-600"
+                        : "text-foreground"
+                  }`}
+                >
+                  {geocoding
                     ? "Finding address…"
-                    : autoAddress || "Move the pin to select a location"}
+                    : autoAddress
+                      ? autoAddress
+                      : geocodeFailed
+                        ? "Unable to fetch address, please enter manually"
+                        : "Move the pin to select a location"}
                 </span>
               </button>
             )}
           </div>
+
 
           <label className="block">
             <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">
