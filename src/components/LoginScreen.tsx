@@ -9,6 +9,12 @@ export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    captureReferralCode();
+  }, []);
+
+
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
     setPhone(digits);
