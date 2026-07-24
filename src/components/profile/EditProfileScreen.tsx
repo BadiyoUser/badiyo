@@ -6,6 +6,7 @@ import { getErrorMessage } from "@/lib/errorMessage";
 export function EditProfileScreen({ onBack }: { onBack: () => void }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [syntheticEmail, setSyntheticEmail] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [initialPhone, setInitialPhone] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -35,7 +36,11 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
         .single();
       if (data) {
         setFullName(data.full_name ?? "");
-        setEmail(data.email ?? "");
+        const rawEmail = data.email ?? "";
+        // Hide internal synthetic emails used for phone-OTP auth
+        const isSynthetic = /@badiyo\.phone\.local$/i.test(rawEmail);
+        setSyntheticEmail(isSynthetic ? rawEmail : null);
+        setEmail(isSynthetic ? "" : rawEmail);
         setPhone(data.phone ?? "");
         setInitialPhone(data.phone ?? "");
         setAvatarUrl(data.avatar_url ?? null);
@@ -81,7 +86,7 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
     setSaved(false);
     const update: { full_name: string | null; email: string | null; phone?: string | null } = {
       full_name: fullName || null,
-      email: email || null,
+      email: email ? email : syntheticEmail,
     };
     if (!phoneReadOnly) {
       update.phone = phone || null;
