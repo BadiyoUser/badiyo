@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BadiyoLogo } from "@/components/BadiyoLogo";
 import { LoginScreen } from "@/components/LoginScreen";
+import { OtpVerifyScreen } from "@/components/OtpVerifyScreen";
 import { HomeScreen } from "@/components/HomeScreen";
 import {
   SlotSelectionScreen,
@@ -54,6 +55,7 @@ type Phase =
   | "splash"
   | "splash-out"
   | "login"
+  | "otp-verify"
   | "home"
   | "slot"
   | "address"
@@ -87,6 +89,7 @@ function Index() {
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pendingPhone, setPendingPhone] = useState<string | null>(null);
   const [online, setOnline] = useState(
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
@@ -162,7 +165,25 @@ function Index() {
       )}
       {phase === "login" && (
         <div className="animate-fade-slide-in">
-          <LoginScreen onContinue={() => setPhase("home")} />
+          <LoginScreen onOtpSent={(p) => { setPendingPhone(p); setPhase("otp-verify"); }} />
+        </div>
+      )}
+      {phase === "otp-verify" && pendingPhone && (
+        <div className="animate-fade-slide-in">
+          <OtpVerifyScreen
+            phone={pendingPhone}
+            onBack={() => setPhase("login")}
+            onVerified={async () => {
+              try {
+                await ensureUserRow(`+91${pendingPhone}`);
+                const { linkReferralIfAny } = await import("@/lib/referrals");
+                await linkReferralIfAny();
+              } catch (e) {
+                console.error("post-otp setup failed:", e);
+              }
+              setPhase("home");
+            }}
+          />
         </div>
       )}
       {phase === "home" && (
