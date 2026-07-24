@@ -86,6 +86,10 @@ function Index() {
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [online, setOnline] = useState(
+    typeof navigator === "undefined" ? true : navigator.onLine,
+  );
 
   function resetAndGoHome() {
     setActiveBookingId(null);
@@ -104,10 +108,17 @@ function Index() {
         ensureUserRow().catch((e) => console.error("ensureUserRow failed:", e));
       }
     });
+    const goOnline = () => setOnline(true);
+    const goOffline = () => setOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       sub.subscription.unsubscribe();
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+
     };
   }, []);
 
