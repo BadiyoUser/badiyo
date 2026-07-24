@@ -373,7 +373,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      credit_referral_for_booking: {
+        Args: { _booking_id: string }
+        Returns: undefined
+      }
+      link_referral: { Args: { _code: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
