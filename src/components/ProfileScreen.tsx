@@ -144,6 +144,19 @@ export function ProfileScreen({
             </div>
           </section>
         ))}
+
+        <button
+          onClick={handleLogout}
+          className="mt-4 flex w-full items-center gap-3 rounded-[14px] border border-destructive/30 bg-card px-4 py-3 text-left transition active:scale-[0.99]"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+            <LogOut className="h-5 w-5 text-destructive" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-destructive">Logout</p>
+            <p className="text-xs text-muted-foreground">Sign out of your account</p>
+          </div>
+        </button>
       </div>
     </main>
   );
