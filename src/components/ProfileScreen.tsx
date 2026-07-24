@@ -73,8 +73,10 @@ export function ProfileScreen({
       title: "Account",
       items: [
         { key: "edit", label: "Edit Profile", desc: "Name, email and avatar", icon: UserCog, onClick: onOpenEditProfile },
+        { key: "payment", label: "Payment Methods", desc: "UPI, cards & saved methods", icon: CreditCard, onClick: onOpenPaymentMethods },
       ],
     },
+
     {
       title: "Activity",
       items: [
