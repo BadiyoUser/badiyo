@@ -69,12 +69,14 @@ export function PaymentScreen({
   address,
   onBack,
   onDone,
+  onTrackBooking,
 }: {
   service: SelectedService;
   slot: SelectedSlot;
   address: SelectedAddress;
   onBack: () => void;
   onDone: () => void;
+  onTrackBooking: (bookingId: string | null) => void;
 }) {
   const [status, setStatus] = useState<Status>("loading");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
