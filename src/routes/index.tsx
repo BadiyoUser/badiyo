@@ -63,7 +63,12 @@ type Phase =
   | "booking-details"
   | "profile"
   | "wallet"
-  | "rewards";
+  | "rewards"
+  | "edit-profile"
+  | "notifications"
+  | "settings"
+  | "help"
+  | "about";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
