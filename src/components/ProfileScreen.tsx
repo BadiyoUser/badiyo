@@ -11,8 +11,10 @@ import {
   FileText,
   Gift,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
