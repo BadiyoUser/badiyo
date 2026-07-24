@@ -168,9 +168,17 @@ export function AddressSelectionScreen({
                         : "border-border bg-card"
                     }`}
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-primary/10">
-                      <Home className="h-5 w-5 text-primary" />
-                    </div>
+                    {a.landmark_photo_url ? (
+                      <img
+                        src={a.landmark_photo_url}
+                        alt={a.label || "Home"}
+                        className="h-10 w-10 shrink-0 rounded-full border border-border object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-primary/10">
+                        <Home className="h-5 w-5 text-primary" />
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-bold text-foreground">
                         {a.label || "Address"}
