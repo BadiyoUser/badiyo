@@ -42,6 +42,8 @@ export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
         .upsert({ id: userId, phone: `+91${phone}` }, { onConflict: "id" });
       if (upsertError) throw upsertError;
 
+      await linkReferralIfAny();
+
       onContinue?.();
     } catch (err) {
       console.error("Login failed:", err);
