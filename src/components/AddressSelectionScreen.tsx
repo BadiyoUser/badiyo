@@ -50,7 +50,7 @@ export function AddressSelectionScreen({
   }, [addresses, selectedId]);
 
   const addMutation = useMutation({
-    mutationFn: async (input: NewAddressInput) => {
+    mutationFn: async (input: PickedAddress) => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) {
@@ -62,7 +62,11 @@ export function AddressSelectionScreen({
           user_id: uid,
           label: input.label,
           full_address: input.full_address,
-          area: input.area || null,
+          area: input.area,
+          city: input.city ?? undefined,
+          latitude: input.latitude,
+          longitude: input.longitude,
+          is_default: addresses.length === 0,
         })
         .select("id, label, full_address, area, city, is_default")
         .single();
