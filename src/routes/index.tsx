@@ -20,6 +20,8 @@ import { ExpertAssignedScreen } from "@/components/tracking/ExpertAssignedScreen
 import { OtpScreen } from "@/components/tracking/OtpScreen";
 import { ServiceInProgressScreen } from "@/components/tracking/ServiceInProgressScreen";
 import { RateReviewScreen } from "@/components/tracking/RateReviewScreen";
+import { MyBookingsScreen, type BookingRow } from "@/components/MyBookingsScreen";
+import { BookingDetailsScreen } from "@/components/BookingDetailsScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
