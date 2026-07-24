@@ -27,9 +27,7 @@ export function LoginScreen() {
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-6 pt-16 pb-10">
         {/* Logo */}
         <div className="flex justify-center">
-          <div className="rounded-2xl badiyo-green px-6 py-4">
-            <BadiyoLogo className="h-10 w-auto" />
-          </div>
+          <BadiyoLogo variant="green" className="h-12 w-auto" />
         </div>
 
         {/* Heading */}
