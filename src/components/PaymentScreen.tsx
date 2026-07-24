@@ -178,7 +178,7 @@ export function PaymentScreen({
       rzp.open();
     } catch (e) {
       console.error("Razorpay checkout error", e);
-      setErrorMsg((e as Error).message || "Something went wrong");
+      setErrorMsg(await getErrorMessage(e));
       setStatus("failed");
     }
   }
