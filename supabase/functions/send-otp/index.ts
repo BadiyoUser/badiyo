@@ -52,6 +52,16 @@ Deno.serve(async (req) => {
         destination: fullPhone,
         userName: digits,
         templateParams: [code],
+        // Authentication template's URL "Copy Code" button needs its own
+        // parameter matching the OTP code.
+        buttons: [
+          {
+            type: "button",
+            sub_type: "url",
+            index: 0,
+            parameters: [{ type: "text", text: code }],
+          },
+        ],
       }),
     });
 
