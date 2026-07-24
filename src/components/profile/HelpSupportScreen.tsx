@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, ChevronDown, MessageCircle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 const FAQS = [
   {
