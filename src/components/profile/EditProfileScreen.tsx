@@ -1,49 +1,94 @@
 import { ArrowLeft, User, Camera } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function EditProfileScreen({ onBack }: { onBack: () => void }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [initialPhone, setInitialPhone] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [authProvider, setAuthProvider] = useState<string | null>(null);
+  const [uid, setUid] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     (async () => {
       const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) return;
+      const u = userRes.user;
+      if (!u) return;
+      setUid(u.id);
+      // Auth provider: 'phone' for OTP, 'email'/'google' etc for others
+      const providers = (u.app_metadata?.providers as string[] | undefined) ?? [];
+      const primary = (u.app_metadata?.provider as string | undefined) ?? providers[0] ?? null;
+      setAuthProvider(primary);
+
       const { data } = await supabase
         .from("users")
         .select("full_name, email, phone, avatar_url")
-        .eq("id", uid)
+        .eq("id", u.id)
         .single();
       if (data) {
         setFullName(data.full_name ?? "");
         setEmail(data.email ?? "");
         setPhone(data.phone ?? "");
+        setInitialPhone(data.phone ?? "");
         setAvatarUrl(data.avatar_url ?? null);
       }
     })();
   }, []);
 
+  // Phone is read-only only when the user signed in via mobile AND already has a phone set.
+  const phoneReadOnly = authProvider === "phone" && !!initialPhone;
+
+  async function handlePhotoPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !uid) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${uid}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("address-photos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("address-photos").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const { error: updErr } = await supabase
+        .from("users")
+        .update({ avatar_url: url })
+        .eq("id", uid);
+      if (updErr) throw updErr;
+      setAvatarUrl(url);
+    } catch (err) {
+      console.error("Avatar upload failed:", err);
+      setUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function handleSave() {
+    if (!uid) return;
     setSaving(true);
     setSaved(false);
-    const { data: userRes } = await supabase.auth.getUser();
-    const uid = userRes.user?.id;
-    if (!uid) {
-      setSaving(false);
-      return;
+    const update: { full_name: string | null; email: string | null; phone?: string | null } = {
+      full_name: fullName || null,
+      email: email || null,
+    };
+    if (!phoneReadOnly) {
+      update.phone = phone || null;
     }
-    const { error } = await supabase
-      .from("users")
-      .update({ full_name: fullName || null, email: email || null })
-      .eq("id", uid);
+    const { error } = await supabase.from("users").update(update).eq("id", uid);
     setSaving(false);
     if (!error) {
+      setInitialPhone(phone);
       setSaved(true);
       setTimeout(() => setSaved(false), 1500);
     }
@@ -74,13 +119,27 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
             </div>
             <button
               type="button"
-              className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm disabled:opacity-60"
               aria-label="Change photo"
             >
               <Camera className="h-4 w-4" />
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoPick}
+            />
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">Tap to change photo</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {uploading ? "Uploading…" : "Tap to change photo"}
+          </p>
+          {uploadError && (
+            <p className="mt-1 text-xs text-destructive">{uploadError}</p>
+          )}
         </section>
 
         <section className="mt-8 space-y-4">
@@ -104,12 +163,21 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
           </Field>
           <Field label="Phone">
             <input
-              type="text"
+              type="tel"
+              inputMode="tel"
               value={phone}
-              readOnly
-              className="w-full rounded-[14px] border border-border bg-muted px-4 py-3 text-sm text-muted-foreground"
+              onChange={(e) => !phoneReadOnly && setPhone(e.target.value)}
+              readOnly={phoneReadOnly}
+              placeholder={phoneReadOnly ? "" : "Add your mobile number"}
+              className={
+                phoneReadOnly
+                  ? "w-full rounded-[14px] border border-border bg-muted px-4 py-3 text-sm text-muted-foreground"
+                  : "w-full rounded-[14px] border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+              }
             />
-            <p className="mt-1 text-xs text-muted-foreground">Phone number cannot be changed.</p>
+            {phoneReadOnly && (
+              <p className="mt-1 text-xs text-muted-foreground">Phone number cannot be changed.</p>
+            )}
           </Field>
         </section>
 
