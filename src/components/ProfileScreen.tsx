@@ -17,6 +17,7 @@ import type { LucideIcon } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { signAddressPhotoUrl } from "@/lib/storageUrl";
 
 type Item = { key: string; label: string; desc: string; icon: LucideIcon; onClick: () => void };
 type Group = { title: string; items: Item[] };
@@ -48,6 +49,7 @@ export function ProfileScreen({
 }) {
 
   const [fullName, setFullName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -56,12 +58,14 @@ export function ProfileScreen({
       if (!uid) return;
       const { data } = await supabase
         .from("users")
-        .select("full_name")
+        .select("full_name, avatar_url")
         .eq("id", uid)
         .single();
       if (data?.full_name) setFullName(data.full_name);
+      if (data?.avatar_url) setAvatarUrl(await signAddressPhotoUrl(data.avatar_url));
     })();
   }, []);
+
 
   async function handleLogout() {
     await supabase.auth.signOut();
