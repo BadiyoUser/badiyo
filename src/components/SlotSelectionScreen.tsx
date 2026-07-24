@@ -39,7 +39,7 @@ export function SlotSelectionScreen({
 }: {
   service: SelectedService;
   onBack: () => void;
-  onContinue: () => void;
+  onContinue: (slot: SelectedSlot) => void;
 }) {
   const [mode, setMode] = useState<Mode>("now");
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
