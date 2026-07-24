@@ -154,30 +154,31 @@ export function HomeScreen({
         </section>
 
         {/* Book Cleaning section */}
-        <h2 className="mt-10 text-xl font-extrabold tracking-tight text-foreground">
+        <h2 className="mt-8 text-lg font-extrabold tracking-tight text-foreground">
           Book Cleaning
         </h2>
 
-        <div className="mt-5 grid grid-cols-3 gap-4">
+        <div className="mt-4 flex flex-col gap-3">
           {services.map((s) => (
             <article
               key={s.id}
-              className="flex flex-col items-center rounded-[18px] border border-border bg-card p-5 pt-6 shadow-sm"
+              className="flex items-center gap-4 rounded-[18px] border border-border bg-card p-4 shadow-sm"
             >
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Icon name={s.icon} className="h-8 w-8 text-primary" />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <Icon name={s.icon} className="h-5 w-5 text-primary" />
               </div>
-              <div className="mt-4 text-lg font-extrabold text-foreground text-center leading-tight">
-                {s.duration_label}
-              </div>
-              {s.subtitle && (
-                <div className="mt-1.5 text-xs text-muted-foreground text-center leading-tight">
-                  {s.subtitle}
+              <div className="flex min-w-0 flex-1 flex-col">
+                <div className="text-base font-bold text-foreground">
+                  {s.duration_label}
                 </div>
-              )}
-              <div className="mt-3 h-px w-8 bg-primary/40" />
-              <div className="mt-3 text-lg font-extrabold text-primary">
-                Rs {Number(s.price)}
+                {s.subtitle && (
+                  <div className="text-xs text-muted-foreground">
+                    {s.subtitle}
+                  </div>
+                )}
+                <div className="text-sm font-bold text-primary">
+                  Rs {Number(s.price)}
+                </div>
               </div>
               <button
                 onClick={() =>
@@ -186,7 +187,7 @@ export function HomeScreen({
                     price: Number(s.price),
                   })
                 }
-                className="mt-4 w-full rounded-[12px] bg-primary px-3 py-3 text-sm font-bold text-primary-foreground transition active:scale-[0.98]"
+                className="shrink-0 rounded-[12px] bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition active:scale-[0.98]"
               >
                 Book Now
               </button>
@@ -194,7 +195,7 @@ export function HomeScreen({
           ))}
         </div>
 
-        <p className="mt-5 text-center text-xs text-muted-foreground">
+        <p className="mt-4 text-center text-xs text-muted-foreground">
           Need it later? Schedule a time inside booking
         </p>
 
