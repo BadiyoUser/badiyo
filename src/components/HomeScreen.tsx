@@ -12,7 +12,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "vacuum-cleaner": Wind,
   sparkles: Sparkles,
   gift: Gift,
-  home: HomeIcon,
+  home: Home,
 };
 
 function Icon({ name, className }: { name?: string | null; className?: string }) {
