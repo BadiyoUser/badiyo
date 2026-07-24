@@ -180,7 +180,7 @@ export function HomeScreen({
 
 
         {/* Book Cleaning section */}
-        <h2 className="mt-5 text-lg font-extrabold tracking-tight text-foreground">
+        <h2 className="mt-3 text-lg font-extrabold tracking-tight text-foreground">
           Book Cleaning
         </h2>
 
