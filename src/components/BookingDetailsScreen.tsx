@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Calendar, Home as HomeIcon, Star, X } from "lucide-re
 import type { BookingRow } from "./MyBookingsScreen";
 import { supabase } from "@/integrations/supabase/client";
 import { RescheduleSheet } from "./RescheduleSheet";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 function statusPillClasses(status: string): string {
   if (status === "completed") return "bg-primary/15 text-primary";
