@@ -179,7 +179,7 @@ export function LocationPickerSheet({
         className="flex-1 bg-black/40"
         onClick={onClose}
       />
-      <div className="mx-auto w-full max-w-md rounded-t-[24px] bg-card p-5 pb-8 shadow-lg animate-in slide-in-from-bottom duration-200">
+      <div className="mx-auto flex w-full max-w-md flex-col rounded-t-[24px] bg-card p-5 pb-8 shadow-lg animate-in slide-in-from-bottom duration-200 max-h-[85vh] h-[85vh]">
         <div className="mx-auto h-1.5 w-10 rounded-full bg-border" />
         <div className="mt-4 flex items-center justify-between">
           <h2 className="text-base font-extrabold text-foreground">
@@ -243,11 +243,12 @@ export function LocationPickerSheet({
         </div>
 
         {/* Saved */}
-        <div className="mt-5">
+        <div className="mt-5 flex min-h-0 flex-1 flex-col">
           <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
             Your saved addresses
           </div>
-          <div className="mt-2 max-h-[40vh] space-y-2 overflow-y-auto">
+          <div className="mt-2 flex-1 space-y-2 overflow-y-auto pr-1">
+
             {isLoading ? (
               <p className="py-6 text-center text-sm text-muted-foreground">
                 Loading…
