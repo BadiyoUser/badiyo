@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { GoogleIcon } from "./GoogleIcon";
 import { supabase } from "@/integrations/supabase/client";
+import { captureReferralCode, linkReferralIfAny } from "@/lib/referrals";
 
 export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    captureReferralCode();
+  }, []);
+
+
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
@@ -34,6 +41,8 @@ export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
         .from("users")
         .upsert({ id: userId, phone: `+91${phone}` }, { onConflict: "id" });
       if (upsertError) throw upsertError;
+
+      await linkReferralIfAny();
 
       onContinue?.();
     } catch (err) {
