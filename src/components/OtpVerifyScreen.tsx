@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { supabase } from "@/integrations/supabase/client";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export function OtpVerifyScreen({
   phone,
