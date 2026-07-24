@@ -11,6 +11,7 @@ type Address = {
   area: string | null;
   city: string | null;
   is_default: boolean | null;
+  landmark_photo_url: string | null;
 };
 
 async function fetchAddresses(): Promise<Address[]> {
@@ -19,7 +20,7 @@ async function fetchAddresses(): Promise<Address[]> {
   if (!uid) return [];
   const { data, error } = await supabase
     .from("addresses")
-    .select("id, label, full_address, area, city, is_default")
+    .select("id, label, full_address, area, city, is_default, landmark_photo_url")
     .eq("user_id", uid)
     .order("created_at", { ascending: false });
   if (error) throw error;
