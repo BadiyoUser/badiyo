@@ -22,6 +22,8 @@ import { ServiceInProgressScreen } from "@/components/tracking/ServiceInProgress
 import { RateReviewScreen } from "@/components/tracking/RateReviewScreen";
 import { MyBookingsScreen, type BookingRow } from "@/components/MyBookingsScreen";
 import { BookingDetailsScreen } from "@/components/BookingDetailsScreen";
+import { ProfileScreen } from "@/components/ProfileScreen";
+import { WalletScreen } from "@/components/WalletScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
