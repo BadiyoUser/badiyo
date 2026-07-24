@@ -19,8 +19,8 @@ export function RateReviewScreen({
     if (bookingId) {
       const { error } = await supabase.rpc("submit_booking_review", {
         _booking_id: bookingId,
-        _rating: rating || null,
-        _review: text.trim() || null,
+        _rating: rating || 0,
+        _review: text.trim() || "",
       });
       if (error) console.error("review submit failed:", error);
     }
