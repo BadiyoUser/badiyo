@@ -75,6 +75,7 @@ export function ProfileScreen({
       items: [
         { key: "bookings", label: "My Bookings", desc: "View past and upcoming services", icon: CalendarCheck, onClick: onOpenBookings },
         { key: "wallet", label: "Wallet", desc: "Badiyo coins & transactions", icon: WalletIcon, onClick: onOpenWallet },
+        { key: "referrals", label: "Refer & Earn", desc: "Invite friends and earn rewards", icon: Gift, onClick: onOpenReferrals },
       ],
     },
     {
