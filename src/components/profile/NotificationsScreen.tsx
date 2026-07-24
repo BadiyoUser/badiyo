@@ -1,7 +1,10 @@
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { getErrorMessage } from "@/lib/errorMessage";
 
-type Pref = { key: string; label: string; desc: string };
+type Pref = { key: "booking" | "promos" | "referrals"; label: string; desc: string };
 
 const PREFS: Pref[] = [
   { key: "booking", label: "Booking updates", desc: "Confirmations, reminders and status changes" },
@@ -9,12 +12,49 @@ const PREFS: Pref[] = [
   { key: "referrals", label: "Referral updates", desc: "When friends join and earn you coins" },
 ];
 
+const DEFAULTS = { booking: true, promos: true, referrals: true };
+
 export function NotificationsScreen({ onBack }: { onBack: () => void }) {
-  const [state, setState] = useState<Record<string, boolean>>({
-    booking: true,
-    promos: true,
-    referrals: true,
-  });
+  const [state, setState] = useState<Record<string, boolean>>(DEFAULTS);
+  const [uid, setUid] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      const id = userRes.user?.id ?? null;
+      if (cancelled) return;
+      setUid(id);
+      if (!id) return;
+      const { data } = await supabase
+        .from("users")
+        .select("notification_preferences")
+        .eq("id", id)
+        .maybeSingle();
+      if (cancelled) return;
+      const prefs = (data?.notification_preferences ?? {}) as Record<string, boolean>;
+      setState({ ...DEFAULTS, ...prefs });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function toggle(key: string) {
+    const next = { ...state, [key]: !state[key] };
+    setState(next);
+    if (!uid) return;
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({ notification_preferences: next })
+        .eq("id", uid);
+      if (error) throw error;
+    } catch (e) {
+      setState(state);
+      toast.error(await getErrorMessage(e));
+    }
+  }
 
   return (
     <main className="min-h-screen w-full bg-background pb-10">
@@ -42,7 +82,7 @@ export function NotificationsScreen({ onBack }: { onBack: () => void }) {
                 <button
                   role="switch"
                   aria-checked={on}
-                  onClick={() => setState((s) => ({ ...s, [p.key]: !s[p.key] }))}
+                  onClick={() => toggle(p.key)}
                   className={`relative h-6 w-11 shrink-0 rounded-full transition ${
                     on ? "bg-primary" : "bg-muted"
                   }`}
