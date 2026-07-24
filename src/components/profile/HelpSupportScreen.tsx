@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, ChevronDown, MessageCircle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 const FAQS = [
   {
@@ -51,8 +52,8 @@ export function HelpSupportScreen({ onBack }: { onBack: () => void }) {
       if (error) throw error;
       setTicketId(data.id);
       setMessage("");
-    } catch (e: any) {
-      setError(e?.message ?? "Failed to submit. Please try again.");
+    } catch (e) {
+      setError(await getErrorMessage(e));
     } finally {
       setSubmitting(false);
     }

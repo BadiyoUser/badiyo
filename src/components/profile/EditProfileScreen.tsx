@@ -1,6 +1,7 @@
 import { ArrowLeft, User, Camera } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export function EditProfileScreen({ onBack }: { onBack: () => void }) {
   const [fullName, setFullName] = useState("");
@@ -68,7 +69,7 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
       setAvatarUrl(url);
     } catch (err) {
       console.error("Avatar upload failed:", err);
-      setUploadError(err instanceof Error ? err.message : "Upload failed");
+      setUploadError(await getErrorMessage(err));
     } finally {
       setUploading(false);
     }

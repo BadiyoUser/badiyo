@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Calendar, Home as HomeIcon, Star, X } from "lucide-re
 import type { BookingRow } from "./MyBookingsScreen";
 import { supabase } from "@/integrations/supabase/client";
 import { RescheduleSheet } from "./RescheduleSheet";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 function statusPillClasses(status: string): string {
   if (status === "completed") return "bg-primary/15 text-primary";
@@ -75,8 +76,8 @@ export function BookingDetailsScreen({
       setStatus("cancelled");
       setConfirmingCancel(false);
       onBack();
-    } catch (e: any) {
-      setError(e?.message ?? "Could not cancel. Try again.");
+    } catch (e) {
+      setError(await getErrorMessage(e));
     } finally {
       setCancelling(false);
     }
@@ -95,8 +96,8 @@ export function BookingDetailsScreen({
       setScheduledDate(date);
       setScheduledSlot(slotLabel);
       setRescheduleOpen(false);
-    } catch (e: any) {
-      setError(e?.message ?? "Could not reschedule. Try again.");
+    } catch (e) {
+      setError(await getErrorMessage(e));
     } finally {
       setSaving(false);
     }

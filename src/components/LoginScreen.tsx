@@ -3,6 +3,7 @@ import { BadiyoLogo } from "./BadiyoLogo";
 import { GoogleIcon } from "./GoogleIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { captureReferralCode } from "@/lib/referrals";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export function LoginScreen({
   onOtpSent,
@@ -38,7 +39,7 @@ export function LoginScreen({
       onOtpSent?.(phone);
     } catch (err) {
       console.error("send-otp failed:", err);
-      setError(err instanceof Error ? err.message : "Could not send OTP. Please try again.");
+      setError(await getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,7 @@ export function LoginScreen({
       // Browser navigates away to Google; no further action here.
     } catch (err) {
       console.error("Google sign-in failed:", err);
-      setError(err instanceof Error ? err.message : "Could not start Google sign-in.");
+      setError(await getErrorMessage(err));
       setLoading(false);
     }
   };
