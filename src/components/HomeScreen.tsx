@@ -213,25 +213,7 @@ export function HomeScreen({
         )}
       </div>
 
-      {/* Bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card">
-        <div className="mx-auto flex w-full max-w-md items-stretch justify-around px-4 py-2">
-          {navItems.map((item, idx) => {
-            const active = idx === 0;
-            return (
-              <button
-                key={item.payload?.label ?? idx}
-                className={`flex flex-1 flex-col items-center gap-1 rounded-[14px] px-3 py-2 text-xs font-semibold transition ${
-                  active ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <Icon name={item.payload?.icon} className="h-5 w-5" />
-                <span>{item.payload?.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+      <BottomNav activeKey="home" onHome={() => {}} onRewards={onOpenRewards ?? (() => {})} />
     </main>
   );
 }
