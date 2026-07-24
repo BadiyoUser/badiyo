@@ -72,7 +72,7 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
         .update({ avatar_url: url })
         .eq("id", uid);
       if (updErr) throw updErr;
-      setAvatarUrl(url);
+      setAvatarUrl(await signAddressPhotoUrl(url));
     } catch (err) {
       console.error("Avatar upload failed:", err);
       setUploadError(await getErrorMessage(err));
