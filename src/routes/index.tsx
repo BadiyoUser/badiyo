@@ -265,8 +265,14 @@ function Index() {
             onOpenSettings={() => setPhase("settings")}
             onOpenHelp={() => setPhase("help")}
             onOpenAbout={() => setPhase("about")}
+            onOpenReferrals={() => setPhase("referrals")}
             onLogout={() => setPhase("login")}
           />
+        </div>
+      )}
+      {phase === "referrals" && (
+        <div className="animate-fade-slide-in">
+          <ReferralDashboardScreen onBack={() => setPhase("profile")} />
         </div>
       )}
       {phase === "wallet" && (
