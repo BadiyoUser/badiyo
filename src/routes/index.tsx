@@ -8,6 +8,7 @@ import {
   type SelectedService,
 } from "@/components/SlotSelectionScreen";
 import { AddressSelectionScreen } from "@/components/AddressSelectionScreen";
+import { BookingSummaryScreen } from "@/components/BookingSummaryScreen";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Phase = "splash" | "splash-out" | "login" | "home" | "slot" | "address";
+type Phase = "splash" | "splash-out" | "login" | "home" | "slot" | "address" | "summary";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
@@ -78,7 +79,15 @@ function Index() {
       )}
       {phase === "address" && (
         <div className="animate-fade-slide-in">
-          <AddressSelectionScreen onBack={() => setPhase("slot")} />
+          <AddressSelectionScreen
+            onBack={() => setPhase("slot")}
+            onContinue={() => setPhase("summary")}
+          />
+        </div>
+      )}
+      {phase === "summary" && (
+        <div className="animate-fade-slide-in">
+          <BookingSummaryScreen onBack={() => setPhase("address")} />
         </div>
       )}
     </div>
