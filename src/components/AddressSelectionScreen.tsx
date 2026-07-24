@@ -1,9 +1,92 @@
-import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Home, MapPin, Plus, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-export function AddressSelectionScreen({ onBack }: { onBack: () => void }) {
+type Address = {
+  id: string;
+  label: string | null;
+  full_address: string;
+  area: string | null;
+  city: string | null;
+  is_default: boolean | null;
+};
+
+async function fetchAddresses(): Promise<Address[]> {
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+  if (!uid) return [];
+  const { data, error } = await supabase
+    .from("addresses")
+    .select("id, label, full_address, area, city, is_default")
+    .eq("user_id", uid)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Address[];
+}
+
+type NewAddressInput = {
+  label: string;
+  full_address: string;
+  area: string;
+};
+
+export function AddressSelectionScreen({
+  onBack,
+  onContinue,
+}: {
+  onBack: () => void;
+  onContinue: (address: Address) => void;
+}) {
+  const qc = useQueryClient();
+  const { data: addresses = [], isLoading } = useQuery({
+    queryKey: ["addresses"],
+    queryFn: fetchAddresses,
+  });
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  useEffect(() => {
+    if (!selectedId && addresses.length > 0) {
+      const def = addresses.find((a) => a.is_default) ?? addresses[0];
+      setSelectedId(def.id);
+    }
+  }, [addresses, selectedId]);
+
+  const addMutation = useMutation({
+    mutationFn: async (input: NewAddressInput) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) {
+        throw new Error("You need to sign in before saving an address.");
+      }
+      const { data, error } = await supabase
+        .from("addresses")
+        .insert({
+          user_id: uid,
+          label: input.label,
+          full_address: input.full_address,
+          area: input.area || null,
+        })
+        .select("id, label, full_address, area, city, is_default")
+        .single();
+      if (error) throw error;
+      return data as Address;
+    },
+    onSuccess: (created) => {
+      qc.invalidateQueries({ queryKey: ["addresses"] });
+      setSelectedId(created.id);
+      setSheetOpen(false);
+    },
+  });
+
+  const selected = addresses.find((a) => a.id === selectedId) ?? null;
+
   return (
-    <main className="min-h-screen w-full bg-background">
+    <main className="min-h-screen w-full bg-background pb-28">
       <div className="mx-auto w-full max-w-md px-5 pt-6">
+        {/* Header */}
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -13,14 +96,233 @@ export function AddressSelectionScreen({ onBack }: { onBack: () => void }) {
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
           <h1 className="text-base font-bold text-foreground">
-            Address Selection
+            Select Address
           </h1>
         </div>
 
-        <div className="mt-16 text-center text-sm text-muted-foreground">
-          Coming soon
+        {/* Content */}
+        <div className="mt-6">
+          {isLoading ? (
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              Loading addresses…
+            </div>
+          ) : addresses.length === 0 ? (
+            <div className="mt-8 flex flex-col items-center rounded-[18px] border border-border bg-card px-6 py-12 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <MapPin className="h-7 w-7 text-primary" />
+              </div>
+              <p className="mt-4 text-base font-bold text-foreground">
+                No saved addresses yet
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Add one to continue with your booking
+              </p>
+              <button
+                onClick={() => setSheetOpen(true)}
+                className="mt-6 w-full rounded-[14px] bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition active:scale-[0.99]"
+              >
+                + Add New Address
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {addresses.map((a) => {
+                const active = a.id === selectedId;
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => setSelectedId(a.id)}
+                    className={`flex w-full items-start gap-3 rounded-[18px] border p-4 text-left transition ${
+                      active
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-card"
+                    }`}
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-primary/10">
+                      <Home className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-bold text-foreground">
+                        {a.label || "Address"}
+                      </div>
+                      <div className="mt-0.5 text-sm text-muted-foreground line-clamp-2">
+                        {a.full_address}
+                      </div>
+                      {a.area && (
+                        <div className="mt-0.5 text-xs text-muted-foreground/80">
+                          {a.area}
+                        </div>
+                      )}
+                    </div>
+                    <span
+                      aria-hidden
+                      className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                        active ? "border-primary" : "border-border"
+                      }`}
+                    >
+                      {active && (
+                        <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setSheetOpen(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-[18px] border-2 border-dashed border-border bg-transparent px-4 py-4 text-sm font-bold text-primary transition active:scale-[0.99]"
+              >
+                <Plus className="h-4 w-4" />
+                Add New Address
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Fixed continue */}
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card">
+        <div className="mx-auto w-full max-w-md px-5 py-4">
+          <button
+            disabled={!selected}
+            onClick={() => selected && onContinue(selected)}
+            className={`w-full rounded-[14px] px-4 py-3.5 text-sm font-bold transition ${
+              selected
+                ? "bg-primary text-primary-foreground active:scale-[0.99]"
+                : "bg-primary/30 text-primary-foreground/70"
+            }`}
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom sheet */}
+      {sheetOpen && (
+        <AddAddressSheet
+          onClose={() => setSheetOpen(false)}
+          onSave={(input) => addMutation.mutate(input)}
+          isSaving={addMutation.isPending}
+          error={addMutation.error?.message ?? null}
+        />
+      )}
     </main>
+  );
+}
+
+const LABELS = ["Home", "Work", "Other"] as const;
+
+function AddAddressSheet({
+  onClose,
+  onSave,
+  isSaving,
+  error,
+}: {
+  onClose: () => void;
+  onSave: (input: NewAddressInput) => void;
+  isSaving: boolean;
+  error: string | null;
+}) {
+  const [label, setLabel] = useState<(typeof LABELS)[number]>("Home");
+  const [fullAddress, setFullAddress] = useState("");
+  const [area, setArea] = useState("");
+
+  const canSave = fullAddress.trim().length > 0 && !isSaving;
+
+  return (
+    <div className="fixed inset-0 z-20 flex flex-col justify-end bg-black/40">
+      <button
+        aria-label="Close"
+        onClick={onClose}
+        className="flex-1"
+      />
+      <div className="animate-fade-slide-in mx-auto w-full max-w-md rounded-t-[24px] bg-card p-5 pb-8 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-bold text-foreground">
+            Add New Address
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-border"
+          >
+            <X className="h-4 w-4 text-foreground" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Label
+            </div>
+            <div className="flex gap-2">
+              {LABELS.map((l) => {
+                const active = label === l;
+                return (
+                  <button
+                    key={l}
+                    onClick={() => setLabel(l)}
+                    className={`rounded-[14px] border px-4 py-2 text-sm font-semibold transition ${
+                      active
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card text-foreground"
+                    }`}
+                  >
+                    {l}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <label className="block">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Full Address
+            </span>
+            <textarea
+              value={fullAddress}
+              onChange={(e) => setFullAddress(e.target.value)}
+              rows={3}
+              placeholder="Flat / House no, Building, Street"
+              className="w-full rounded-[14px] border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Area
+            </span>
+            <input
+              value={area}
+              onChange={(e) => setArea(e.target.value)}
+              placeholder="e.g. Lahoti Compound"
+              className="w-full rounded-[14px] border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+
+          {error && (
+            <p className="text-xs font-semibold text-red-600">{error}</p>
+          )}
+
+          <button
+            disabled={!canSave}
+            onClick={() =>
+              onSave({
+                label,
+                full_address: fullAddress.trim(),
+                area: area.trim(),
+              })
+            }
+            className={`w-full rounded-[14px] px-4 py-3.5 text-sm font-bold transition ${
+              canSave
+                ? "bg-primary text-primary-foreground active:scale-[0.99]"
+                : "bg-primary/30 text-primary-foreground/70"
+            }`}
+          >
+            {isSaving ? "Saving…" : "Save Address"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
