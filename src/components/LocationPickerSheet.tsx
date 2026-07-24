@@ -109,6 +109,8 @@ export function LocationPickerSheet({
         <AddAddressMapScreen
           onBack={() => setShowMap(false)}
           onSave={(a) => addMutation.mutate(a)}
+          isSaving={addMutation.isPending}
+          error={addMutation.error ? (addMutation.error as Error).message : null}
         />
       </div>
     );
