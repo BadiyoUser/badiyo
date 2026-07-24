@@ -39,7 +39,7 @@ export function LoginScreen({
       onOtpSent?.(phone);
     } catch (err) {
       console.error("send-otp failed:", err);
-      setError(err instanceof Error ? err.message : "Could not send OTP. Please try again.");
+      setError(await getErrorMessage(err));
     } finally {
       setLoading(false);
     }
