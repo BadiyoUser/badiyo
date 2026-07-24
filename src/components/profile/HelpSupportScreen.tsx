@@ -52,8 +52,8 @@ export function HelpSupportScreen({ onBack }: { onBack: () => void }) {
       if (error) throw error;
       setTicketId(data.id);
       setMessage("");
-    } catch (e: any) {
-      setError(e?.message ?? "Failed to submit. Please try again.");
+    } catch (e) {
+      setError(await getErrorMessage(e));
     } finally {
       setSubmitting(false);
     }
