@@ -3,6 +3,7 @@ import { BadiyoLogo } from "./BadiyoLogo";
 import { GoogleIcon } from "./GoogleIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { captureReferralCode } from "@/lib/referrals";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export function LoginScreen({
   onOtpSent,
