@@ -137,6 +137,7 @@ function Index() {
           await ensureUserRow();
           const { linkReferralIfAny } = await import("@/lib/referrals");
           await linkReferralIfAny();
+          registerPushForCurrentUser().catch(() => {});
         } catch (e) {
           console.error("ensureUserRow failed:", e);
         }
