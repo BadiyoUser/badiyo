@@ -243,6 +243,16 @@ export function HomeScreen({
       </div>
 
       <BottomNav activeKey="home" onHome={() => {}} onRewards={onOpenRewards ?? (() => {})} />
+
+      <LocationPickerSheet
+        open={locationSheetOpen}
+        activeId={activeAddress?.id ?? null}
+        onClose={() => setLocationSheetOpen(false)}
+        onSelect={(a) => {
+          setActiveAddress(a);
+          setLocationSheetOpen(false);
+        }}
+      />
     </main>
   );
 }
