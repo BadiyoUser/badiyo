@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, MapPin, Plus, X } from "lucide-react";
+import { Check, Loader2, LocateFixed, MapPin, Plus, Search, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AddAddressMapScreen, type PickedAddress } from "./AddAddressMapScreen";
+import { reverseGeocode } from "@/lib/geocode.functions";
 
 export type SavedAddress = {
   id: string;
@@ -39,6 +40,11 @@ export function LocationPickerSheet({
 }) {
   const qc = useQueryClient();
   const [showMap, setShowMap] = useState(false);
+  const [query, setQuery] = useState("");
+  const [locLoading, setLocLoading] = useState(false);
+  const [locError, setLocError] = useState<string | null>(null);
+  const [currentLoc, setCurrentLoc] = useState<string | null>(null);
+
   const { data: addresses = [], isLoading } = useQuery({
     queryKey: ["addresses"],
     queryFn: fetchAddresses,
@@ -46,7 +52,11 @@ export function LocationPickerSheet({
   });
 
   useEffect(() => {
-    if (!open) setShowMap(false);
+    if (!open) {
+      setShowMap(false);
+      setQuery("");
+      setLocError(null);
+    }
   }, [open]);
 
   const addMutation = useMutation({
@@ -101,6 +111,43 @@ export function LocationPickerSheet({
     },
   });
 
+  const handleUseCurrentLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setLocError("Geolocation is not supported on this device.");
+      return;
+    }
+    setLocError(null);
+    setLocLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await reverseGeocode({
+            data: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+          });
+          const virtual: SavedAddress = {
+            id: `current-${Date.now()}`,
+            label: "Current location",
+            full_address: res.formatted_address,
+            area: res.area,
+            city: res.city,
+            is_default: false,
+          };
+          setCurrentLoc(res.formatted_address);
+          onSelect(virtual);
+        } catch (e) {
+          setLocError((e as Error).message || "Could not resolve location.");
+        } finally {
+          setLocLoading(false);
+        }
+      },
+      (err) => {
+        setLocLoading(false);
+        setLocError(err.message || "Location permission denied.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
+
   if (!open) return null;
 
   if (showMap) {
@@ -116,14 +163,23 @@ export function LocationPickerSheet({
     );
   }
 
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? addresses.filter((a) =>
+        [a.label, a.full_address, a.area, a.city]
+          .filter(Boolean)
+          .some((v) => (v as string).toLowerCase().includes(q)),
+      )
+    : addresses;
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/40">
+    <div className="fixed inset-0 z-50 flex flex-col justify-end">
       <button
         aria-label="Close"
-        className="flex-1"
+        className="flex-1 bg-black/40"
         onClick={onClose}
       />
-      <div className="mx-auto w-full max-w-md rounded-t-[24px] bg-card p-5 pb-8 shadow-lg">
+      <div className="mx-auto w-full max-w-md rounded-t-[24px] bg-card p-5 pb-8 shadow-lg animate-in slide-in-from-bottom duration-200">
         <div className="mx-auto h-1.5 w-10 rounded-full bg-border" />
         <div className="mt-4 flex items-center justify-between">
           <h2 className="text-base font-extrabold text-foreground">
@@ -138,57 +194,105 @@ export function LocationPickerSheet({
           </button>
         </div>
 
-        <div className="mt-4 max-h-[55vh] space-y-2 overflow-y-auto">
-          {isLoading ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Loading…
-            </p>
-          ) : addresses.length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-              No saved addresses — add one to get started
-            </p>
-          ) : (
-            addresses.map((a) => {
-              const active = a.id === activeId;
-              return (
-                <button
-                  key={a.id}
-                  onClick={() => onSelect(a)}
-                  className={`flex w-full items-start gap-3 rounded-[16px] border p-3 text-left transition ${
-                    active
-                      ? "border-primary bg-primary/5"
-                      : "border-border bg-card"
-                  }`}
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <MapPin className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-bold text-foreground">
-                      {a.label ?? "Address"}
-                    </div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      {a.area ?? a.full_address}
-                    </div>
-                  </div>
-                  {active && (
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary">
-                      <Check className="h-3.5 w-3.5 text-primary-foreground" />
-                    </div>
-                  )}
-                </button>
-              );
-            })
-          )}
+        {/* Search */}
+        <div className="mt-4 flex items-center gap-2 rounded-[14px] border border-border bg-background px-3 py-2.5">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search for area, street name..."
+            className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          />
         </div>
 
-        <button
-          onClick={() => setShowMap(true)}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-[14px] border border-dashed border-primary/60 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition active:scale-[0.99]"
-        >
-          <Plus className="h-4 w-4" />
-          Add New Address
-        </button>
+        {/* Actions */}
+        <div className="mt-3 space-y-2">
+          <button
+            onClick={handleUseCurrentLocation}
+            disabled={locLoading}
+            className="flex w-full items-start gap-3 rounded-[14px] border border-border bg-card p-3 text-left transition active:scale-[0.99] disabled:opacity-60"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+              {locLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              ) : (
+                <LocateFixed className="h-4 w-4 text-primary" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-bold text-primary">
+                Use current location
+              </div>
+              <div className="truncate text-xs text-muted-foreground">
+                {locError
+                  ? locError
+                  : currentLoc ?? "Using GPS · reverse geocoded"}
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setShowMap(true)}
+            className="flex w-full items-center gap-3 rounded-[14px] border border-dashed border-primary/60 bg-primary/5 p-3 text-left transition active:scale-[0.99]"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15">
+              <Plus className="h-4 w-4 text-primary" />
+            </div>
+            <div className="text-sm font-bold text-primary">Add New Address</div>
+          </button>
+        </div>
+
+        {/* Saved */}
+        <div className="mt-5">
+          <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            Your saved addresses
+          </div>
+          <div className="mt-2 max-h-[40vh] space-y-2 overflow-y-auto">
+            {isLoading ? (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                Loading…
+              </p>
+            ) : filtered.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                {addresses.length === 0
+                  ? "No saved addresses yet"
+                  : "No addresses match your search"}
+              </p>
+            ) : (
+              filtered.map((a) => {
+                const active = a.id === activeId;
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => onSelect(a)}
+                    className={`flex w-full items-start gap-3 rounded-[16px] border p-3 text-left transition ${
+                      active
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-card"
+                    }`}
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                      <MapPin className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-foreground">
+                        {a.label ?? "Address"}
+                      </div>
+                      <div className="line-clamp-2 text-xs text-muted-foreground">
+                        {a.full_address}
+                      </div>
+                    </div>
+                    {active && (
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary">
+                        <Check className="h-3.5 w-3.5 text-primary-foreground" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
