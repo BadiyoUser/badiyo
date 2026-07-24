@@ -93,6 +93,8 @@ export function HomeScreen({
 
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
   const [activeAddress, setActiveAddress] = useState<SavedAddress | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
 
   useEffect(() => {
     let cancelled = false;
