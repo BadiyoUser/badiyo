@@ -154,7 +154,58 @@ function Index() {
             slot={selectedSlot}
             address={selectedAddress}
             onBack={() => setPhase("summary")}
-            onDone={() => setPhase("home")}
+            onDone={resetAndGoHome}
+            onTrackBooking={(id) => {
+              setActiveBookingId(id);
+              setPhase("expert-assigned");
+            }}
+          />
+        </div>
+      )}
+      {phase === "expert-assigned" && selectedAddress && (
+        <div className="animate-fade-slide-in">
+          <ExpertAssignedScreen
+            bookingId={activeBookingId}
+            address={selectedAddress}
+            onSimulateArrived={() => setPhase("otp-start")}
+          />
+        </div>
+      )}
+      {phase === "otp-start" && (
+        <div className="animate-fade-slide-in">
+          <OtpScreen
+            title="Share this OTP with your expert"
+            subtitle="Give this code to your expert to start the service."
+            code="4821"
+            ctaLabel="Service Started"
+            onContinue={() => setPhase("in-progress")}
+          />
+        </div>
+      )}
+      {phase === "in-progress" && (
+        <div className="animate-fade-slide-in">
+          <ServiceInProgressScreen
+            bookingId={activeBookingId}
+            onSimulateComplete={() => setPhase("otp-end")}
+          />
+        </div>
+      )}
+      {phase === "otp-end" && (
+        <div className="animate-fade-slide-in">
+          <OtpScreen
+            title="Share end OTP with your expert"
+            subtitle="Give this code to your expert to confirm the service is complete."
+            code="7392"
+            ctaLabel="Confirm Completion"
+            onContinue={() => setPhase("rate-review")}
+          />
+        </div>
+      )}
+      {phase === "rate-review" && (
+        <div className="animate-fade-slide-in">
+          <RateReviewScreen
+            bookingId={activeBookingId}
+            onSubmit={resetAndGoHome}
           />
         </div>
       )}
