@@ -141,10 +141,21 @@ export function HomeScreen({
           <button
             onClick={onOpenProfile}
             aria-label="Profile"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-primary/60 bg-card"
+            className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary/60 bg-card"
           >
-            <User className="h-5 w-5 text-primary" />
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Profile"
+                className="h-full w-full object-cover"
+                loading="eager"
+                decoding="async"
+              />
+            ) : (
+              <User className="h-5 w-5 text-primary" />
+            )}
           </button>
+
         </header>
 
         {/* Search bar */}
