@@ -1,5 +1,6 @@
 // Supabase Edge Function: verify-otp
-// Verifies the OTP, creates/updates the auth user (phone), and returns a session.
+// Verifies the OTP, creates/updates a Supabase auth user backed by a synthetic
+// email (phone provider is disabled), and returns a session.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -20,6 +21,9 @@ Deno.serve(async (req) => {
       return json({ error: "Invalid phone or code" }, 400);
     }
     const fullPhone = `+91${digits}`;
+    // Synthetic email used as the auth identity since Supabase phone provider
+    // is disabled. Kept internal — never shown to the user.
+    const syntheticEmail = `phone_91${digits}@badiyo.phone.local`;
 
     const url = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -47,33 +51,45 @@ Deno.serve(async (req) => {
     // Mark verified (single-use).
     await admin.from("otp_codes").update({ is_verified: true }).eq("id", row.id);
 
-    // Find or create auth user by phone. Supabase stores phone WITHOUT leading '+'.
-    const bareNumber = `91${digits}`;
-    const { data: existingId } = await admin.rpc("get_auth_user_id_by_phone", {
-      _phone: bareNumber,
+    // Look up existing auth user by synthetic email; fall back to phone lookup
+    // for accounts created before this change.
+    let userId: string | null = null;
+    const { data: byEmail } = await admin.rpc("get_auth_user_id_by_email", {
+      _email: syntheticEmail,
     });
+    if (byEmail) userId = byEmail as string;
+    if (!userId) {
+      const { data: byPhone } = await admin.rpc("get_auth_user_id_by_phone", {
+        _phone: `91${digits}`,
+      });
+      if (byPhone) userId = byPhone as string;
+    }
 
     const password = crypto.randomUUID() + crypto.randomUUID();
 
-    if (existingId) {
-      const { error: updErr } = await admin.auth.admin.updateUserById(
-        existingId as string,
-        { password },
-      );
+    if (userId) {
+      const { error: updErr } = await admin.auth.admin.updateUserById(userId, {
+        password,
+        email: syntheticEmail,
+        email_confirm: true,
+        user_metadata: { phone: fullPhone },
+      });
       if (updErr) {
         console.error("updateUserById failed", updErr);
-        return json({ error: "Could not sign in" }, 500);
+        return json({ error: updErr.message || "Could not sign in" }, 500);
       }
     } else {
-      const { error: createErr } = await admin.auth.admin.createUser({
-        phone: fullPhone,
-        phone_confirm: true,
+      const { data: created, error: createErr } = await admin.auth.admin.createUser({
+        email: syntheticEmail,
+        email_confirm: true,
         password,
+        user_metadata: { phone: fullPhone },
       });
-      if (createErr) {
+      if (createErr || !created.user) {
         console.error("createUser failed", createErr);
-        return json({ error: "Could not create account" }, 500);
+        return json({ error: createErr?.message || "Could not create account" }, 500);
       }
+      userId = created.user.id;
     }
 
     // Sign in with the freshly-set password to mint a session.
@@ -81,12 +97,12 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const { data: signIn, error: signErr } = await anon.auth.signInWithPassword({
-      phone: fullPhone,
+      email: syntheticEmail,
       password,
     });
     if (signErr || !signIn.session) {
       console.error("signInWithPassword failed", signErr);
-      return json({ error: "Could not sign in" }, 500);
+      return json({ error: signErr?.message || "Could not sign in" }, 500);
     }
 
     return json({
