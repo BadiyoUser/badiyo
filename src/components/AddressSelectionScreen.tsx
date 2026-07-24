@@ -108,7 +108,7 @@ export function AddressSelectionScreen({
           .update({ landmark_photo_url: publicUrl })
           .eq("id", created.id);
         if (updErr) throw updErr;
-        created.landmark_photo_url = publicUrl;
+        created.landmark_photo_url = await signAddressPhotoUrl(publicUrl);
       }
 
       return created;
