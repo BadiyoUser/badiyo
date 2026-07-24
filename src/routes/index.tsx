@@ -258,6 +258,11 @@ function Index() {
             onBack={() => setPhase("home")}
             onOpenBookings={() => setPhase("my-bookings")}
             onOpenWallet={() => setPhase("wallet")}
+            onOpenEditProfile={() => setPhase("edit-profile")}
+            onOpenNotifications={() => setPhase("notifications")}
+            onOpenSettings={() => setPhase("settings")}
+            onOpenHelp={() => setPhase("help")}
+            onOpenAbout={() => setPhase("about")}
           />
         </div>
       )}
@@ -272,6 +277,35 @@ function Index() {
             onOpenHome={() => setPhase("home")}
             onOpenRewards={() => setPhase("rewards")}
           />
+        </div>
+      )}
+      {phase === "edit-profile" && (
+        <div className="animate-fade-slide-in">
+          <EditProfileScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "notifications" && (
+        <div className="animate-fade-slide-in">
+          <NotificationsScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "settings" && (
+        <div className="animate-fade-slide-in">
+          <SettingsScreen
+            onBack={() => setPhase("profile")}
+            onOpenNotifications={() => setPhase("notifications")}
+            onOpenAbout={() => setPhase("about")}
+          />
+        </div>
+      )}
+      {phase === "help" && (
+        <div className="animate-fade-slide-in">
+          <HelpSupportScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "about" && (
+        <div className="animate-fade-slide-in">
+          <AboutScreen onBack={() => setPhase("profile")} />
         </div>
       )}
     </div>
