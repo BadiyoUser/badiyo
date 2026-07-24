@@ -96,6 +96,7 @@ function Index() {
   const [online, setOnline] = useState(
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
+  const [forceUpdate, setForceUpdate] = useState(false);
 
   function resetAndGoHome() {
     setActiveBookingId(null);
