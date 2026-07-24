@@ -243,11 +243,12 @@ export function LocationPickerSheet({
         </div>
 
         {/* Saved */}
-        <div className="mt-5">
+        <div className="mt-5 flex min-h-0 flex-1 flex-col">
           <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
             Your saved addresses
           </div>
-          <div className="mt-2 max-h-[40vh] space-y-2 overflow-y-auto">
+          <div className="mt-2 flex-1 space-y-2 overflow-y-auto pr-1">
+
             {isLoading ? (
               <p className="py-6 text-center text-sm text-muted-foreground">
                 Loading…
