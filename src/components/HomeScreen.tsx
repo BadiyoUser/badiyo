@@ -75,7 +75,7 @@ const EXPERT_TILES = [
 export function HomeScreen({
   onBookService,
 }: {
-  onBookService?: (service: { duration_label: string; price: number }) => void;
+  onBookService?: (service: { duration_label: string; price: number; subtitle: string | null; icon: string | null }) => void;
 }) {
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
