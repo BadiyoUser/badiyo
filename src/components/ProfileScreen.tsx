@@ -9,8 +9,11 @@ import {
   Settings as SettingsIcon,
   HelpCircle,
   FileText,
+  LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 type Item = { key: string; label: string; desc: string; icon: LucideIcon; onClick: () => void };
 type Group = { title: string; items: Item[] };
@@ -24,6 +27,7 @@ export function ProfileScreen({
   onOpenSettings,
   onOpenHelp,
   onOpenAbout,
+  onLogout,
 }: {
   onBack: () => void;
   onOpenBookings: () => void;
@@ -33,7 +37,29 @@ export function ProfileScreen({
   onOpenSettings: () => void;
   onOpenHelp: () => void;
   onOpenAbout: () => void;
+  onLogout: () => void;
 }) {
+  const [fullName, setFullName] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("users")
+        .select("full_name")
+        .eq("id", uid)
+        .single();
+      if (data?.full_name) setFullName(data.full_name);
+    })();
+  }, []);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    onLogout();
+  }
+
   const groups: Group[] = [
     {
       title: "Account",
