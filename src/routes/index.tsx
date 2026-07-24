@@ -118,7 +118,7 @@ function Index() {
               setSelectedService(s);
               setPhase("slot");
             }}
-            onOpenProfile={() => setPhase("my-bookings")}
+            onOpenProfile={() => setPhase("profile")}
           />
         </div>
       )}
