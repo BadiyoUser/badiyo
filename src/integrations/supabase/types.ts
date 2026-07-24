@@ -14,7 +14,176 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      addresses: {
+        Row: {
+          area: string | null
+          city: string | null
+          created_at: string | null
+          full_address: string
+          id: string
+          is_default: boolean | null
+          label: string | null
+          latitude: number | null
+          longitude: number | null
+          user_id: string | null
+        }
+        Insert: {
+          area?: string | null
+          city?: string | null
+          created_at?: string | null
+          full_address: string
+          id?: string
+          is_default?: boolean | null
+          label?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          area?: string | null
+          city?: string | null
+          created_at?: string | null
+          full_address?: string
+          id?: string
+          is_default?: boolean | null
+          label?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addresses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homepage_sections: {
+        Row: {
+          city_id: string | null
+          display_order: number
+          is_active: boolean | null
+          payload: Json
+          section_id: string
+          section_type: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          city_id?: string | null
+          display_order?: number
+          is_active?: boolean | null
+          payload: Json
+          section_id?: string
+          section_type: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          city_id?: string | null
+          display_order?: number
+          is_active?: boolean | null
+          payload?: Json
+          section_id?: string
+          section_type?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      service_catalogue_config: {
+        Row: {
+          area_partner_payout: number | null
+          created_at: string | null
+          display_order: number | null
+          duration_label: string
+          duration_minutes: number
+          expert_payout: number | null
+          hq_revenue: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          price: number
+          subtitle: string | null
+        }
+        Insert: {
+          area_partner_payout?: number | null
+          created_at?: string | null
+          display_order?: number | null
+          duration_label: string
+          duration_minutes: number
+          expert_payout?: number | null
+          hq_revenue?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          price: number
+          subtitle?: string | null
+        }
+        Update: {
+          area_partner_payout?: number | null
+          created_at?: string | null
+          display_order?: number | null
+          duration_label?: string
+          duration_minutes?: number
+          expert_payout?: number | null
+          hq_revenue?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          price?: number
+          subtitle?: string | null
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          referral_code: string | null
+          referral_count: number | null
+          referred_by: string | null
+          successful_referrals: number | null
+          total_coins_earned: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          referral_code?: string | null
+          referral_count?: number | null
+          referred_by?: string | null
+          successful_referrals?: number | null
+          total_coins_earned?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          referral_code?: string | null
+          referral_count?: number | null
+          referred_by?: string | null
+          successful_referrals?: number | null
+          total_coins_earned?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BadiyoLogo } from "@/components/BadiyoLogo";
 import { LoginScreen } from "@/components/LoginScreen";
+import { HomeScreen } from "@/components/HomeScreen";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [phase, setPhase] = useState<"splash" | "splash-out" | "login">("splash");
+  const [phase, setPhase] = useState<"splash" | "splash-out" | "login" | "home">("splash");
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("splash-out"), 1800);
@@ -29,7 +30,7 @@ function Index() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {phase !== "login" && (
+      {(phase === "splash" || phase === "splash-out") && (
         <div
           className={`fixed inset-0 flex items-center justify-center badiyo-green ${
             phase === "splash-out" ? "animate-fade-out" : ""
@@ -40,9 +41,15 @@ function Index() {
       )}
       {phase === "login" && (
         <div className="animate-fade-slide-in">
-          <LoginScreen />
+          <LoginScreen onContinue={() => setPhase("home")} />
+        </div>
+      )}
+      {phase === "home" && (
+        <div className="animate-fade-slide-in">
+          <HomeScreen />
         </div>
       )}
     </div>
   );
 }
+
