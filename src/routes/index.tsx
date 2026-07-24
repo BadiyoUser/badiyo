@@ -57,7 +57,8 @@ type Phase =
   | "my-bookings"
   | "booking-details"
   | "profile"
-  | "wallet";
+  | "wallet"
+  | "rewards";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
