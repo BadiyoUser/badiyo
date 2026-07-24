@@ -46,9 +46,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "badiyo — Home cleaning, on demand" },
-      { name: "description", content: "Book trusted home cleaning services with badiyo. Fast, reliable, and just a tap away." },
+      { name: "description", content: "Book trusted home cleaning services in Latur with badiyo. Fast, reliable experts — just a tap away." },
       { property: "og:title", content: "badiyo — Home cleaning, on demand" },
-      { property: "og:description", content: "Book trusted home cleaning services with badiyo. Fast, reliable, and just a tap away." },
+      { property: "og:description", content: "Book trusted home cleaning services in Latur with badiyo. Fast, reliable experts — just a tap away." },
     ],
   }),
   component: Index,
