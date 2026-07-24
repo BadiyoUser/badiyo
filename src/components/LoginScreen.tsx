@@ -2,9 +2,13 @@ import { useEffect, useState } from "react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { GoogleIcon } from "./GoogleIcon";
 import { supabase } from "@/integrations/supabase/client";
-import { captureReferralCode, linkReferralIfAny } from "@/lib/referrals";
+import { captureReferralCode } from "@/lib/referrals";
 
-export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
+export function LoginScreen({
+  onOtpSent,
+}: {
+  onOtpSent?: (phone: string) => void;
+} = {}) {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,8 +16,6 @@ export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
   useEffect(() => {
     captureReferralCode();
   }, []);
-
-
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
@@ -28,26 +30,15 @@ export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
     setLoading(true);
     setError(null);
     try {
-      const { data: existing } = await supabase.auth.getSession();
-      let userId = existing.session?.user.id ?? null;
-      if (!userId) {
-        const { data, error: signInError } = await supabase.auth.signInAnonymously();
-        if (signInError) throw signInError;
-        userId = data.user?.id ?? null;
-      }
-      if (!userId) throw new Error("Could not create session");
-
-      const { error: upsertError } = await supabase
-        .from("users")
-        .upsert({ id: userId, phone: `+91${phone}` }, { onConflict: "id" });
-      if (upsertError) throw upsertError;
-
-      await linkReferralIfAny();
-
-      onContinue?.();
+      const { data, error: fnErr } = await supabase.functions.invoke("send-otp", {
+        body: { phone },
+      });
+      if (fnErr) throw fnErr;
+      if (data?.error) throw new Error(data.error);
+      onOtpSent?.(phone);
     } catch (err) {
-      console.error("Login failed:", err);
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      console.error("send-otp failed:", err);
+      setError(err instanceof Error ? err.message : "Could not send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
