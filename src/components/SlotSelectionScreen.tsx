@@ -4,7 +4,13 @@ import { ArrowLeft, Clock } from "lucide-react";
 export type SelectedService = {
   duration_label: string;
   price: number;
+  subtitle: string | null;
+  icon: string | null;
 };
+
+export type SelectedSlot =
+  | { mode: "now" }
+  | { mode: "later"; day: string; slotId: "morning" | "afternoon" | "evening"; slotLabel: string; slotRange: string };
 
 type Mode = "now" | "later";
 type TimeSlot = "morning" | "afternoon" | "evening";
