@@ -112,6 +112,7 @@ export function AddAddressMapScreen({
   useEffect(() => {
     let cancelled = false;
     setGeocoding(true);
+    setGeocodeFailed(false);
     geocode({ data: center })
       .then((r) => {
         if (cancelled) return;
@@ -119,7 +120,14 @@ export function AddAddressMapScreen({
         setArea(r.area);
         setCity(r.city);
       })
-      .catch((e) => console.error(e))
+      .catch((e) => {
+        if (cancelled) return;
+        console.error("Reverse geocode failed:", e);
+        setAutoAddress("");
+        setArea(null);
+        setCity(null);
+        setGeocodeFailed(true);
+      })
       .finally(() => !cancelled && setGeocoding(false));
     return () => {
       cancelled = true;
