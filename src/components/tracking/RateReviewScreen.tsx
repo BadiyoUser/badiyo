@@ -17,14 +17,11 @@ export function RateReviewScreen({
     if (submitting) return;
     setSubmitting(true);
     if (bookingId) {
-      const { error } = await supabase
-        .from("bookings")
-        .update({
-          status: "completed",
-          rating: rating || null,
-          review_text: text.trim() || null,
-        })
-        .eq("id", bookingId);
+      const { error } = await supabase.rpc("submit_booking_review", {
+        _booking_id: bookingId,
+        _rating: rating || null,
+        _review: text.trim() || null,
+      });
       if (error) console.error("review submit failed:", error);
     }
     setSubmitting(false);

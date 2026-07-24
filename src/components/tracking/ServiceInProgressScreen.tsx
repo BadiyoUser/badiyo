@@ -22,9 +22,7 @@ export function ServiceInProgressScreen({
   useEffect(() => {
     if (!bookingId) return;
     supabase
-      .from("bookings")
-      .update({ status: "in_progress" })
-      .eq("id", bookingId)
+      .rpc("advance_booking_status", { _booking_id: bookingId, _new_status: "in_progress" })
       .then(({ error }) => {
         if (error) console.error("status update failed:", error);
       });
