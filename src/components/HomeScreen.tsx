@@ -157,6 +157,7 @@ export function HomeScreen({
                 onClick={() =>
                   onBookService?.({
                     duration_label: s.duration_label,
+                    duration_minutes: Number(s.duration_minutes),
                     price: Number(s.price),
                     subtitle: s.subtitle,
                     icon: s.icon,
