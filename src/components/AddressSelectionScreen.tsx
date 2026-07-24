@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Home, MapPin, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { signAddressPhotoUrl } from "@/lib/storageUrl";
 import { AddAddressMapScreen, type PickedAddress } from "./AddAddressMapScreen";
 
 type Address = {
