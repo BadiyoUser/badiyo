@@ -3,6 +3,7 @@ import { ArrowLeft, Clock } from "lucide-react";
 
 export type SelectedService = {
   duration_label: string;
+  duration_minutes: number;
   price: number;
   subtitle: string | null;
   icon: string | null;
