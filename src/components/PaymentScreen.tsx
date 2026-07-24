@@ -145,7 +145,13 @@ export function PaymentScreen({
       const receipt = `bk_${Date.now()}`;
       const { data, error } = await supabase.functions.invoke(
         "create-razorpay-order",
-        { body: { amount: amountPaise, currency: "INR", receipt } },
+        {
+          body: {
+            service_duration_minutes: service.duration_minutes,
+            currency: "INR",
+            receipt,
+          },
+        },
       );
       if (error) throw new Error(error.message);
       if (!data?.order_id || !data?.key_id) {
