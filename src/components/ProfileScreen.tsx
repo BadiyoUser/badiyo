@@ -9,8 +9,11 @@ import {
   Settings as SettingsIcon,
   HelpCircle,
   FileText,
+  LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 type Item = { key: string; label: string; desc: string; icon: LucideIcon; onClick: () => void };
 type Group = { title: string; items: Item[] };
@@ -24,6 +27,7 @@ export function ProfileScreen({
   onOpenSettings,
   onOpenHelp,
   onOpenAbout,
+  onLogout,
 }: {
   onBack: () => void;
   onOpenBookings: () => void;
@@ -33,7 +37,29 @@ export function ProfileScreen({
   onOpenSettings: () => void;
   onOpenHelp: () => void;
   onOpenAbout: () => void;
+  onLogout: () => void;
 }) {
+  const [fullName, setFullName] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("users")
+        .select("full_name")
+        .eq("id", uid)
+        .single();
+      if (data?.full_name) setFullName(data.full_name);
+    })();
+  }, []);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    onLogout();
+  }
+
   const groups: Group[] = [
     {
       title: "Account",
@@ -88,7 +114,7 @@ export function ProfileScreen({
             <User className="h-7 w-7 text-primary" />
           </div>
           <div className="min-w-0">
-            <p className="text-base font-bold text-foreground">Hello!</p>
+            <p className="text-base font-bold text-foreground">{fullName ? `Hello, ${fullName}!` : "Hello!"}</p>
             <p className="text-xs text-muted-foreground">Manage your bookings and rewards</p>
           </div>
         </section>
@@ -118,6 +144,19 @@ export function ProfileScreen({
             </div>
           </section>
         ))}
+
+        <button
+          onClick={handleLogout}
+          className="mt-4 flex w-full items-center gap-3 rounded-[14px] border border-destructive/30 bg-card px-4 py-3 text-left transition active:scale-[0.99]"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+            <LogOut className="h-5 w-5 text-destructive" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-destructive">Logout</p>
+            <p className="text-xs text-muted-foreground">Sign out of your account</p>
+          </div>
+        </button>
       </div>
     </main>
   );
