@@ -35,7 +35,10 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
         .single();
       if (data) {
         setFullName(data.full_name ?? "");
-        setEmail(data.email ?? "");
+        const rawEmail = data.email ?? "";
+        // Hide internal synthetic emails used for phone-OTP auth
+        const isSynthetic = /@badiyo\.phone\.local$/i.test(rawEmail);
+        setEmail(isSynthetic ? "" : rawEmail);
         setPhone(data.phone ?? "");
         setInitialPhone(data.phone ?? "");
         setAvatarUrl(data.avatar_url ?? null);
