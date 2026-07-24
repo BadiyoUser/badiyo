@@ -125,9 +125,14 @@ export function ProfileScreen({
         </header>
 
         <section className="mt-6 flex items-center gap-4 rounded-[18px] border border-border bg-card p-4 shadow-sm">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary/60 bg-primary/10">
-            <User className="h-7 w-7 text-primary" />
+          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-primary/60 bg-primary/10">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+            ) : (
+              <User className="h-7 w-7 text-primary" />
+            )}
           </div>
+
           <div className="min-w-0">
             <p className="text-base font-bold text-foreground">{fullName ? `Hello, ${fullName}!` : "Hello!"}</p>
             <p className="text-xs text-muted-foreground">Manage your bookings and rewards</p>
