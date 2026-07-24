@@ -50,7 +50,9 @@ type Phase =
   | "otp-start"
   | "in-progress"
   | "otp-end"
-  | "rate-review";
+  | "rate-review"
+  | "my-bookings"
+  | "booking-details";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
