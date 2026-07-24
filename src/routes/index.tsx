@@ -154,7 +154,12 @@ function Index() {
             }}
             onOpenProfile={() => setPhase("profile")}
             onOpenRewards={() => setPhase("rewards")}
+            onSearch={(q) => {
+              setSearchQuery(q);
+              setPhase("search-results");
+            }}
           />
+
         </div>
       )}
       {phase === "slot" && selectedService && (
