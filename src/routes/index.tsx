@@ -55,6 +55,15 @@ function Index() {
   const [selectedService, setSelectedService] = useState<SelectedService | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
+  const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
+
+  function resetAndGoHome() {
+    setActiveBookingId(null);
+    setSelectedService(null);
+    setSelectedSlot(null);
+    setSelectedAddress(null);
+    setPhase("home");
+  }
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("splash-out"), 1800);
