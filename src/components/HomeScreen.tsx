@@ -63,7 +63,11 @@ async function fetchSections(): Promise<HomepageSection[]> {
   return (data ?? []) as HomepageSection[];
 }
 
-export function HomeScreen() {
+export function HomeScreen({
+  onBookService,
+}: {
+  onBookService?: (service: { duration_label: string; price: number }) => void;
+}) {
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
     queryFn: fetchServices,
@@ -143,7 +147,15 @@ export function HomeScreen() {
                   Rs {Number(s.price)}
                 </div>
               </div>
-              <button className="mt-4 w-full rounded-[14px] bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition active:scale-[0.99]">
+              <button
+                onClick={() =>
+                  onBookService?.({
+                    duration_label: s.duration_label,
+                    price: Number(s.price),
+                  })
+                }
+                className="mt-4 w-full rounded-[14px] bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition active:scale-[0.99]"
+              >
                 Book now
               </button>
             </article>
