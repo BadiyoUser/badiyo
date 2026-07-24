@@ -50,7 +50,7 @@ export function ProfileScreen({
 }) {
 
   const [fullName, setFullName] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const { data: avatarUrl } = useAvatarUrl();
 
   useEffect(() => {
     (async () => {
@@ -59,13 +59,13 @@ export function ProfileScreen({
       if (!uid) return;
       const { data } = await supabase
         .from("users")
-        .select("full_name, avatar_url")
+        .select("full_name")
         .eq("id", uid)
         .single();
       if (data?.full_name) setFullName(data.full_name);
-      if (data?.avatar_url) setAvatarUrl(await signAddressPhotoUrl(data.avatar_url));
     })();
   }, []);
+
 
 
   async function handleLogout() {
