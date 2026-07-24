@@ -92,11 +92,14 @@ export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
 
           <button
             type="submit"
-            disabled={!isValid}
+            disabled={!isValid || loading}
             className="w-full rounded-[14px] bg-primary px-4 py-3.5 text-base font-bold text-primary-foreground transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Continue
+            {loading ? "Please wait…" : "Continue"}
           </button>
+          {error && (
+            <p className="text-center text-sm font-medium text-destructive">{error}</p>
+          )}
         </form>
 
         {/* Divider */}
