@@ -121,6 +121,7 @@ function Index() {
               setPhase("slot");
             }}
             onOpenProfile={() => setPhase("profile")}
+            onOpenRewards={() => setPhase("rewards")}
           />
         </div>
       )}
