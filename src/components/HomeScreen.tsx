@@ -82,9 +82,6 @@ export function HomeScreen({
 
   const searchBar = sections.find((s) => s.section_type === "search_bar");
   const promo = sections.find((s) => s.section_type === "promo_banner");
-  const navItems = sections
-    .filter((s) => s.section_type === "nav_item")
-    .sort((a, b) => a.display_order - b.display_order);
 
   const searchPlaceholder =
     searchBar?.payload?.placeholder ?? "Search for cleaning services…";
