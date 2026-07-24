@@ -100,12 +100,34 @@ function Index() {
   }
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("splash-out"), 1800);
-    const t2 = setTimeout(() => setPhase("login"), 2300);
-    ensureUserRow().catch((e) => console.error("startup ensureUserRow failed:", e));
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
-        ensureUserRow().catch((e) => console.error("ensureUserRow failed:", e));
+    let cancelled = false;
+
+    // If we're returning from Google OAuth, a session will already exist —
+    // skip the splash and go straight to home once it's confirmed.
+    supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return;
+      if (data.session?.user && !data.session.user.is_anonymous) {
+        setPhase("home");
+        ensureUserRow()
+          .then(() => import("@/lib/referrals").then((m) => m.linkReferralIfAny()))
+          .catch((e) => console.error("post-oauth setup failed:", e));
+        return;
+      }
+      // Otherwise run the normal splash → login flow.
+      setTimeout(() => !cancelled && setPhase("splash-out"), 1800);
+      setTimeout(() => !cancelled && setPhase("login"), 2300);
+      ensureUserRow().catch((e) => console.error("startup ensureUserRow failed:", e));
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        try {
+          await ensureUserRow();
+          const { linkReferralIfAny } = await import("@/lib/referrals");
+          await linkReferralIfAny();
+        } catch (e) {
+          console.error("ensureUserRow failed:", e);
+        }
       }
     });
     const goOnline = () => setOnline(true);
@@ -113,12 +135,10 @@ function Index() {
     window.addEventListener("online", goOnline);
     window.addEventListener("offline", goOffline);
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
+      cancelled = true;
       sub.subscription.unsubscribe();
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
-
     };
   }, []);
 
