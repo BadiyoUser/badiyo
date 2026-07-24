@@ -1,0 +1,98 @@
+import { ArrowLeft, ChevronRight, Globe, Bell, Shield, Trash2, X } from "lucide-react";
+import { useState } from "react";
+
+export function SettingsScreen({
+  onBack,
+  onOpenNotifications,
+  onOpenAbout,
+}: {
+  onBack: () => void;
+  onOpenNotifications: () => void;
+  onOpenAbout: () => void;
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const items = [
+    { key: "lang", label: "Language", value: "English", icon: Globe, onClick: () => {} },
+    { key: "notif", label: "Notification Preferences", icon: Bell, onClick: onOpenNotifications },
+    { key: "privacy", label: "Privacy Policy", icon: Shield, onClick: onOpenAbout },
+  ];
+
+  return (
+    <main className="min-h-screen w-full bg-background pb-10">
+      <div className="mx-auto w-full max-w-md px-5 pt-6">
+        <header className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            aria-label="Back"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card"
+          >
+            <ArrowLeft className="h-5 w-5 text-foreground" />
+          </button>
+          <h1 className="text-lg font-bold text-foreground">Settings</h1>
+        </header>
+
+        <section className="mt-6 divide-y divide-border overflow-hidden rounded-[18px] border border-border bg-card shadow-sm">
+          {items.map((it) => (
+            <button
+              key={it.key}
+              onClick={it.onClick}
+              className="flex w-full items-center gap-3 px-4 py-4 text-left transition active:bg-muted/40"
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                <it.icon className="h-4 w-4 text-primary" />
+              </div>
+              <p className="min-w-0 flex-1 text-sm font-bold text-foreground">{it.label}</p>
+              {it.value && <span className="text-xs text-muted-foreground">{it.value}</span>}
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+          ))}
+        </section>
+
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="mt-6 flex w-full items-center gap-3 rounded-[14px] border border-destructive/30 bg-card px-4 py-4 text-left"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-destructive/10">
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </div>
+          <p className="flex-1 text-sm font-bold text-destructive">Delete Account</p>
+        </button>
+      </div>
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-20 flex items-end justify-center bg-black/40 sm:items-center">
+          <div className="w-full max-w-md rounded-t-[20px] bg-card p-5 sm:rounded-[20px]">
+            <div className="flex items-start justify-between">
+              <h2 className="text-base font-bold text-foreground">Delete your account?</h2>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                aria-label="Close"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This will permanently remove your profile, bookings, and rewards. This action cannot be undone.
+            </p>
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 rounded-[14px] border border-border bg-card py-3 text-sm font-bold text-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 rounded-[14px] bg-destructive py-3 text-sm font-bold text-destructive-foreground"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}

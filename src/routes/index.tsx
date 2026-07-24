@@ -25,6 +25,11 @@ import { BookingDetailsScreen } from "@/components/BookingDetailsScreen";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { WalletScreen } from "@/components/WalletScreen";
 import { RewardsScreen } from "@/components/RewardsScreen";
+import { EditProfileScreen } from "@/components/profile/EditProfileScreen";
+import { NotificationsScreen } from "@/components/profile/NotificationsScreen";
+import { SettingsScreen } from "@/components/profile/SettingsScreen";
+import { HelpSupportScreen } from "@/components/profile/HelpSupportScreen";
+import { AboutScreen } from "@/components/profile/AboutScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -58,7 +63,12 @@ type Phase =
   | "booking-details"
   | "profile"
   | "wallet"
-  | "rewards";
+  | "rewards"
+  | "edit-profile"
+  | "notifications"
+  | "settings"
+  | "help"
+  | "about";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
@@ -248,6 +258,11 @@ function Index() {
             onBack={() => setPhase("home")}
             onOpenBookings={() => setPhase("my-bookings")}
             onOpenWallet={() => setPhase("wallet")}
+            onOpenEditProfile={() => setPhase("edit-profile")}
+            onOpenNotifications={() => setPhase("notifications")}
+            onOpenSettings={() => setPhase("settings")}
+            onOpenHelp={() => setPhase("help")}
+            onOpenAbout={() => setPhase("about")}
           />
         </div>
       )}
@@ -262,6 +277,35 @@ function Index() {
             onOpenHome={() => setPhase("home")}
             onOpenRewards={() => setPhase("rewards")}
           />
+        </div>
+      )}
+      {phase === "edit-profile" && (
+        <div className="animate-fade-slide-in">
+          <EditProfileScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "notifications" && (
+        <div className="animate-fade-slide-in">
+          <NotificationsScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "settings" && (
+        <div className="animate-fade-slide-in">
+          <SettingsScreen
+            onBack={() => setPhase("profile")}
+            onOpenNotifications={() => setPhase("notifications")}
+            onOpenAbout={() => setPhase("about")}
+          />
+        </div>
+      )}
+      {phase === "help" && (
+        <div className="animate-fade-slide-in">
+          <HelpSupportScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "about" && (
+        <div className="animate-fade-slide-in">
+          <AboutScreen onBack={() => setPhase("profile")} />
         </div>
       )}
     </div>
