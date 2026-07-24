@@ -35,7 +35,10 @@ import { ReferralDashboardScreen } from "@/components/ReferralDashboardScreen";
 import { PaymentMethodsScreen } from "@/components/profile/PaymentMethodsScreen";
 import { SearchResultsScreen } from "@/components/SearchResultsScreen";
 import { NoInternetScreen } from "@/components/utility/NoInternetScreen";
+import { ForceUpdateScreen } from "@/components/utility/ForceUpdateScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
+import { registerPushForCurrentUser } from "@/lib/push";
+import { APP_VERSION, fetchMinSupportedVersion, isBelow } from "@/lib/version";
 import { supabase } from "@/integrations/supabase/client";
 
 
