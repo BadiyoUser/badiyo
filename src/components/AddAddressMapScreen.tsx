@@ -71,6 +71,9 @@ export function AddAddressMapScreen({
   const [locating, setLocating] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [geocodeFailed, setGeocodeFailed] = useState(false);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const geocode = useServerFn(reverseGeocode);
   const centerRef = useRef(center);
   centerRef.current = center;
