@@ -177,8 +177,30 @@ export function AddAddressMapScreen({
       longitude: center.lng,
       label,
       address_details: addressDetails.trim(),
+      photo,
     });
   };
+
+  const handlePhotoPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setPhoto(f);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(URL.createObjectURL(f));
+    e.target.value = "";
+  };
+
+  const removePhoto = () => {
+    setPhoto(null);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(null);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+    };
+  }, [photoPreview]);
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-background">
