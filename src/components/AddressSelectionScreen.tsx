@@ -12,6 +12,8 @@ type Address = {
   city: string | null;
   is_default: boolean | null;
   landmark_photo_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 async function fetchAddresses(): Promise<Address[]> {
