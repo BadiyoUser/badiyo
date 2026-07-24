@@ -35,6 +35,7 @@ type Service = {
   id: string;
   icon: string | null;
   duration_label: string;
+  duration_minutes: number;
   subtitle: string | null;
   price: number;
   display_order: number | null;
@@ -49,7 +50,7 @@ type HomepageSection = {
 async function fetchServices(): Promise<Service[]> {
   const { data, error } = await supabase
     .from("service_catalogue_config")
-    .select("id, icon, duration_label, subtitle, price, display_order")
+    .select("id, icon, duration_label, duration_minutes, subtitle, price, display_order")
     .eq("is_active", true)
     .order("display_order", { ascending: true });
   if (error) throw error;
@@ -75,7 +76,7 @@ const EXPERT_TILES = [
 export function HomeScreen({
   onBookService,
 }: {
-  onBookService?: (service: { duration_label: string; price: number; subtitle: string | null; icon: string | null }) => void;
+  onBookService?: (service: { duration_label: string; duration_minutes: number; price: number; subtitle: string | null; icon: string | null }) => void;
 }) {
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
@@ -157,6 +158,7 @@ export function HomeScreen({
                 onClick={() =>
                   onBookService?.({
                     duration_label: s.duration_label,
+                    duration_minutes: Number(s.duration_minutes),
                     price: Number(s.price),
                     subtitle: s.subtitle,
                     icon: s.icon,

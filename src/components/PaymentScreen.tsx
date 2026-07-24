@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, XCircle, Loader2, ArrowLeft } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, ArrowLeft, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { SelectedService, SelectedSlot } from "./SlotSelectionScreen";
 import type { SelectedAddress } from "./BookingSummaryScreen";
@@ -52,6 +52,17 @@ function loadRazorpay(): Promise<boolean> {
 
 type Status = "loading" | "success" | "failed";
 
+type BookingRow = {
+  id: string;
+  service_label: string;
+  service_duration_minutes: number;
+  price: number;
+  slot_type: string;
+  scheduled_date: string | null;
+  scheduled_time_slot: string | null;
+  razorpay_payment_id: string | null;
+};
+
 export function PaymentScreen({
   service,
   slot,
@@ -67,14 +78,59 @@ export function PaymentScreen({
 }) {
   const [status, setStatus] = useState<Status>("loading");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [paymentId, setPaymentId] = useState<string | null>(null);
+  const [bookingId, setBookingId] = useState<string | null>(null);
+  const [booking, setBooking] = useState<BookingRow | null>(null);
+  const [bookingLoadError, setBookingLoadError] = useState<string | null>(null);
   const startedRef = useRef(false);
 
   const amountPaise = Math.round(Number(service.price) * 100);
 
+  async function createBooking(paymentId: string, orderId: string) {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) throw new Error("Not authenticated");
+
+      const scheduled_date =
+        slot.mode === "later" ? new Date(slot.day).toISOString().slice(0, 10) : null;
+      const scheduled_time_slot =
+        slot.mode === "later" ? `${slot.slotLabel} (${slot.slotRange})` : null;
+
+      const { data, error } = await supabase
+        .from("bookings")
+        .insert({
+          user_id: uid,
+          address_id: address.id,
+          service_duration_minutes: service.duration_minutes,
+          service_label: service.duration_label,
+          price: service.price,
+          slot_type: slot.mode === "now" ? "now" : "scheduled",
+          scheduled_date,
+          scheduled_time_slot,
+          status: "confirmed",
+          razorpay_order_id: orderId,
+          razorpay_payment_id: paymentId,
+        })
+        .select(
+          "id, service_label, service_duration_minutes, price, slot_type, scheduled_date, scheduled_time_slot, razorpay_payment_id",
+        )
+        .single();
+
+      if (error) throw error;
+      setBookingId(data.id);
+      setBooking(data as BookingRow);
+    } catch (e) {
+      console.error("Failed to create booking record:", e);
+      setBookingLoadError(
+        "Booking saved, but there was an issue loading details - check My Bookings",
+      );
+    }
+  }
+
   async function startCheckout() {
     setStatus("loading");
     setErrorMsg(null);
+    setBookingLoadError(null);
     try {
       const ok = await loadRazorpay();
       if (!ok || !window.Razorpay) {
@@ -104,8 +160,8 @@ export function PaymentScreen({
         prefill: { contact },
         theme: { color: "#00B97A" },
         handler: (resp) => {
-          setPaymentId(resp.razorpay_payment_id);
           setStatus("success");
+          void createBooking(resp.razorpay_payment_id, resp.razorpay_order_id);
         },
         modal: {
           ondismiss: () => {
@@ -128,6 +184,44 @@ export function PaymentScreen({
     startCheckout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Re-fetch booking by id (supports refresh scenarios in-session)
+  useEffect(() => {
+    if (!bookingId) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select(
+          "id, service_label, service_duration_minutes, price, slot_type, scheduled_date, scheduled_time_slot, razorpay_payment_id",
+        )
+        .eq("id", bookingId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error) {
+        console.error("Failed to fetch booking:", error);
+        setBookingLoadError(
+          "Booking saved, but there was an issue loading details - check My Bookings",
+        );
+        return;
+      }
+      if (data) setBooking(data as BookingRow);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bookingId]);
+
+  const displayLabel = booking?.service_label ?? service.duration_label;
+  const displayPrice = booking?.price ?? service.price;
+  const displayWhen = booking
+    ? booking.slot_type === "now"
+      ? "Now · arriving in 30–45 mins"
+      : `${booking.scheduled_date ?? ""} · ${booking.scheduled_time_slot ?? ""}`
+    : slot.mode === "now"
+      ? "Now · arriving in 30–45 mins"
+      : `${slot.day} · ${slot.slotLabel} (${slot.slotRange})`;
+  const displayPaymentId = booking?.razorpay_payment_id ?? null;
 
   return (
     <main className="min-h-screen w-full bg-background">
@@ -165,10 +259,24 @@ export function PaymentScreen({
             <p className="mt-2 text-sm text-muted-foreground">
               Your payment was successful.
             </p>
-            {paymentId && (
+            {displayPaymentId && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Payment ID: {paymentId}
+                Payment ID: {displayPaymentId}
               </p>
+            )}
+            {bookingId && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Booking ID: {bookingId.slice(0, 8)}
+              </p>
+            )}
+
+            {bookingLoadError && (
+              <div className="mt-4 flex w-full items-start gap-2 rounded-[14px] border border-border bg-card p-3 text-left">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">
+                  {bookingLoadError}
+                </p>
+              </div>
             )}
 
             <section className="mt-8 w-full rounded-[18px] border border-border bg-card p-5 text-left">
@@ -176,7 +284,7 @@ export function PaymentScreen({
                 Service
               </div>
               <div className="mt-1 text-base font-bold text-foreground">
-                {service.duration_label}
+                {displayLabel}
               </div>
               {service.subtitle && (
                 <div className="text-xs text-muted-foreground">
@@ -187,11 +295,7 @@ export function PaymentScreen({
               <div className="mt-4 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 When
               </div>
-              <div className="mt-1 text-sm text-foreground">
-                {slot.mode === "now"
-                  ? "Now · arriving in 30–45 mins"
-                  : `${slot.day} · ${slot.slotLabel} (${slot.slotRange})`}
-              </div>
+              <div className="mt-1 text-sm text-foreground">{displayWhen}</div>
 
               <div className="mt-4 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 Address
@@ -209,7 +313,7 @@ export function PaymentScreen({
                   Total paid
                 </span>
                 <span className="text-sm font-bold text-foreground">
-                  Rs {service.price}
+                  Rs {displayPrice}
                 </span>
               </div>
             </section>
