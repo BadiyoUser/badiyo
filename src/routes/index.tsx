@@ -68,7 +68,8 @@ type Phase =
   | "notifications"
   | "settings"
   | "help"
-  | "about";
+  | "about"
+  | "referrals";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
