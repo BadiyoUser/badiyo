@@ -225,20 +225,23 @@ export function HomeScreen({
 
         {/* Promo banner */}
         {promo && (
-          <div className="mt-10 flex items-center gap-3 rounded-[18px] bg-primary/10 p-4">
+          <button
+            onClick={onOpenRewards}
+            className="mt-10 flex w-full items-center gap-3 rounded-[18px] bg-primary/10 p-4 text-left transition active:scale-[0.98]"
+          >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/20">
               <Icon name={promo.payload?.icon} className="h-5 w-5 text-primary" />
             </div>
             <p className="flex-1 text-sm font-semibold text-foreground leading-snug">
               {promo.payload?.text}
             </p>
-            <button
-              aria-label="Open rewards"
+            <span
+              aria-hidden="true"
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
             >
               →
-            </button>
-          </div>
+            </span>
+          </button>
         )}
       </div>
 
