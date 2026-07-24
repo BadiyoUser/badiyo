@@ -68,11 +68,14 @@ export function HomeScreen({
   onBookService,
   onOpenProfile,
   onOpenRewards,
+  onSearch,
 }: {
   onBookService?: (service: { duration_label: string; duration_minutes: number; price: number; subtitle: string | null; icon: string | null }) => void;
   onOpenProfile?: () => void;
   onOpenRewards?: () => void;
+  onSearch?: (query: string) => void;
 }) {
+
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
     queryFn: fetchServices,
@@ -90,6 +93,8 @@ export function HomeScreen({
 
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
   const [activeAddress, setActiveAddress] = useState<SavedAddress | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
 
   useEffect(() => {
     let cancelled = false;
@@ -139,16 +144,25 @@ export function HomeScreen({
         </header>
 
         {/* Search bar */}
-        <div className="mt-5 flex items-center gap-3 rounded-[16px] border border-border bg-card px-4 py-3 shadow-sm">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSearch?.(searchQuery.trim());
+          }}
+          className="mt-5 flex items-center gap-3 rounded-[16px] border border-border bg-card px-4 py-3 shadow-sm"
+        >
           <Search className="h-5 w-5 text-muted-foreground" />
           <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/80"
             placeholder={searchPlaceholder}
           />
-          <button aria-label="Voice search">
+          <button type="button" aria-label="Voice search">
             <Mic className="h-5 w-5 text-muted-foreground" />
           </button>
-        </div>
+        </form>
+
 
         {/* Book Cleaning section */}
         <h2 className="mt-8 text-lg font-extrabold tracking-tight text-foreground">

@@ -31,8 +31,12 @@ import { SettingsScreen } from "@/components/profile/SettingsScreen";
 import { HelpSupportScreen } from "@/components/profile/HelpSupportScreen";
 import { AboutScreen } from "@/components/profile/AboutScreen";
 import { ReferralDashboardScreen } from "@/components/ReferralDashboardScreen";
+import { PaymentMethodsScreen } from "@/components/profile/PaymentMethodsScreen";
+import { SearchResultsScreen } from "@/components/SearchResultsScreen";
+import { NoInternetScreen } from "@/components/utility/NoInternetScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -70,7 +74,10 @@ type Phase =
   | "settings"
   | "help"
   | "about"
-  | "referrals";
+  | "referrals"
+  | "payment-methods"
+  | "search-results";
+
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
@@ -79,6 +86,10 @@ function Index() {
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [online, setOnline] = useState(
+    typeof navigator === "undefined" ? true : navigator.onLine,
+  );
 
   function resetAndGoHome() {
     setActiveBookingId(null);
@@ -97,15 +108,24 @@ function Index() {
         ensureUserRow().catch((e) => console.error("ensureUserRow failed:", e));
       }
     });
+    const goOnline = () => setOnline(true);
+    const goOffline = () => setOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       sub.subscription.unsubscribe();
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+
     };
   }, []);
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
+      {!online && <NoInternetScreen onRetry={() => setOnline(navigator.onLine)} />}
+
       {(phase === "splash" || phase === "splash-out") && (
         <div
           className={`fixed inset-0 flex items-center justify-center badiyo-green ${
@@ -134,7 +154,12 @@ function Index() {
             }}
             onOpenProfile={() => setPhase("profile")}
             onOpenRewards={() => setPhase("rewards")}
+            onSearch={(q) => {
+              setSearchQuery(q);
+              setPhase("search-results");
+            }}
           />
+
         </div>
       )}
       {phase === "slot" && selectedService && (
@@ -266,10 +291,29 @@ function Index() {
             onOpenHelp={() => setPhase("help")}
             onOpenAbout={() => setPhase("about")}
             onOpenReferrals={() => setPhase("referrals")}
+            onOpenPaymentMethods={() => setPhase("payment-methods")}
             onLogout={() => setPhase("login")}
           />
         </div>
       )}
+      {phase === "payment-methods" && (
+        <div className="animate-fade-slide-in">
+          <PaymentMethodsScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "search-results" && (
+        <div className="animate-fade-slide-in">
+          <SearchResultsScreen
+            query={searchQuery}
+            onBack={() => setPhase("home")}
+            onBookService={(s) => {
+              setSelectedService(s);
+              setPhase("slot");
+            }}
+          />
+        </div>
+      )}
+
       {phase === "referrals" && (
         <div className="animate-fade-slide-in">
           <ReferralDashboardScreen onBack={() => setPhase("profile")} />

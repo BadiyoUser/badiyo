@@ -1,5 +1,6 @@
-import { ArrowLeft, ChevronDown, MessageCircle } from "lucide-react";
 import { useState } from "react";
+import { ArrowLeft, ChevronDown, MessageCircle, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const FAQS = [
   {
@@ -26,6 +27,36 @@ const FAQS = [
 
 export function HelpSupportScreen({ onBack }: { onBack: () => void }) {
   const [open, setOpen] = useState<number | null>(0);
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [ticketId, setTicketId] = useState<string | null>(null);
+
+  async function handleSubmit() {
+    if (!message.trim() || submitting) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) {
+        setError("Please sign in to raise a ticket.");
+        return;
+      }
+      const { data, error } = await supabase
+        .from("support_tickets")
+        .insert({ user_id: uid, message: message.trim() })
+        .select("id")
+        .single();
+      if (error) throw error;
+      setTicketId(data.id);
+      setMessage("");
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <main className="min-h-screen w-full bg-background pb-10">
@@ -66,19 +97,59 @@ export function HelpSupportScreen({ onBack }: { onBack: () => void }) {
           })}
         </section>
 
-        <a
-          href="#"
-          onClick={(e) => e.preventDefault()}
-          className="mt-6 flex items-center gap-3 rounded-[18px] bg-primary/10 p-4"
-        >
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <MessageCircle className="h-5 w-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold text-foreground">Chat with us</p>
-            <p className="text-xs text-muted-foreground">We typically reply within a few minutes on WhatsApp</p>
-          </div>
-        </a>
+        <h2 className="mt-8 text-sm font-bold text-foreground">Raise a ticket</h2>
+        {ticketId ? (
+          <section className="mt-3 flex flex-col items-center rounded-[18px] border border-border bg-card p-6 text-center shadow-sm">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <CheckCircle2 className="h-7 w-7 text-primary" />
+            </div>
+            <p className="mt-3 text-base font-bold text-foreground">
+              Ticket submitted — we'll get back to you soon
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ticket ID: {ticketId.slice(0, 8).toUpperCase()}
+            </p>
+            <button
+              onClick={() => setTicketId(null)}
+              className="mt-5 text-xs font-semibold text-primary"
+            >
+              Raise another ticket
+            </button>
+          </section>
+        ) : (
+          <section className="mt-3 rounded-[18px] border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+                <MessageCircle className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">Describe your issue</p>
+                <p className="text-xs text-muted-foreground">
+                  Our team typically responds within a few hours.
+                </p>
+              </div>
+            </div>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={5}
+              placeholder="Tell us what happened…"
+              className="mt-4 w-full resize-none rounded-[14px] border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
+            />
+            {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
+            <button
+              onClick={handleSubmit}
+              disabled={!message.trim() || submitting}
+              className={`mt-3 w-full rounded-[14px] px-4 py-3 text-sm font-bold transition ${
+                message.trim() && !submitting
+                  ? "bg-primary text-primary-foreground active:scale-[0.99]"
+                  : "bg-primary/30 text-primary-foreground/70"
+              }`}
+            >
+              {submitting ? "Submitting…" : "Submit"}
+            </button>
+          </section>
+        )}
       </div>
     </main>
   );

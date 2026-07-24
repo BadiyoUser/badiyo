@@ -11,8 +11,10 @@ import {
   FileText,
   Gift,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,6 +31,7 @@ export function ProfileScreen({
   onOpenHelp,
   onOpenAbout,
   onOpenReferrals,
+  onOpenPaymentMethods,
   onLogout,
 }: {
   onBack: () => void;
@@ -40,8 +43,10 @@ export function ProfileScreen({
   onOpenHelp: () => void;
   onOpenAbout: () => void;
   onOpenReferrals: () => void;
+  onOpenPaymentMethods: () => void;
   onLogout: () => void;
 }) {
+
   const [fullName, setFullName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,8 +73,10 @@ export function ProfileScreen({
       title: "Account",
       items: [
         { key: "edit", label: "Edit Profile", desc: "Name, email and avatar", icon: UserCog, onClick: onOpenEditProfile },
+        { key: "payment", label: "Payment Methods", desc: "UPI, cards & saved methods", icon: CreditCard, onClick: onOpenPaymentMethods },
       ],
     },
+
     {
       title: "Activity",
       items: [
