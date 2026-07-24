@@ -110,6 +110,7 @@ export function HomeScreen({
             <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
           </button>
           <button
+            onClick={onOpenProfile}
             aria-label="Profile"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-primary/60 bg-card"
           >
