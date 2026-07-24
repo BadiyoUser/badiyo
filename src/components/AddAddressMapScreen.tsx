@@ -111,29 +111,32 @@ export function AddAddressMapScreen({
     };
   }, []);
 
-  // Reverse geocode when center settles
+  // Reverse geocode when center settles (debounced to coalesce rapid idles)
   useEffect(() => {
     let cancelled = false;
-    setGeocoding(true);
-    setGeocodeFailed(false);
-    geocode({ data: center })
-      .then((r) => {
-        if (cancelled) return;
-        setAutoAddress(r.formatted_address);
-        setArea(r.area);
-        setCity(r.city);
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        console.error("Reverse geocode failed:", e);
-        setAutoAddress("");
-        setArea(null);
-        setCity(null);
-        setGeocodeFailed(true);
-      })
-      .finally(() => !cancelled && setGeocoding(false));
+    const t = setTimeout(() => {
+      setGeocoding(true);
+      setGeocodeFailed(false);
+      geocode({ data: center })
+        .then((r) => {
+          if (cancelled) return;
+          setAutoAddress(r.formatted_address);
+          setArea(r.area);
+          setCity(r.city);
+        })
+        .catch((e) => {
+          if (cancelled) return;
+          console.error("Reverse geocode failed:", e);
+          setAutoAddress("");
+          setArea(null);
+          setCity(null);
+          setGeocodeFailed(true);
+        })
+        .finally(() => !cancelled && setGeocoding(false));
+    }, 400);
     return () => {
       cancelled = true;
+      clearTimeout(t);
     };
   }, [center, geocode]);
 
