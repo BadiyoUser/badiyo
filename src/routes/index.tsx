@@ -74,7 +74,10 @@ type Phase =
   | "settings"
   | "help"
   | "about"
-  | "referrals";
+  | "referrals"
+  | "payment-methods"
+  | "search-results";
+
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
