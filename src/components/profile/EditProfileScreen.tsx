@@ -86,7 +86,7 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
     setSaved(false);
     const update: { full_name: string | null; email: string | null; phone?: string | null } = {
       full_name: fullName || null,
-      email: email || null,
+      email: email ? email : syntheticEmail,
     };
     if (!phoneReadOnly) {
       update.phone = phone || null;
