@@ -31,6 +31,7 @@ export function ProfileScreen({
   onOpenHelp,
   onOpenAbout,
   onOpenReferrals,
+  onOpenPaymentMethods,
   onLogout,
 }: {
   onBack: () => void;
@@ -42,8 +43,10 @@ export function ProfileScreen({
   onOpenHelp: () => void;
   onOpenAbout: () => void;
   onOpenReferrals: () => void;
+  onOpenPaymentMethods: () => void;
   onLogout: () => void;
 }) {
+
   const [fullName, setFullName] = useState<string | null>(null);
 
   useEffect(() => {
