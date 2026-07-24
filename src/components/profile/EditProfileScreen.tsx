@@ -6,6 +6,7 @@ import { getErrorMessage } from "@/lib/errorMessage";
 export function EditProfileScreen({ onBack }: { onBack: () => void }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [syntheticEmail, setSyntheticEmail] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [initialPhone, setInitialPhone] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
