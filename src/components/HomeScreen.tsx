@@ -158,6 +158,8 @@ export function HomeScreen({
                   onBookService?.({
                     duration_label: s.duration_label,
                     price: Number(s.price),
+                    subtitle: s.subtitle,
+                    icon: s.icon,
                   })
                 }
                 className="shrink-0 rounded-[12px] bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition active:scale-[0.98]"
