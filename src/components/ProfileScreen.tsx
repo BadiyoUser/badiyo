@@ -9,6 +9,7 @@ import {
   Settings as SettingsIcon,
   HelpCircle,
   FileText,
+  Gift,
   LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -27,6 +28,7 @@ export function ProfileScreen({
   onOpenSettings,
   onOpenHelp,
   onOpenAbout,
+  onOpenReferrals,
   onLogout,
 }: {
   onBack: () => void;
@@ -37,6 +39,7 @@ export function ProfileScreen({
   onOpenSettings: () => void;
   onOpenHelp: () => void;
   onOpenAbout: () => void;
+  onOpenReferrals: () => void;
   onLogout: () => void;
 }) {
   const [fullName, setFullName] = useState<string | null>(null);
@@ -72,6 +75,7 @@ export function ProfileScreen({
       items: [
         { key: "bookings", label: "My Bookings", desc: "View past and upcoming services", icon: CalendarCheck, onClick: onOpenBookings },
         { key: "wallet", label: "Wallet", desc: "Badiyo coins & transactions", icon: WalletIcon, onClick: onOpenWallet },
+        { key: "referrals", label: "Refer & Earn", desc: "Invite friends and earn rewards", icon: Gift, onClick: onOpenReferrals },
       ],
     },
     {

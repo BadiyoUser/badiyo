@@ -169,6 +169,88 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_config: {
+        Row: {
+          id: string
+          is_active: boolean
+          milestone_referrals: number | null
+          milestone_reward_coins: number | null
+          reward_coins: number
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          milestone_referrals?: number | null
+          milestone_reward_coins?: number | null
+          reward_coins?: number
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          milestone_referrals?: number | null
+          milestone_reward_coins?: number | null
+          reward_coins?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      referral_transactions: {
+        Row: {
+          booking_id: string | null
+          created_at: string | null
+          id: string
+          referred_user_id: string | null
+          referrer_id: string | null
+          reward_amount: number | null
+          reward_date: string | null
+          status: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          referred_user_id?: string | null
+          referrer_id?: string | null
+          reward_amount?: number | null
+          reward_date?: string | null
+          status?: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          referred_user_id?: string | null
+          referrer_id?: string | null
+          reward_amount?: number | null
+          reward_date?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_transactions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_transactions_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_transactions_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_catalogue_config: {
         Row: {
           area_partner_payout: number | null

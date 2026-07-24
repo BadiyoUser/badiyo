@@ -30,6 +30,7 @@ import { NotificationsScreen } from "@/components/profile/NotificationsScreen";
 import { SettingsScreen } from "@/components/profile/SettingsScreen";
 import { HelpSupportScreen } from "@/components/profile/HelpSupportScreen";
 import { AboutScreen } from "@/components/profile/AboutScreen";
+import { ReferralDashboardScreen } from "@/components/ReferralDashboardScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -68,7 +69,8 @@ type Phase =
   | "notifications"
   | "settings"
   | "help"
-  | "about";
+  | "about"
+  | "referrals";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
@@ -263,8 +265,14 @@ function Index() {
             onOpenSettings={() => setPhase("settings")}
             onOpenHelp={() => setPhase("help")}
             onOpenAbout={() => setPhase("about")}
+            onOpenReferrals={() => setPhase("referrals")}
             onLogout={() => setPhase("login")}
           />
+        </div>
+      )}
+      {phase === "referrals" && (
+        <div className="animate-fade-slide-in">
+          <ReferralDashboardScreen onBack={() => setPhase("profile")} />
         </div>
       )}
       {phase === "wallet" && (
