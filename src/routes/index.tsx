@@ -36,7 +36,12 @@ function Index() {
             phase === "splash-out" ? "animate-fade-out" : ""
           }`}
         >
-          <BadiyoLogo className="w-64 max-w-[70vw] animate-logo-in" />
+          <div className="flex flex-col items-center">
+            <BadiyoLogo className="w-64 max-w-[70vw] animate-logo-in" />
+            <p className="mt-4 text-center text-sm font-light text-white/90">
+              हर घर का अपना साथी
+            </p>
+          </div>
         </div>
       )}
       {phase === "login" && (
