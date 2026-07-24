@@ -60,7 +60,7 @@ export function LoginScreen({
       // Browser navigates away to Google; no further action here.
     } catch (err) {
       console.error("Google sign-in failed:", err);
-      setError(err instanceof Error ? err.message : "Could not start Google sign-in.");
+      setError(await getErrorMessage(err));
       setLoading(false);
     }
   };
