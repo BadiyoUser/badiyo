@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { GoogleIcon } from "./GoogleIcon";
 import { supabase } from "@/integrations/supabase/client";
+import { captureReferralCode, linkReferralIfAny } from "@/lib/referrals";
 
 export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
   const [phone, setPhone] = useState("");
