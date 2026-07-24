@@ -239,6 +239,20 @@ function Index() {
           />
         </div>
       )}
+      {phase === "profile" && (
+        <div className="animate-fade-slide-in">
+          <ProfileScreen
+            onBack={() => setPhase("home")}
+            onOpenBookings={() => setPhase("my-bookings")}
+            onOpenWallet={() => setPhase("wallet")}
+          />
+        </div>
+      )}
+      {phase === "wallet" && (
+        <div className="animate-fade-slide-in">
+          <WalletScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
     </div>
   );
 }
