@@ -31,8 +31,12 @@ import { SettingsScreen } from "@/components/profile/SettingsScreen";
 import { HelpSupportScreen } from "@/components/profile/HelpSupportScreen";
 import { AboutScreen } from "@/components/profile/AboutScreen";
 import { ReferralDashboardScreen } from "@/components/ReferralDashboardScreen";
+import { PaymentMethodsScreen } from "@/components/profile/PaymentMethodsScreen";
+import { SearchResultsScreen } from "@/components/SearchResultsScreen";
+import { NoInternetScreen } from "@/components/utility/NoInternetScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
