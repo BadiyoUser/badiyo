@@ -7,6 +7,7 @@ import {
   MapPin,
   Mic,
   Search,
+  ShieldCheck,
   Sparkles,
   User,
   Wind,
@@ -14,6 +15,10 @@ import {
 } from "lucide-react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { supabase } from "@/integrations/supabase/client";
+import heroCleaning from "@/assets/hero-cleaning.png";
+import expertHouse from "@/assets/expert-house-cleaning.jpg";
+import expertDusting from "@/assets/expert-dusting.jpg";
+import expertDishes from "@/assets/expert-dishes.jpg";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   clock: Clock,
@@ -63,6 +68,12 @@ async function fetchSections(): Promise<HomepageSection[]> {
   return (data ?? []) as HomepageSection[];
 }
 
+const EXPERT_TILES = [
+  { image: expertHouse, label: "House Cleaning" },
+  { image: expertDusting, label: "Dusting & Wiping" },
+  { image: expertDishes, label: "Cleaning Dishes" },
+];
+
 export function HomeScreen({
   onBookService,
 }: {
@@ -84,68 +95,89 @@ export function HomeScreen({
     .sort((a, b) => a.display_order - b.display_order);
 
   const searchPlaceholder =
-    searchBar?.payload?.placeholder ?? "Search for cleaning services";
+    searchBar?.payload?.placeholder ?? "Search for cleaning services…";
 
   return (
     <main className="min-h-screen w-full bg-background pb-28">
       <div className="mx-auto w-full max-w-md px-5 pt-6">
         {/* Header */}
-        <header className="flex items-center justify-between">
+        <header className="flex items-center justify-between gap-3">
           <BadiyoLogo variant="green" className="h-7 w-auto" />
           <button className="flex items-center gap-1 text-sm font-semibold text-foreground max-w-[55%]">
             <MapPin className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">Lahoti Compound, Latur</span>
+            <span className="truncate">Lahoti Compound</span>
             <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
           </button>
           <button
             aria-label="Profile"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-primary/60 bg-card"
           >
-            <User className="h-5 w-5 text-foreground" />
+            <User className="h-5 w-5 text-primary" />
           </button>
         </header>
 
         {/* Search bar */}
-        <div className="mt-5 flex items-center gap-3 rounded-[14px] border border-border bg-card px-4 py-3">
+        <div className="mt-5 flex items-center gap-3 rounded-[16px] border border-border bg-card px-4 py-3 shadow-sm">
           <Search className="h-5 w-5 text-muted-foreground" />
           <input
             className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/80"
             placeholder={searchPlaceholder}
           />
           <button aria-label="Voice search">
-            <Mic className="h-5 w-5 text-primary" />
+            <Mic className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
 
-        {/* Section heading */}
-        <h2 className="mt-8 text-lg font-bold tracking-tight text-foreground">
-          Book cleaning
+        {/* Hero banner */}
+        <section className="relative mt-5 overflow-hidden rounded-[20px] bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 p-5">
+          <div className="relative z-10 max-w-[62%]">
+            <h1 className="text-[22px] font-extrabold leading-tight tracking-tight text-foreground">
+              A cleaner home,
+              <br />
+              <span className="text-primary">a happier you.</span>
+            </h1>
+            <div className="mt-4 flex items-start gap-2">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p className="text-xs font-medium text-foreground/80">
+                Trusted experts. On time. Every time.
+              </p>
+            </div>
+          </div>
+          <img
+            src={heroCleaning}
+            alt="Cleaning supplies"
+            width={768}
+            height={512}
+            loading="lazy"
+            className="pointer-events-none absolute -right-2 bottom-0 top-0 z-0 h-full w-[45%] object-contain object-right"
+          />
+        </section>
+
+        {/* Book Cleaning section */}
+        <h2 className="mt-7 text-xl font-extrabold tracking-tight text-foreground">
+          Book Cleaning
         </h2>
 
-        {/* Service cards */}
-        <div className="mt-4 space-y-4">
+        <div className="mt-4 grid grid-cols-3 gap-3">
           {services.map((s) => (
             <article
               key={s.id}
-              className="rounded-[18px] border border-border bg-card p-5"
+              className="flex flex-col items-center rounded-[18px] border border-border bg-card p-3 pt-4 shadow-sm"
             >
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-primary/10">
-                  <Icon name={s.icon} className="h-6 w-6 text-primary" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <Icon name={s.icon} className="h-7 w-7 text-primary" strokeWidth={1.75} />
+              </div>
+              <div className="mt-3 text-base font-extrabold text-foreground text-center leading-tight">
+                {s.duration_label}
+              </div>
+              {s.subtitle && (
+                <div className="mt-1 text-[11px] text-muted-foreground text-center leading-tight">
+                  {s.subtitle}
                 </div>
-                <div className="flex-1">
-                  <div className="text-base font-bold text-foreground">
-                    {s.duration_label}
-                  </div>
-                  {s.subtitle && (
-                    <div className="text-sm text-muted-foreground">
-                      {s.subtitle}
-                    </div>
-                  )}
-                </div>
-                <div className="text-base font-bold text-foreground">
-                  Rs {Number(s.price)}
-                </div>
+              )}
+              <div className="mt-2 h-px w-6 bg-primary/40" />
+              <div className="mt-2 text-base font-extrabold text-primary">
+                Rs {Number(s.price)}
               </div>
               <button
                 onClick={() =>
@@ -154,9 +186,9 @@ export function HomeScreen({
                     price: Number(s.price),
                   })
                 }
-                className="mt-4 w-full rounded-[14px] bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition active:scale-[0.99]"
+                className="mt-3 w-full rounded-[12px] bg-primary px-2 py-2.5 text-xs font-bold text-primary-foreground transition active:scale-[0.98]"
               >
-                Book now
+                Book Now
               </button>
             </article>
           ))}
@@ -166,15 +198,45 @@ export function HomeScreen({
           Need it later? Schedule a time inside booking
         </p>
 
+        {/* Expert tiles */}
+        <h2 className="mt-8 text-xl font-extrabold tracking-tight text-foreground">
+          One Expert who can do it all
+        </h2>
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          {EXPERT_TILES.map((tile) => (
+            <div key={tile.label} className="flex flex-col">
+              <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
+                <img
+                  src={tile.image}
+                  alt={tile.label}
+                  width={512}
+                  height={512}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
+                {tile.label}
+              </p>
+            </div>
+          ))}
+        </div>
+
         {/* Promo banner */}
         {promo && (
-          <div className="mt-6 flex items-center gap-3 rounded-[18px] bg-primary/10 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20">
+          <div className="mt-7 flex items-center gap-3 rounded-[18px] bg-primary/10 p-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/20">
               <Icon name={promo.payload?.icon} className="h-5 w-5 text-primary" />
             </div>
-            <p className="text-sm font-semibold text-foreground">
+            <p className="flex-1 text-sm font-semibold text-foreground leading-snug">
               {promo.payload?.text}
             </p>
+            <button
+              aria-label="Open rewards"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
+            >
+              →
+            </button>
           </div>
         )}
       </div>
