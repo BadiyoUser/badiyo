@@ -44,8 +44,11 @@ export function BottomNav({
   };
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card">
-      <div className="mx-auto flex w-full max-w-md items-stretch justify-around px-4 py-2">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card"
+      style={{ paddingBottom: "max(2px, env(safe-area-inset-bottom))" }}
+    >
+      <div className="mx-auto flex w-full max-w-md items-stretch justify-around px-4 pt-2 pb-1">
         {items.map((item, idx) => {
           const key = (item.payload?.target_screen as string) ?? item.payload?.label?.toLowerCase() ?? idx;
           const isActive =
