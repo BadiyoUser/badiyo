@@ -3,6 +3,11 @@ import { useEffect, useState } from "react";
 import { BadiyoLogo } from "@/components/BadiyoLogo";
 import { LoginScreen } from "@/components/LoginScreen";
 import { HomeScreen } from "@/components/HomeScreen";
+import {
+  SlotSelectionScreen,
+  type SelectedService,
+} from "@/components/SlotSelectionScreen";
+import { AddressSelectionScreen } from "@/components/AddressSelectionScreen";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,8 +21,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+type Phase = "splash" | "splash-out" | "login" | "home" | "slot" | "address";
+
 function Index() {
-  const [phase, setPhase] = useState<"splash" | "splash-out" | "login" | "home">("splash");
+  const [phase, setPhase] = useState<Phase>("splash");
+  const [selectedService, setSelectedService] = useState<SelectedService | null>(null);
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("splash-out"), 1800);
@@ -51,10 +59,28 @@ function Index() {
       )}
       {phase === "home" && (
         <div className="animate-fade-slide-in">
-          <HomeScreen />
+          <HomeScreen
+            onBookService={(s) => {
+              setSelectedService(s);
+              setPhase("slot");
+            }}
+          />
+        </div>
+      )}
+      {phase === "slot" && selectedService && (
+        <div className="animate-fade-slide-in">
+          <SlotSelectionScreen
+            service={selectedService}
+            onBack={() => setPhase("home")}
+            onContinue={() => setPhase("address")}
+          />
+        </div>
+      )}
+      {phase === "address" && (
+        <div className="animate-fade-slide-in">
+          <AddressSelectionScreen onBack={() => setPhase("slot")} />
         </div>
       )}
     </div>
   );
 }
-
