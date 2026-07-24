@@ -51,10 +51,7 @@ export function OtpVerifyScreen({
       onVerified();
     } catch (err) {
       console.error("verify-otp failed", err);
-      const msg =
-        (err as { context?: { error?: string } })?.context?.error ||
-        (err instanceof Error ? err.message : "Invalid or expired code");
-      setError(msg);
+      setError(await getErrorMessage(err));
       setDigits(["", "", "", ""]);
       inputs.current[0]?.focus();
     } finally {
