@@ -12,6 +12,8 @@ type Address = {
   city: string | null;
   is_default: boolean | null;
   landmark_photo_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 async function fetchAddresses(): Promise<Address[]> {
@@ -20,7 +22,7 @@ async function fetchAddresses(): Promise<Address[]> {
   if (!uid) return [];
   const { data, error } = await supabase
     .from("addresses")
-    .select("id, label, full_address, area, city, is_default, landmark_photo_url")
+    .select("id, label, full_address, area, city, is_default, landmark_photo_url, latitude, longitude")
     .eq("user_id", uid)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -75,7 +77,7 @@ export function AddressSelectionScreen({
           longitude: input.longitude,
           is_default: addresses.length === 0,
         })
-        .select("id, label, full_address, area, city, is_default, landmark_photo_url")
+        .select("id, label, full_address, area, city, is_default, landmark_photo_url, latitude, longitude")
         .single();
       if (error) throw error;
       const created = data as Address;

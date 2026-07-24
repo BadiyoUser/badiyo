@@ -70,8 +70,10 @@ export type Database = {
           created_at: string | null
           id: string
           price: number
+          rating: number | null
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
+          review_text: string | null
           scheduled_date: string | null
           scheduled_time_slot: string | null
           service_duration_minutes: number
@@ -86,8 +88,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           price: number
+          rating?: number | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          review_text?: string | null
           scheduled_date?: string | null
           scheduled_time_slot?: string | null
           service_duration_minutes: number
@@ -102,8 +106,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           price?: number
+          rating?: number | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          review_text?: string | null
           scheduled_date?: string | null
           scheduled_time_slot?: string | null
           service_duration_minutes?: number

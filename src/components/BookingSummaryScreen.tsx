@@ -8,6 +8,8 @@ export type SelectedAddress = {
   area: string | null;
   city: string | null;
   is_default: boolean | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 function formatSlot(slot: SelectedSlot): { title: string; subtitle: string } {

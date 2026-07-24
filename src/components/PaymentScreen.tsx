@@ -69,12 +69,14 @@ export function PaymentScreen({
   address,
   onBack,
   onDone,
+  onTrackBooking,
 }: {
   service: SelectedService;
   slot: SelectedSlot;
   address: SelectedAddress;
   onBack: () => void;
   onDone: () => void;
+  onTrackBooking: (bookingId: string | null) => void;
 }) {
   const [status, setStatus] = useState<Status>("loading");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -184,6 +186,13 @@ export function PaymentScreen({
     startCheckout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-navigate to tracking after payment success
+  useEffect(() => {
+    if (status !== "success") return;
+    const t = setTimeout(() => onTrackBooking(bookingId), 3000);
+    return () => clearTimeout(t);
+  }, [status, bookingId, onTrackBooking]);
 
   // Re-fetch booking by id (supports refresh scenarios in-session)
   useEffect(() => {
