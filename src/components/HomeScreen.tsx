@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Clock, Gift, Home, MapPin, Mic, Search, Sparkles, User, Wind, type LucideIcon } from "lucide-react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { BottomNav } from "./BottomNav";
+import { LocationPickerSheet, type SavedAddress } from "./LocationPickerSheet";
 import { supabase } from "@/integrations/supabase/client";
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
@@ -86,15 +88,45 @@ export function HomeScreen({
   const searchPlaceholder =
     searchBar?.payload?.placeholder ?? "Search for cleaning services…";
 
+  const [locationSheetOpen, setLocationSheetOpen] = useState(false);
+  const [activeAddress, setActiveAddress] = useState<SavedAddress | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("addresses")
+        .select("id, label, full_address, area, city, is_default")
+        .eq("user_id", uid)
+        .order("is_default", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (!cancelled && data && data.length > 0) {
+        setActiveAddress(data[0] as SavedAddress);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const locationLabel = activeAddress?.area ?? activeAddress?.label ?? "Lahoti Compound";
+
   return (
     <main className="min-h-screen w-full bg-background pb-28">
       <div className="mx-auto w-full max-w-md px-5 pt-6">
         {/* Header */}
         <header className="flex items-center justify-between gap-3">
           <BadiyoLogo variant="green" className="h-7 w-auto" />
-          <button className="flex items-center gap-1 text-sm font-semibold text-foreground max-w-[55%]">
+          <button
+            onClick={() => setLocationSheetOpen(true)}
+            className="flex items-center gap-1 text-sm font-semibold text-foreground max-w-[55%]"
+          >
             <MapPin className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">Lahoti Compound</span>
+            <span className="truncate">{locationLabel}</span>
             <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
           </button>
           <button
@@ -211,6 +243,16 @@ export function HomeScreen({
       </div>
 
       <BottomNav activeKey="home" onHome={() => {}} onRewards={onOpenRewards ?? (() => {})} />
+
+      <LocationPickerSheet
+        open={locationSheetOpen}
+        activeId={activeAddress?.id ?? null}
+        onClose={() => setLocationSheetOpen(false)}
+        onSelect={(a) => {
+          setActiveAddress(a);
+          setLocationSheetOpen(false);
+        }}
+      />
     </main>
   );
 }
