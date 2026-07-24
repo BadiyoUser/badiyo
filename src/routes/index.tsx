@@ -124,6 +124,8 @@ function Index() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
+      {!online && <NoInternetScreen onRetry={() => setOnline(navigator.onLine)} />}
+
       {(phase === "splash" || phase === "splash-out") && (
         <div
           className={`fixed inset-0 flex items-center justify-center badiyo-green ${
