@@ -5,6 +5,8 @@ import { BadiyoLogo } from "./BadiyoLogo";
 import { BottomNav } from "./BottomNav";
 import { LocationPickerSheet, type SavedAddress } from "./LocationPickerSheet";
 import { supabase } from "@/integrations/supabase/client";
+import { useAvatarUrl } from "@/lib/useAvatarUrl";
+
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
 import expertDishes from "@/assets/expert-dishes.jpg";
