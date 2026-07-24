@@ -75,10 +75,34 @@ export function AddressSelectionScreen({
           longitude: input.longitude,
           is_default: addresses.length === 0,
         })
-        .select("id, label, full_address, area, city, is_default")
+        .select("id, label, full_address, area, city, is_default, landmark_photo_url")
         .single();
       if (error) throw error;
-      return data as Address;
+      const created = data as Address;
+
+      if (input.photo) {
+        const ext = (input.photo.name.split(".").pop() || "jpg").toLowerCase();
+        const path = `${uid}/${created.id}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("address-photos")
+          .upload(path, input.photo, {
+            upsert: true,
+            contentType: input.photo.type || "image/jpeg",
+          });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage
+          .from("address-photos")
+          .getPublicUrl(path);
+        const publicUrl = pub.publicUrl;
+        const { error: updErr } = await supabase
+          .from("addresses")
+          .update({ landmark_photo_url: publicUrl })
+          .eq("id", created.id);
+        if (updErr) throw updErr;
+        created.landmark_photo_url = publicUrl;
+      }
+
+      return created;
     },
     onSuccess: (created) => {
       qc.invalidateQueries({ queryKey: ["addresses"] });
