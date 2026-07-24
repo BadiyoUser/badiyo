@@ -9,6 +9,8 @@ import {
 } from "@/components/SlotSelectionScreen";
 import { AddressSelectionScreen } from "@/components/AddressSelectionScreen";
 import { BookingSummaryScreen } from "@/components/BookingSummaryScreen";
+import { ensureUserRow } from "@/lib/ensureUserRow";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
