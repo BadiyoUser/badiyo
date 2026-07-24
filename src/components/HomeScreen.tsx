@@ -165,7 +165,7 @@ export function HomeScreen({
               className="flex flex-col items-center rounded-[18px] border border-border bg-card p-3 pt-4 shadow-sm"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                <Icon name={s.icon} className="h-7 w-7 text-primary" strokeWidth={1.75} />
+                <Icon name={s.icon} className="h-7 w-7 text-primary" />
               </div>
               <div className="mt-3 text-base font-extrabold text-foreground text-center leading-tight">
                 {s.duration_label}
