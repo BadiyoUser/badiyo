@@ -86,6 +86,8 @@ export function HomeScreen({
     queryKey: ["homepage_sections"],
     queryFn: fetchSections,
   });
+  const { data: avatarUrl } = useAvatarUrl();
+
 
   const searchBar = sections.find((s) => s.section_type === "search_bar");
   const promo = sections.find((s) => s.section_type === "promo_banner");
