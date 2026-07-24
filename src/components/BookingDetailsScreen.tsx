@@ -96,8 +96,8 @@ export function BookingDetailsScreen({
       setScheduledDate(date);
       setScheduledSlot(slotLabel);
       setRescheduleOpen(false);
-    } catch (e: any) {
-      setError(e?.message ?? "Could not reschedule. Try again.");
+    } catch (e) {
+      setError(await getErrorMessage(e));
     } finally {
       setSaving(false);
     }
