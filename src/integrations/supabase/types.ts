@@ -64,6 +64,72 @@ export type Database = {
           },
         ]
       }
+      bookings: {
+        Row: {
+          address_id: string | null
+          created_at: string | null
+          id: string
+          price: number
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          scheduled_date: string | null
+          scheduled_time_slot: string | null
+          service_duration_minutes: number
+          service_label: string
+          slot_type: string
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          address_id?: string | null
+          created_at?: string | null
+          id?: string
+          price: number
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          scheduled_date?: string | null
+          scheduled_time_slot?: string | null
+          service_duration_minutes: number
+          service_label: string
+          slot_type: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          address_id?: string | null
+          created_at?: string | null
+          id?: string
+          price?: number
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          scheduled_date?: string | null
+          scheduled_time_slot?: string | null
+          service_duration_minutes?: number
+          service_label?: string
+          slot_type?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_address_id_fkey"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homepage_sections: {
         Row: {
           city_id: string | null
