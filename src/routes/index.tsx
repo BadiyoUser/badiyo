@@ -291,10 +291,29 @@ function Index() {
             onOpenHelp={() => setPhase("help")}
             onOpenAbout={() => setPhase("about")}
             onOpenReferrals={() => setPhase("referrals")}
+            onOpenPaymentMethods={() => setPhase("payment-methods")}
             onLogout={() => setPhase("login")}
           />
         </div>
       )}
+      {phase === "payment-methods" && (
+        <div className="animate-fade-slide-in">
+          <PaymentMethodsScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "search-results" && (
+        <div className="animate-fade-slide-in">
+          <SearchResultsScreen
+            query={searchQuery}
+            onBack={() => setPhase("home")}
+            onBookService={(s) => {
+              setSelectedService(s);
+              setPhase("slot");
+            }}
+          />
+        </div>
+      )}
+
       {phase === "referrals" && (
         <div className="animate-fade-slide-in">
           <ReferralDashboardScreen onBack={() => setPhase("profile")} />
