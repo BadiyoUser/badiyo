@@ -1,5 +1,9 @@
-import { ArrowLeft, Clock, Calendar, Home as HomeIcon, Star } from "lucide-react";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Clock, Calendar, Home as HomeIcon, Star, X } from "lucide-react";
 import type { BookingRow } from "./MyBookingsScreen";
+import { supabase } from "@/integrations/supabase/client";
+import { RescheduleSheet } from "./RescheduleSheet";
 
 function statusPillClasses(status: string): string {
   if (status === "completed") return "bg-primary/15 text-primary";
@@ -37,8 +41,66 @@ export function BookingDetailsScreen({
   booking: BookingRow;
   onBack: () => void;
 }) {
-  const slot = slotText(booking);
+  const qc = useQueryClient();
+  const [status, setStatus] = useState(booking.status);
+  const [scheduledDate, setScheduledDate] = useState(booking.scheduled_date);
+  const [scheduledSlot, setScheduledSlot] = useState(booking.scheduled_time_slot);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const slot = slotText({
+    ...booking,
+    status,
+    scheduled_date: scheduledDate,
+    scheduled_time_slot: scheduledSlot,
+  });
   const addr = booking.addresses;
+
+  const canCancel = status === "confirmed";
+  const canReschedule = status === "confirmed" && booking.slot_type === "scheduled";
+
+  async function handleCancel() {
+    setCancelling(true);
+    setError(null);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: "cancelled" })
+        .eq("id", booking.id);
+      if (error) throw error;
+      await qc.invalidateQueries({ queryKey: ["my-bookings"] });
+      setStatus("cancelled");
+      setConfirmingCancel(false);
+      onBack();
+    } catch (e: any) {
+      setError(e?.message ?? "Could not cancel. Try again.");
+    } finally {
+      setCancelling(false);
+    }
+  }
+
+  async function handleReschedule(date: string, slotLabel: string) {
+    setSaving(true);
+    setError(null);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ scheduled_date: date, scheduled_time_slot: slotLabel })
+        .eq("id", booking.id);
+      if (error) throw error;
+      await qc.invalidateQueries({ queryKey: ["my-bookings"] });
+      setScheduledDate(date);
+      setScheduledSlot(slotLabel);
+      setRescheduleOpen(false);
+    } catch (e: any) {
+      setError(e?.message ?? "Could not reschedule. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <main className="min-h-screen w-full bg-background pb-10">
@@ -59,15 +121,15 @@ export function BookingDetailsScreen({
           <div>
             <p className="text-xs text-muted-foreground">Status</p>
             <p className="mt-0.5 text-base font-bold text-foreground">
-              {statusLabel(booking.status)}
+              {statusLabel(status)}
             </p>
           </div>
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${statusPillClasses(
-              booking.status,
+              status,
             )}`}
           >
-            {statusLabel(booking.status)}
+            {statusLabel(status)}
           </span>
         </div>
 
@@ -161,11 +223,81 @@ export function BookingDetailsScreen({
           </section>
         ) : null}
 
+        {error && (
+          <p className="mt-3 text-center text-xs text-destructive">{error}</p>
+        )}
+
+        {(canCancel || canReschedule) && (
+          <div className="mt-5 space-y-2">
+            {canReschedule && (
+              <button
+                onClick={() => setRescheduleOpen(true)}
+                className="w-full rounded-[14px] border border-primary bg-primary/10 px-4 py-3 text-sm font-bold text-primary transition active:scale-[0.99]"
+              >
+                Reschedule
+              </button>
+            )}
+            {canCancel && (
+              <button
+                onClick={() => setConfirmingCancel(true)}
+                className="w-full rounded-[14px] border border-destructive/40 bg-card px-4 py-3 text-sm font-bold text-destructive transition active:scale-[0.99]"
+              >
+                Cancel Booking
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Booking id */}
         <p className="mt-4 text-center text-[11px] text-muted-foreground">
           Booking ID: {booking.id.slice(0, 8).toUpperCase()}
         </p>
       </div>
+
+      {/* Cancel confirmation dialog */}
+      {confirmingCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
+          <div className="w-full max-w-sm rounded-[18px] bg-card p-5 shadow-xl">
+            <div className="flex items-start justify-between">
+              <h2 className="text-base font-bold text-foreground">Cancel booking?</h2>
+              <button
+                onClick={() => setConfirmingCancel(false)}
+                aria-label="Close"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-muted"
+              >
+                <X className="h-4 w-4 text-foreground" />
+              </button>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Are you sure you want to cancel this booking? This cannot be undone.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setConfirmingCancel(false)}
+                className="flex-1 rounded-[14px] border border-border bg-card px-4 py-3 text-sm font-bold text-foreground"
+              >
+                Keep booking
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="flex-1 rounded-[14px] bg-destructive px-4 py-3 text-sm font-bold text-destructive-foreground disabled:opacity-70"
+              >
+                {cancelling ? "Cancelling…" : "Yes, cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <RescheduleSheet
+        open={rescheduleOpen}
+        initialDate={scheduledDate}
+        initialSlot={scheduledSlot}
+        onClose={() => setRescheduleOpen(false)}
+        onConfirm={handleReschedule}
+        saving={saving}
+      />
     </main>
   );
 }
