@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Crosshair, MapPin, Search } from "lucide-react";
+import { ArrowLeft, Crosshair, Loader2, MapPin, Search } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { reverseGeocode } from "@/lib/geocode.functions";
 
