@@ -24,6 +24,7 @@ import { MyBookingsScreen, type BookingRow } from "@/components/MyBookingsScreen
 import { BookingDetailsScreen } from "@/components/BookingDetailsScreen";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { WalletScreen } from "@/components/WalletScreen";
+import { RewardsScreen } from "@/components/RewardsScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -56,7 +57,8 @@ type Phase =
   | "my-bookings"
   | "booking-details"
   | "profile"
-  | "wallet";
+  | "wallet"
+  | "rewards";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
@@ -119,6 +121,7 @@ function Index() {
               setPhase("slot");
             }}
             onOpenProfile={() => setPhase("profile")}
+            onOpenRewards={() => setPhase("rewards")}
           />
         </div>
       )}
@@ -251,6 +254,14 @@ function Index() {
       {phase === "wallet" && (
         <div className="animate-fade-slide-in">
           <WalletScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "rewards" && (
+        <div className="animate-fade-slide-in">
+          <RewardsScreen
+            onOpenHome={() => setPhase("home")}
+            onOpenRewards={() => setPhase("rewards")}
+          />
         </div>
       )}
     </div>

@@ -1,18 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  ChevronDown,
-  Clock,
-  Gift,
-  Home as HomeIcon,
-  MapPin,
-  Mic,
-  Search,
-  Sparkles,
-  User,
-  Wind,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronDown, Clock, Gift, Home, MapPin, Mic, Search, Sparkles, User, Wind, type LucideIcon } from "lucide-react";
 import { BadiyoLogo } from "./BadiyoLogo";
+import { BottomNav } from "./BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
@@ -23,7 +12,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "vacuum-cleaner": Wind,
   sparkles: Sparkles,
   gift: Gift,
-  home: HomeIcon,
+  home: Home,
 };
 
 function Icon({ name, className }: { name?: string | null; className?: string }) {
@@ -76,9 +65,11 @@ const EXPERT_TILES = [
 export function HomeScreen({
   onBookService,
   onOpenProfile,
+  onOpenRewards,
 }: {
   onBookService?: (service: { duration_label: string; duration_minutes: number; price: number; subtitle: string | null; icon: string | null }) => void;
   onOpenProfile?: () => void;
+  onOpenRewards?: () => void;
 }) {
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
@@ -91,9 +82,6 @@ export function HomeScreen({
 
   const searchBar = sections.find((s) => s.section_type === "search_bar");
   const promo = sections.find((s) => s.section_type === "promo_banner");
-  const navItems = sections
-    .filter((s) => s.section_type === "nav_item")
-    .sort((a, b) => a.display_order - b.display_order);
 
   const searchPlaceholder =
     searchBar?.payload?.placeholder ?? "Search for cleaning services…";
@@ -222,25 +210,7 @@ export function HomeScreen({
         )}
       </div>
 
-      {/* Bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card">
-        <div className="mx-auto flex w-full max-w-md items-stretch justify-around px-4 py-2">
-          {navItems.map((item, idx) => {
-            const active = idx === 0;
-            return (
-              <button
-                key={item.payload?.label ?? idx}
-                className={`flex flex-1 flex-col items-center gap-1 rounded-[14px] px-3 py-2 text-xs font-semibold transition ${
-                  active ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <Icon name={item.payload?.icon} className="h-5 w-5" />
-                <span>{item.payload?.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+      <BottomNav activeKey="home" onHome={() => {}} onRewards={onOpenRewards ?? (() => {})} />
     </main>
   );
 }
