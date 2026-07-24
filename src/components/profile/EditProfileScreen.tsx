@@ -1,8 +1,11 @@
 import { ArrowLeft, User, Camera } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { signAddressPhotoUrl } from "@/lib/storageUrl";
+
+
 
 export function EditProfileScreen({ onBack }: { onBack: () => void }) {
   const [fullName, setFullName] = useState("");
