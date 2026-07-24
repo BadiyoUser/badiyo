@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Home, MapPin, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { signAddressPhotoUrl } from "@/lib/storageUrl";
 import { AddAddressMapScreen, type PickedAddress } from "./AddAddressMapScreen";
 
 type Address = {
@@ -26,7 +27,13 @@ async function fetchAddresses(): Promise<Address[]> {
     .eq("user_id", uid)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as Address[];
+  const rows = (data ?? []) as Address[];
+  return Promise.all(
+    rows.map(async (r) => ({
+      ...r,
+      landmark_photo_url: await signAddressPhotoUrl(r.landmark_photo_url),
+    })),
+  );
 }
 
 export function AddressSelectionScreen({
@@ -101,7 +108,7 @@ export function AddressSelectionScreen({
           .update({ landmark_photo_url: publicUrl })
           .eq("id", created.id);
         if (updErr) throw updErr;
-        created.landmark_photo_url = publicUrl;
+        created.landmark_photo_url = await signAddressPhotoUrl(publicUrl);
       }
 
       return created;

@@ -2,6 +2,7 @@ import { ArrowLeft, User, Camera } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { signAddressPhotoUrl } from "@/lib/storageUrl";
 
 export function EditProfileScreen({ onBack }: { onBack: () => void }) {
   const [fullName, setFullName] = useState("");
@@ -43,7 +44,7 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
         setEmail(isSynthetic ? "" : rawEmail);
         setPhone(data.phone ?? "");
         setInitialPhone(data.phone ?? "");
-        setAvatarUrl(data.avatar_url ?? null);
+        setAvatarUrl(await signAddressPhotoUrl(data.avatar_url ?? null));
       }
     })();
   }, []);
@@ -71,7 +72,7 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
         .update({ avatar_url: url })
         .eq("id", uid);
       if (updErr) throw updErr;
-      setAvatarUrl(url);
+      setAvatarUrl(await signAddressPhotoUrl(url));
     } catch (err) {
       console.error("Avatar upload failed:", err);
       setUploadError(await getErrorMessage(err));
