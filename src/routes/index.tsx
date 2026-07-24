@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BadiyoLogo } from "@/components/BadiyoLogo";
 import { LoginScreen } from "@/components/LoginScreen";
+import { OtpVerifyScreen } from "@/components/OtpVerifyScreen";
 import { HomeScreen } from "@/components/HomeScreen";
 import {
   SlotSelectionScreen,
@@ -88,6 +89,7 @@ function Index() {
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pendingPhone, setPendingPhone] = useState<string | null>(null);
   const [online, setOnline] = useState(
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
