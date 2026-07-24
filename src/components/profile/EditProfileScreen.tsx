@@ -21,6 +21,8 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
   const [authProvider, setAuthProvider] = useState<string | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
 
   useEffect(() => {
     (async () => {
