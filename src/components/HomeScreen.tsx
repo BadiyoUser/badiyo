@@ -1,18 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  ChevronDown,
-  Clock,
-  Gift,
-  Home as HomeIcon,
-  MapPin,
-  Mic,
-  Search,
-  Sparkles,
-  User,
-  Wind,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronDown, Clock, Gift, MapPin, Mic, Search, Sparkles, User, Wind, type LucideIcon } from "lucide-react";
 import { BadiyoLogo } from "./BadiyoLogo";
+import { BottomNav } from "./BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
