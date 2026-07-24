@@ -15,6 +15,7 @@ import {
   BookingSummaryScreen,
   type SelectedAddress,
 } from "@/components/BookingSummaryScreen";
+import { PaymentScreen } from "@/components/PaymentScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
