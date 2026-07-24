@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Home, MapPin, Plus, X } from "lucide-react";
+import { ArrowLeft, Home, MapPin, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AddAddressMapScreen, type PickedAddress } from "./AddAddressMapScreen";
 
 type Address = {
   id: string;
@@ -24,12 +25,6 @@ async function fetchAddresses(): Promise<Address[]> {
   if (error) throw error;
   return (data ?? []) as Address[];
 }
-
-type NewAddressInput = {
-  label: string;
-  full_address: string;
-  area: string;
-};
 
 export function AddressSelectionScreen({
   onBack,
