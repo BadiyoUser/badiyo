@@ -54,6 +54,7 @@ type Phase =
   | "splash"
   | "splash-out"
   | "login"
+  | "otp-verify"
   | "home"
   | "slot"
   | "address"
@@ -162,7 +163,25 @@ function Index() {
       )}
       {phase === "login" && (
         <div className="animate-fade-slide-in">
-          <LoginScreen onContinue={() => setPhase("home")} />
+          <LoginScreen onOtpSent={(p) => { setPendingPhone(p); setPhase("otp-verify"); }} />
+        </div>
+      )}
+      {phase === "otp-verify" && pendingPhone && (
+        <div className="animate-fade-slide-in">
+          <OtpVerifyScreen
+            phone={pendingPhone}
+            onBack={() => setPhase("login")}
+            onVerified={async () => {
+              try {
+                await ensureUserRow(`+91${pendingPhone}`);
+                const { linkReferralIfAny } = await import("@/lib/referrals");
+                await linkReferralIfAny();
+              } catch (e) {
+                console.error("post-otp setup failed:", e);
+              }
+              setPhase("home");
+            }}
+          />
         </div>
       )}
       {phase === "home" && (
