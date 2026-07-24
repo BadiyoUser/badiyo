@@ -1,17 +1,72 @@
-import { ArrowLeft, ChevronRight, CalendarCheck, Wallet as WalletIcon, User } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronRight,
+  CalendarCheck,
+  Wallet as WalletIcon,
+  User,
+  UserCog,
+  Bell,
+  Settings as SettingsIcon,
+  HelpCircle,
+  FileText,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+type Item = { key: string; label: string; desc: string; icon: LucideIcon; onClick: () => void };
+type Group = { title: string; items: Item[] };
 
 export function ProfileScreen({
   onBack,
   onOpenBookings,
   onOpenWallet,
+  onOpenEditProfile,
+  onOpenNotifications,
+  onOpenSettings,
+  onOpenHelp,
+  onOpenAbout,
 }: {
   onBack: () => void;
   onOpenBookings: () => void;
   onOpenWallet: () => void;
+  onOpenEditProfile: () => void;
+  onOpenNotifications: () => void;
+  onOpenSettings: () => void;
+  onOpenHelp: () => void;
+  onOpenAbout: () => void;
 }) {
-  const items = [
-    { key: "bookings", label: "My Bookings", desc: "View past and upcoming services", icon: CalendarCheck, onClick: onOpenBookings },
-    { key: "wallet", label: "Wallet", desc: "Badiyo coins & transactions", icon: WalletIcon, onClick: onOpenWallet },
+  const groups: Group[] = [
+    {
+      title: "Account",
+      items: [
+        { key: "edit", label: "Edit Profile", desc: "Name, email and avatar", icon: UserCog, onClick: onOpenEditProfile },
+      ],
+    },
+    {
+      title: "Activity",
+      items: [
+        { key: "bookings", label: "My Bookings", desc: "View past and upcoming services", icon: CalendarCheck, onClick: onOpenBookings },
+        { key: "wallet", label: "Wallet", desc: "Badiyo coins & transactions", icon: WalletIcon, onClick: onOpenWallet },
+      ],
+    },
+    {
+      title: "Preferences",
+      items: [
+        { key: "notif", label: "Notifications", desc: "Manage what you get pinged about", icon: Bell, onClick: onOpenNotifications },
+        { key: "settings", label: "Settings", desc: "Language, privacy and account", icon: SettingsIcon, onClick: onOpenSettings },
+      ],
+    },
+    {
+      title: "Support",
+      items: [
+        { key: "help", label: "Help & Support", desc: "FAQs and contact us", icon: HelpCircle, onClick: onOpenHelp },
+      ],
+    },
+    {
+      title: "Other",
+      items: [
+        { key: "about", label: "About, Terms & Privacy", desc: "Learn more about badiyo", icon: FileText, onClick: onOpenAbout },
+      ],
+    },
   ];
 
   return (
@@ -38,24 +93,31 @@ export function ProfileScreen({
           </div>
         </section>
 
-        <section className="mt-5 space-y-2">
-          {items.map((it) => (
-            <button
-              key={it.key}
-              onClick={it.onClick}
-              className="flex w-full items-center gap-3 rounded-[14px] border border-border bg-card px-4 py-3 text-left transition active:scale-[0.99]"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <it.icon className="h-5 w-5 text-primary" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-foreground">{it.label}</p>
-                <p className="text-xs text-muted-foreground">{it.desc}</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </button>
-          ))}
-        </section>
+        {groups.map((g) => (
+          <section key={g.title} className="mt-6">
+            <h2 className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              {g.title}
+            </h2>
+            <div className="space-y-2">
+              {g.items.map((it) => (
+                <button
+                  key={it.key}
+                  onClick={it.onClick}
+                  className="flex w-full items-center gap-3 rounded-[14px] border border-border bg-card px-4 py-3 text-left transition active:scale-[0.99]"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <it.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-foreground">{it.label}</p>
+                    <p className="text-xs text-muted-foreground">{it.desc}</p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </main>
   );
