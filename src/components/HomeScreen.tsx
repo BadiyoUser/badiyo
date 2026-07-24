@@ -5,6 +5,8 @@ import { BadiyoLogo } from "./BadiyoLogo";
 import { BottomNav } from "./BottomNav";
 import { LocationPickerSheet, type SavedAddress } from "./LocationPickerSheet";
 import { supabase } from "@/integrations/supabase/client";
+import { useAvatarUrl } from "@/lib/useAvatarUrl";
+
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
 import expertDishes from "@/assets/expert-dishes.jpg";
@@ -84,6 +86,8 @@ export function HomeScreen({
     queryKey: ["homepage_sections"],
     queryFn: fetchSections,
   });
+  const { data: avatarUrl } = useAvatarUrl();
+
 
   const searchBar = sections.find((s) => s.section_type === "search_bar");
   const promo = sections.find((s) => s.section_type === "promo_banner");
@@ -137,10 +141,21 @@ export function HomeScreen({
           <button
             onClick={onOpenProfile}
             aria-label="Profile"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-primary/60 bg-card"
+            className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary/60 bg-card"
           >
-            <User className="h-5 w-5 text-primary" />
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Profile"
+                className="h-full w-full object-cover"
+                loading="eager"
+                decoding="async"
+              />
+            ) : (
+              <User className="h-5 w-5 text-primary" />
+            )}
           </button>
+
         </header>
 
         {/* Search bar */}

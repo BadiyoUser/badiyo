@@ -1,8 +1,11 @@
 import { ArrowLeft, User, Camera } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { signAddressPhotoUrl } from "@/lib/storageUrl";
+
+
 
 export function EditProfileScreen({ onBack }: { onBack: () => void }) {
   const [fullName, setFullName] = useState("");
@@ -18,6 +21,8 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
   const [authProvider, setAuthProvider] = useState<string | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
 
   useEffect(() => {
     (async () => {
@@ -73,6 +78,8 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
         .eq("id", uid);
       if (updErr) throw updErr;
       setAvatarUrl(await signAddressPhotoUrl(url));
+      queryClient.invalidateQueries({ queryKey: ["user-avatar-url"] });
+
     } catch (err) {
       console.error("Avatar upload failed:", err);
       setUploadError(await getErrorMessage(err));
