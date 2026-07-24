@@ -17,6 +17,7 @@ import type { LucideIcon } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { signAddressPhotoUrl } from "@/lib/storageUrl";
 
 type Item = { key: string; label: string; desc: string; icon: LucideIcon; onClick: () => void };
 type Group = { title: string; items: Item[] };
@@ -48,6 +49,7 @@ export function ProfileScreen({
 }) {
 
   const [fullName, setFullName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -56,12 +58,14 @@ export function ProfileScreen({
       if (!uid) return;
       const { data } = await supabase
         .from("users")
-        .select("full_name")
+        .select("full_name, avatar_url")
         .eq("id", uid)
         .single();
       if (data?.full_name) setFullName(data.full_name);
+      if (data?.avatar_url) setAvatarUrl(await signAddressPhotoUrl(data.avatar_url));
     })();
   }, []);
+
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -121,9 +125,14 @@ export function ProfileScreen({
         </header>
 
         <section className="mt-6 flex items-center gap-4 rounded-[18px] border border-border bg-card p-4 shadow-sm">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary/60 bg-primary/10">
-            <User className="h-7 w-7 text-primary" />
+          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-primary/60 bg-primary/10">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+            ) : (
+              <User className="h-7 w-7 text-primary" />
+            )}
           </div>
+
           <div className="min-w-0">
             <p className="text-base font-bold text-foreground">{fullName ? `Hello, ${fullName}!` : "Hello!"}</p>
             <p className="text-xs text-muted-foreground">Manage your bookings and rewards</p>
