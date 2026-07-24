@@ -17,7 +17,8 @@ import type { LucideIcon } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { signAddressPhotoUrl } from "@/lib/storageUrl";
+import { useAvatarUrl } from "@/lib/useAvatarUrl";
+
 
 type Item = { key: string; label: string; desc: string; icon: LucideIcon; onClick: () => void };
 type Group = { title: string; items: Item[] };
