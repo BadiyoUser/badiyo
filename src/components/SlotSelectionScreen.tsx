@@ -4,7 +4,13 @@ import { ArrowLeft, Clock } from "lucide-react";
 export type SelectedService = {
   duration_label: string;
   price: number;
+  subtitle: string | null;
+  icon: string | null;
 };
+
+export type SelectedSlot =
+  | { mode: "now" }
+  | { mode: "later"; day: string; slotId: "morning" | "afternoon" | "evening"; slotLabel: string; slotRange: string };
 
 type Mode = "now" | "later";
 type TimeSlot = "morning" | "afternoon" | "evening";
@@ -33,7 +39,7 @@ export function SlotSelectionScreen({
 }: {
   service: SelectedService;
   onBack: () => void;
-  onContinue: () => void;
+  onContinue: (slot: SelectedSlot) => void;
 }) {
   const [mode, setMode] = useState<Mode>("now");
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
@@ -164,7 +170,20 @@ export function SlotSelectionScreen({
         <div className="mx-auto w-full max-w-md px-5 py-4">
           <button
             disabled={!canContinue}
-            onClick={onContinue}
+            onClick={() => {
+              if (mode === "now") {
+                onContinue({ mode: "now" });
+              } else if (selectedDay && selectedSlot) {
+                const s = TIME_SLOTS.find((x) => x.id === selectedSlot)!;
+                onContinue({
+                  mode: "later",
+                  day: selectedDay,
+                  slotId: selectedSlot,
+                  slotLabel: s.label,
+                  slotRange: s.range,
+                });
+              }
+            }}
             className={`w-full rounded-[14px] px-4 py-3.5 text-sm font-bold transition ${
               canContinue
                 ? "bg-primary text-primary-foreground active:scale-[0.99]"

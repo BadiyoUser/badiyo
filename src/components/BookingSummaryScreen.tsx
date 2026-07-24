@@ -1,9 +1,55 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, Home as HomeIcon } from "lucide-react";
+import type { SelectedService, SelectedSlot } from "./SlotSelectionScreen";
 
-export function BookingSummaryScreen({ onBack }: { onBack: () => void }) {
+export type SelectedAddress = {
+  id: string;
+  label: string | null;
+  full_address: string;
+  area: string | null;
+  city: string | null;
+  is_default: boolean | null;
+};
+
+function formatSlot(slot: SelectedSlot): { title: string; subtitle: string } {
+  if (slot.mode === "now") {
+    return {
+      title: "Now",
+      subtitle: "Expert arriving in 30 – 45 mins",
+    };
+  }
+  const date = new Date(slot.day);
+  const dateLabel = date.toLocaleDateString("en-US", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+  return {
+    title: `${dateLabel} · ${slot.slotLabel}`,
+    subtitle: `Between ${slot.slotRange}`,
+  };
+}
+
+export function BookingSummaryScreen({
+  service,
+  slot,
+  address,
+  onBack,
+  onEditAddress,
+  onProceedToPay,
+}: {
+  service: SelectedService;
+  slot: SelectedSlot;
+  address: SelectedAddress;
+  onBack: () => void;
+  onEditAddress: () => void;
+  onProceedToPay: () => void;
+}) {
+  const slotInfo = formatSlot(slot);
+
   return (
-    <main className="min-h-screen w-full bg-background">
+    <main className="min-h-screen w-full bg-background pb-28">
       <div className="mx-auto w-full max-w-md px-5 pt-6">
+        {/* Header */}
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -16,8 +62,105 @@ export function BookingSummaryScreen({ onBack }: { onBack: () => void }) {
             Booking Summary
           </h1>
         </div>
-        <div className="mt-16 text-center text-sm text-muted-foreground">
-          Coming soon
+
+        {/* Service card */}
+        <section className="mt-6 flex items-start gap-4 rounded-[18px] border border-border bg-card p-5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <Clock className="h-6 w-6 text-primary" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-base font-bold text-foreground">
+              {service.duration_label}
+            </div>
+            {service.subtitle && (
+              <div className="mt-0.5 text-xs text-muted-foreground">
+                {service.subtitle}
+              </div>
+            )}
+            <div className="mt-1 text-sm font-bold text-primary">
+              Rs {service.price}
+            </div>
+          </div>
+        </section>
+
+        {/* Slot card */}
+        <section className="mt-4 flex items-start gap-4 rounded-[18px] border border-border bg-card p-5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <Calendar className="h-6 w-6 text-primary" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              When
+            </div>
+            <div className="mt-1 text-base font-bold text-foreground">
+              {slotInfo.title}
+            </div>
+            <div className="mt-0.5 text-sm text-muted-foreground">
+              {slotInfo.subtitle}
+            </div>
+          </div>
+        </section>
+
+        {/* Address card */}
+        <section className="mt-4 flex items-start gap-4 rounded-[18px] border border-border bg-card p-5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <HomeIcon className="h-6 w-6 text-primary" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Address
+              </div>
+              <button
+                onClick={onEditAddress}
+                className="text-xs font-bold text-primary"
+              >
+                Edit
+              </button>
+            </div>
+            <div className="mt-1 text-base font-bold text-foreground">
+              {address.label || "Address"}
+            </div>
+            <div className="mt-0.5 text-sm text-muted-foreground">
+              {address.full_address}
+            </div>
+          </div>
+        </section>
+
+        {/* Price breakdown */}
+        <section className="mt-6 rounded-[18px] border border-border bg-card p-5">
+          <div className="text-sm font-bold text-foreground">
+            Price details
+          </div>
+          <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+            <span>Service price</span>
+            <span className="text-foreground">Rs {service.price}</span>
+          </div>
+          <div className="my-4 h-px bg-border" />
+          <div className="flex items-center justify-between">
+            <span className="text-base font-bold text-foreground">Total</span>
+            <span className="text-base font-bold text-foreground">
+              Rs {service.price}
+            </span>
+          </div>
+        </section>
+      </div>
+
+      {/* Fixed pay button */}
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card">
+        <div className="mx-auto flex w-full max-w-md items-center justify-between gap-4 px-5 py-4">
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground">Total</span>
+            <span className="text-base font-bold text-foreground">
+              Rs {service.price}
+            </span>
+          </div>
+          <button
+            onClick={onProceedToPay}
+            className="flex-1 rounded-[14px] bg-primary px-4 py-3.5 text-sm font-bold text-primary-foreground transition active:scale-[0.99]"
+          >
+            Proceed to Pay
+          </button>
         </div>
       </div>
     </main>

@@ -6,9 +6,15 @@ import { HomeScreen } from "@/components/HomeScreen";
 import {
   SlotSelectionScreen,
   type SelectedService,
+  type SelectedSlot,
 } from "@/components/SlotSelectionScreen";
-import { AddressSelectionScreen } from "@/components/AddressSelectionScreen";
-import { BookingSummaryScreen } from "@/components/BookingSummaryScreen";
+import {
+  AddressSelectionScreen,
+} from "@/components/AddressSelectionScreen";
+import {
+  BookingSummaryScreen,
+  type SelectedAddress,
+} from "@/components/BookingSummaryScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,16 +30,25 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Phase = "splash" | "splash-out" | "login" | "home" | "slot" | "address" | "summary";
+type Phase =
+  | "splash"
+  | "splash-out"
+  | "login"
+  | "home"
+  | "slot"
+  | "address"
+  | "summary"
+  | "payment";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
   const [selectedService, setSelectedService] = useState<SelectedService | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("splash-out"), 1800);
     const t2 = setTimeout(() => setPhase("login"), 2300);
-    // Ensure a public.users row exists whenever we already have (or gain) a session.
     ensureUserRow().catch((e) => console.error("startup ensureUserRow failed:", e));
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
@@ -83,7 +98,10 @@ function Index() {
           <SlotSelectionScreen
             service={selectedService}
             onBack={() => setPhase("home")}
-            onContinue={() => setPhase("address")}
+            onContinue={(slot) => {
+              setSelectedSlot(slot);
+              setPhase("address");
+            }}
           />
         </div>
       )}
@@ -91,13 +109,40 @@ function Index() {
         <div className="animate-fade-slide-in">
           <AddressSelectionScreen
             onBack={() => setPhase("slot")}
-            onContinue={() => setPhase("summary")}
+            onContinue={(addr) => {
+              setSelectedAddress(addr);
+              setPhase("summary");
+            }}
           />
         </div>
       )}
-      {phase === "summary" && (
+      {phase === "summary" && selectedService && selectedSlot && selectedAddress && (
         <div className="animate-fade-slide-in">
-          <BookingSummaryScreen onBack={() => setPhase("address")} />
+          <BookingSummaryScreen
+            service={selectedService}
+            slot={selectedSlot}
+            address={selectedAddress}
+            onBack={() => setPhase("address")}
+            onEditAddress={() => setPhase("address")}
+            onProceedToPay={() => setPhase("payment")}
+          />
+        </div>
+      )}
+      {phase === "payment" && (
+        <div className="animate-fade-slide-in">
+          <main className="min-h-screen w-full bg-background">
+            <div className="mx-auto w-full max-w-md px-5 pt-6">
+              <button
+                onClick={() => setPhase("summary")}
+                className="text-sm font-bold text-primary"
+              >
+                ← Back
+              </button>
+              <div className="mt-16 text-center text-sm text-muted-foreground">
+                Payment — coming soon
+              </div>
+            </div>
+          </main>
         </div>
       )}
     </div>
