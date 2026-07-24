@@ -129,21 +129,15 @@ function Index() {
           />
         </div>
       )}
-      {phase === "payment" && (
+      {phase === "payment" && selectedService && selectedSlot && selectedAddress && (
         <div className="animate-fade-slide-in">
-          <main className="min-h-screen w-full bg-background">
-            <div className="mx-auto w-full max-w-md px-5 pt-6">
-              <button
-                onClick={() => setPhase("summary")}
-                className="text-sm font-bold text-primary"
-              >
-                ← Back
-              </button>
-              <div className="mt-16 text-center text-sm text-muted-foreground">
-                Payment — coming soon
-              </div>
-            </div>
-          </main>
+          <PaymentScreen
+            service={selectedService}
+            slot={selectedSlot}
+            address={selectedAddress}
+            onBack={() => setPhase("summary")}
+            onDone={() => setPhase("home")}
+          />
         </div>
       )}
     </div>
