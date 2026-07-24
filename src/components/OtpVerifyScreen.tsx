@@ -86,7 +86,7 @@ export function OtpVerifyScreen({
       setCooldown(30);
     } catch (err) {
       console.error("resend send-otp failed", err);
-      setError("Could not resend. Try again shortly.");
+      setError(await getErrorMessage(err));
     } finally {
       setResending(false);
     }
