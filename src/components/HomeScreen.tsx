@@ -7,7 +7,6 @@ import {
   MapPin,
   Mic,
   Search,
-  ShieldCheck,
   Sparkles,
   User,
   Wind,
@@ -15,7 +14,6 @@ import {
 } from "lucide-react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { supabase } from "@/integrations/supabase/client";
-import heroCleaning from "@/assets/hero-cleaning.png";
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
 import expertDishes from "@/assets/expert-dishes.jpg";
