@@ -25,6 +25,11 @@ import { BookingDetailsScreen } from "@/components/BookingDetailsScreen";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { WalletScreen } from "@/components/WalletScreen";
 import { RewardsScreen } from "@/components/RewardsScreen";
+import { EditProfileScreen } from "@/components/profile/EditProfileScreen";
+import { NotificationsScreen } from "@/components/profile/NotificationsScreen";
+import { SettingsScreen } from "@/components/profile/SettingsScreen";
+import { HelpSupportScreen } from "@/components/profile/HelpSupportScreen";
+import { AboutScreen } from "@/components/profile/AboutScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
