@@ -180,7 +180,7 @@ export function HomeScreen({
 
 
         {/* Book Cleaning section */}
-        <h2 className="mt-8 text-lg font-extrabold tracking-tight text-foreground">
+        <h2 className="mt-5 text-lg font-extrabold tracking-tight text-foreground">
           Book Cleaning
         </h2>
 
@@ -229,7 +229,7 @@ export function HomeScreen({
         </p>
 
         {/* Expert tiles */}
-        <h2 className="mt-10 text-xl font-extrabold tracking-tight text-foreground">
+        <h2 className="mt-5 text-xl font-extrabold tracking-tight text-foreground">
           One Expert who can do it all
         </h2>
         <div className="mt-5 grid grid-cols-3 gap-4">
