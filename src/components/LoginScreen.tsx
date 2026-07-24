@@ -53,9 +53,24 @@ export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
     }
   };
 
-  const handleGoogle = () => {
-    console.log("Continue with Google");
-    onContinue?.();
+  const handleGoogle = async () => {
+    if (loading) return;
+    setError(null);
+    setLoading(true);
+    try {
+      // Referral code (if any) is already captured to localStorage on mount
+      // and will be linked on return via onAuthStateChange in the root.
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin },
+      });
+      if (oauthError) throw oauthError;
+      // Browser navigates away to Google; no further action here.
+    } catch (err) {
+      console.error("Google sign-in failed:", err);
+      setError(err instanceof Error ? err.message : "Could not start Google sign-in.");
+      setLoading(false);
+    }
   };
 
   return (
