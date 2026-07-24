@@ -28,6 +28,7 @@ export function ProfileScreen({
   onOpenSettings,
   onOpenHelp,
   onOpenAbout,
+  onOpenReferrals,
   onLogout,
 }: {
   onBack: () => void;
@@ -38,6 +39,7 @@ export function ProfileScreen({
   onOpenSettings: () => void;
   onOpenHelp: () => void;
   onOpenAbout: () => void;
+  onOpenReferrals: () => void;
   onLogout: () => void;
 }) {
   const [fullName, setFullName] = useState<string | null>(null);
