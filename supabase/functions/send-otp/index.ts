@@ -41,7 +41,8 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get("AISENSY_API_KEY");
     if (!apiKey) return json({ error: "AISENSY_API_KEY not configured" }, 500);
 
-    const campaignName = Deno.env.get("AISENSY_CAMPAIGN_NAME") || "badiyo_login_otp";
+    const campaignName = Deno.env.get("AISENSY_CAMPAIGN_NAME");
+    if (!campaignName) return json({ error: "AISENSY_CAMPAIGN_NAME not configured" }, 500);
     const aiRes = await fetch("https://backend.aisensy.com/campaign/t1/api/v2", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
