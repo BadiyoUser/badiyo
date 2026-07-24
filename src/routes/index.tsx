@@ -35,7 +35,10 @@ import { ReferralDashboardScreen } from "@/components/ReferralDashboardScreen";
 import { PaymentMethodsScreen } from "@/components/profile/PaymentMethodsScreen";
 import { SearchResultsScreen } from "@/components/SearchResultsScreen";
 import { NoInternetScreen } from "@/components/utility/NoInternetScreen";
+import { ForceUpdateScreen } from "@/components/utility/ForceUpdateScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
+import { registerPushForCurrentUser } from "@/lib/push";
+import { APP_VERSION, fetchMinSupportedVersion, isBelow } from "@/lib/version";
 import { supabase } from "@/integrations/supabase/client";
 
 
@@ -93,6 +96,7 @@ function Index() {
   const [online, setOnline] = useState(
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
+  const [forceUpdate, setForceUpdate] = useState(false);
 
   function resetAndGoHome() {
     setActiveBookingId(null);
@@ -105,6 +109,10 @@ function Index() {
   useEffect(() => {
     let cancelled = false;
 
+    fetchMinSupportedVersion().then((min) => {
+      if (!cancelled && min && isBelow(APP_VERSION, min)) setForceUpdate(true);
+    });
+
     // If we're returning from Google OAuth, a session will already exist —
     // skip the splash and go straight to home once it's confirmed.
     supabase.auth.getSession().then(({ data }) => {
@@ -113,6 +121,7 @@ function Index() {
         setPhase("home");
         ensureUserRow()
           .then(() => import("@/lib/referrals").then((m) => m.linkReferralIfAny()))
+          .then(() => registerPushForCurrentUser())
           .catch((e) => console.error("post-oauth setup failed:", e));
         return;
       }
@@ -128,6 +137,7 @@ function Index() {
           await ensureUserRow();
           const { linkReferralIfAny } = await import("@/lib/referrals");
           await linkReferralIfAny();
+          registerPushForCurrentUser().catch(() => {});
         } catch (e) {
           console.error("ensureUserRow failed:", e);
         }
@@ -147,6 +157,7 @@ function Index() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
+      {forceUpdate && <ForceUpdateScreen />}
       {!online && <NoInternetScreen onRetry={() => setOnline(navigator.onLine)} />}
 
       {(phase === "splash" || phase === "splash-out") && (

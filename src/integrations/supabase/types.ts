@@ -64,6 +64,27 @@ export type Database = {
           },
         ]
       }
+      app_config: {
+        Row: {
+          current_version: string
+          id: number
+          min_supported_version: string
+          updated_at: string
+        }
+        Insert: {
+          current_version?: string
+          id?: number
+          min_supported_version?: string
+          updated_at?: string
+        }
+        Update: {
+          current_version?: string
+          id?: number
+          min_supported_version?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           address_id: string | null
@@ -135,6 +156,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      fcm_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       homepage_sections: {
         Row: {
@@ -354,6 +399,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          notification_preferences: Json
           phone: string | null
           referral_code: string | null
           referral_count: number | null
@@ -368,6 +414,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          notification_preferences?: Json
           phone?: string | null
           referral_code?: string | null
           referral_count?: number | null
@@ -382,6 +429,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          notification_preferences?: Json
           phone?: string | null
           referral_code?: string | null
           referral_count?: number | null
