@@ -215,6 +215,26 @@ function Index() {
           />
         </div>
       )}
+      {phase === "my-bookings" && (
+        <div className="animate-fade-slide-in">
+          <MyBookingsScreen
+            onBack={() => setPhase("home")}
+            onGoHome={() => setPhase("home")}
+            onOpenBooking={(b) => {
+              setSelectedBooking(b);
+              setPhase("booking-details");
+            }}
+          />
+        </div>
+      )}
+      {phase === "booking-details" && selectedBooking && (
+        <div className="animate-fade-slide-in">
+          <BookingDetailsScreen
+            booking={selectedBooking}
+            onBack={() => setPhase("my-bookings")}
+          />
+        </div>
+      )}
     </div>
   );
 }
