@@ -23,6 +23,7 @@ export type Database = {
           id: string
           is_default: boolean | null
           label: string | null
+          landmark_photo_url: string | null
           latitude: number | null
           longitude: number | null
           user_id: string | null
@@ -35,6 +36,7 @@ export type Database = {
           id?: string
           is_default?: boolean | null
           label?: string | null
+          landmark_photo_url?: string | null
           latitude?: number | null
           longitude?: number | null
           user_id?: string | null
@@ -47,6 +49,7 @@ export type Database = {
           id?: string
           is_default?: boolean | null
           label?: string | null
+          landmark_photo_url?: string | null
           latitude?: number | null
           longitude?: number | null
           user_id?: string | null

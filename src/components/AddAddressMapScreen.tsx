@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Crosshair, Loader2, MapPin, Search } from "lucide-react";
+import { ArrowLeft, Camera, Crosshair, Loader2, MapPin, Search, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { reverseGeocode } from "@/lib/geocode.functions";
 
@@ -11,6 +11,7 @@ export type PickedAddress = {
   longitude: number;
   label: string;
   address_details: string;
+  photo: File | null;
 };
 
 type LatLng = { lat: number; lng: number };
@@ -70,6 +71,9 @@ export function AddAddressMapScreen({
   const [locating, setLocating] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [geocodeFailed, setGeocodeFailed] = useState(false);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const geocode = useServerFn(reverseGeocode);
   const centerRef = useRef(center);
   centerRef.current = center;
@@ -173,8 +177,30 @@ export function AddAddressMapScreen({
       longitude: center.lng,
       label,
       address_details: addressDetails.trim(),
+      photo,
     });
   };
+
+  const handlePhotoPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setPhoto(f);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(URL.createObjectURL(f));
+    e.target.value = "";
+  };
+
+  const removePhoto = () => {
+    setPhoto(null);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(null);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+    };
+  }, [photoPreview]);
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col bg-background">
@@ -305,6 +331,46 @@ export function AddAddressMapScreen({
                 );
               })}
             </div>
+          </div>
+
+          <div>
+            <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Add a photo of your home (optional)
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handlePhotoPick}
+              className="hidden"
+            />
+            {photoPreview ? (
+              <div className="relative h-20 w-20">
+                <img
+                  src={photoPreview}
+                  alt="Home preview"
+                  className="h-20 w-20 rounded-[14px] border border-border object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={removePhoto}
+                  aria-label="Remove photo"
+                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background shadow"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-[14px] border-2 border-dashed border-border bg-background text-primary transition active:scale-[0.98]"
+              >
+                <Camera className="h-5 w-5" />
+                <span className="text-[10px] font-bold">Add photo</span>
+              </button>
+            )}
           </div>
 
           {error && <p className="text-xs font-semibold text-red-600">{error}</p>}

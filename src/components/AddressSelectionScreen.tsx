@@ -11,6 +11,7 @@ type Address = {
   area: string | null;
   city: string | null;
   is_default: boolean | null;
+  landmark_photo_url: string | null;
 };
 
 async function fetchAddresses(): Promise<Address[]> {
@@ -19,7 +20,7 @@ async function fetchAddresses(): Promise<Address[]> {
   if (!uid) return [];
   const { data, error } = await supabase
     .from("addresses")
-    .select("id, label, full_address, area, city, is_default")
+    .select("id, label, full_address, area, city, is_default, landmark_photo_url")
     .eq("user_id", uid)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -74,10 +75,34 @@ export function AddressSelectionScreen({
           longitude: input.longitude,
           is_default: addresses.length === 0,
         })
-        .select("id, label, full_address, area, city, is_default")
+        .select("id, label, full_address, area, city, is_default, landmark_photo_url")
         .single();
       if (error) throw error;
-      return data as Address;
+      const created = data as Address;
+
+      if (input.photo) {
+        const ext = (input.photo.name.split(".").pop() || "jpg").toLowerCase();
+        const path = `${uid}/${created.id}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("address-photos")
+          .upload(path, input.photo, {
+            upsert: true,
+            contentType: input.photo.type || "image/jpeg",
+          });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage
+          .from("address-photos")
+          .getPublicUrl(path);
+        const publicUrl = pub.publicUrl;
+        const { error: updErr } = await supabase
+          .from("addresses")
+          .update({ landmark_photo_url: publicUrl })
+          .eq("id", created.id);
+        if (updErr) throw updErr;
+        created.landmark_photo_url = publicUrl;
+      }
+
+      return created;
     },
     onSuccess: (created) => {
       qc.invalidateQueries({ queryKey: ["addresses"] });
@@ -143,9 +168,17 @@ export function AddressSelectionScreen({
                         : "border-border bg-card"
                     }`}
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-primary/10">
-                      <Home className="h-5 w-5 text-primary" />
-                    </div>
+                    {a.landmark_photo_url ? (
+                      <img
+                        src={a.landmark_photo_url}
+                        alt={a.label || "Home"}
+                        className="h-10 w-10 shrink-0 rounded-full border border-border object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-primary/10">
+                        <Home className="h-5 w-5 text-primary" />
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-bold text-foreground">
                         {a.label || "Address"}
