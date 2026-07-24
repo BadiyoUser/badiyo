@@ -187,6 +187,13 @@ export function PaymentScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Auto-navigate to tracking after payment success
+  useEffect(() => {
+    if (status !== "success") return;
+    const t = setTimeout(() => onTrackBooking(bookingId), 3000);
+    return () => clearTimeout(t);
+  }, [status, bookingId, onTrackBooking]);
+
   // Re-fetch booking by id (supports refresh scenarios in-session)
   useEffect(() => {
     if (!bookingId) return;
