@@ -86,7 +86,7 @@ export function AddAddressMapScreen({
           disableDefaultUI: true,
           zoomControl: true,
           zoomControlOptions: {
-            position: window.google.maps.ControlPosition.RIGHT_TOP,
+            position: window.google.maps.ControlPosition.LEFT_BOTTOM,
           },
           clickableIcons: false,
         });
