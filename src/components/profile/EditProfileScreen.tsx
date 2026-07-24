@@ -44,7 +44,7 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
         setEmail(isSynthetic ? "" : rawEmail);
         setPhone(data.phone ?? "");
         setInitialPhone(data.phone ?? "");
-        setAvatarUrl(data.avatar_url ?? null);
+        setAvatarUrl(await signAddressPhotoUrl(data.avatar_url ?? null));
       }
     })();
   }, []);
