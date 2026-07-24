@@ -15,9 +15,7 @@ export function ExpertAssignedScreen({
   useEffect(() => {
     if (!bookingId) return;
     supabase
-      .from("bookings")
-      .update({ status: "expert_assigned" })
-      .eq("id", bookingId)
+      .rpc("advance_booking_status", { _booking_id: bookingId, _new_status: "expert_assigned" })
       .then(({ error }) => {
         if (error) console.error("status update failed:", error);
       });

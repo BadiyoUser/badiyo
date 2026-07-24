@@ -241,6 +241,27 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          ip: string | null
+          phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip?: string | null
+          phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip?: string | null
+          phone?: string | null
+        }
+        Relationships: []
+      }
       referral_config: {
         Row: {
           id: string
@@ -472,6 +493,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      advance_booking_status: {
+        Args: { _booking_id: string; _new_status: string }
+        Returns: undefined
+      }
       credit_referral_for_booking: {
         Args: { _booking_id: string }
         Returns: undefined
@@ -479,6 +504,10 @@ export type Database = {
       get_auth_user_id_by_email: { Args: { _email: string }; Returns: string }
       get_auth_user_id_by_phone: { Args: { _phone: string }; Returns: string }
       link_referral: { Args: { _code: string }; Returns: undefined }
+      submit_booking_review: {
+        Args: { _booking_id: string; _rating: number; _review: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
