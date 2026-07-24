@@ -170,7 +170,20 @@ export function SlotSelectionScreen({
         <div className="mx-auto w-full max-w-md px-5 py-4">
           <button
             disabled={!canContinue}
-            onClick={onContinue}
+            onClick={() => {
+              if (mode === "now") {
+                onContinue({ mode: "now" });
+              } else if (selectedDay && selectedSlot) {
+                const s = TIME_SLOTS.find((x) => x.id === selectedSlot)!;
+                onContinue({
+                  mode: "later",
+                  day: selectedDay,
+                  slotId: selectedSlot,
+                  slotLabel: s.label,
+                  slotRange: s.range,
+                });
+              }
+            }}
             className={`w-full rounded-[14px] px-4 py-3.5 text-sm font-bold transition ${
               canContinue
                 ? "bg-primary text-primary-foreground active:scale-[0.99]"
