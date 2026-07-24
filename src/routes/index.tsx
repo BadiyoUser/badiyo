@@ -60,6 +60,7 @@ function Index() {
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
 
   function resetAndGoHome() {
     setActiveBookingId(null);
