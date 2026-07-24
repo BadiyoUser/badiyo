@@ -222,7 +222,7 @@ function Index() {
       {phase === "my-bookings" && (
         <div className="animate-fade-slide-in">
           <MyBookingsScreen
-            onBack={() => setPhase("home")}
+            onBack={() => setPhase("profile")}
             onGoHome={() => setPhase("home")}
             onOpenBooking={(b) => {
               setSelectedBooking(b);
