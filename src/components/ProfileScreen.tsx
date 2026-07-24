@@ -114,7 +114,7 @@ export function ProfileScreen({
             <User className="h-7 w-7 text-primary" />
           </div>
           <div className="min-w-0">
-            <p className="text-base font-bold text-foreground">Hello!</p>
+            <p className="text-base font-bold text-foreground">{fullName ? `Hello, ${fullName}!` : "Hello!"}</p>
             <p className="text-xs text-muted-foreground">Manage your bookings and rewards</p>
           </div>
         </section>
