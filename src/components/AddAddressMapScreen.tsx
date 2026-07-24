@@ -152,14 +152,13 @@ export function AddAddressMapScreen({
     );
   };
 
-  const canSave =
-    addressDetails.trim().length > 0 &&
-    autoAddress.trim().length > 0 &&
-    !isSaving;
+  const canSave = addressDetails.trim().length > 0 && !isSaving;
 
   const handleSave = () => {
     if (!canSave) return;
-    const full = `${addressDetails.trim()}, ${autoAddress.trim()}`;
+    const full = autoAddress.trim()
+      ? `${addressDetails.trim()}, ${autoAddress.trim()}`
+      : addressDetails.trim();
     onSave({
       full_address: full,
       area,
