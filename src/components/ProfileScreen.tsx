@@ -9,6 +9,7 @@ import {
   Settings as SettingsIcon,
   HelpCircle,
   FileText,
+  Gift,
   LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
