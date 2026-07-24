@@ -263,6 +263,7 @@ function Index() {
             onOpenSettings={() => setPhase("settings")}
             onOpenHelp={() => setPhase("help")}
             onOpenAbout={() => setPhase("about")}
+            onLogout={() => setPhase("login")}
           />
         </div>
       )}
