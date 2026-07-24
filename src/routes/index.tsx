@@ -22,6 +22,8 @@ import { ServiceInProgressScreen } from "@/components/tracking/ServiceInProgress
 import { RateReviewScreen } from "@/components/tracking/RateReviewScreen";
 import { MyBookingsScreen, type BookingRow } from "@/components/MyBookingsScreen";
 import { BookingDetailsScreen } from "@/components/BookingDetailsScreen";
+import { ProfileScreen } from "@/components/ProfileScreen";
+import { WalletScreen } from "@/components/WalletScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -52,7 +54,9 @@ type Phase =
   | "otp-end"
   | "rate-review"
   | "my-bookings"
-  | "booking-details";
+  | "booking-details"
+  | "profile"
+  | "wallet";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
@@ -114,7 +118,7 @@ function Index() {
               setSelectedService(s);
               setPhase("slot");
             }}
-            onOpenProfile={() => setPhase("my-bookings")}
+            onOpenProfile={() => setPhase("profile")}
           />
         </div>
       )}
@@ -218,7 +222,7 @@ function Index() {
       {phase === "my-bookings" && (
         <div className="animate-fade-slide-in">
           <MyBookingsScreen
-            onBack={() => setPhase("home")}
+            onBack={() => setPhase("profile")}
             onGoHome={() => setPhase("home")}
             onOpenBooking={(b) => {
               setSelectedBooking(b);
@@ -233,6 +237,20 @@ function Index() {
             booking={selectedBooking}
             onBack={() => setPhase("my-bookings")}
           />
+        </div>
+      )}
+      {phase === "profile" && (
+        <div className="animate-fade-slide-in">
+          <ProfileScreen
+            onBack={() => setPhase("home")}
+            onOpenBookings={() => setPhase("my-bookings")}
+            onOpenWallet={() => setPhase("wallet")}
+          />
+        </div>
+      )}
+      {phase === "wallet" && (
+        <div className="animate-fade-slide-in">
+          <WalletScreen onBack={() => setPhase("profile")} />
         </div>
       )}
     </div>
