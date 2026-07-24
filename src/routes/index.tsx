@@ -109,6 +109,10 @@ function Index() {
   useEffect(() => {
     let cancelled = false;
 
+    fetchMinSupportedVersion().then((min) => {
+      if (!cancelled && min && isBelow(APP_VERSION, min)) setForceUpdate(true);
+    });
+
     // If we're returning from Google OAuth, a session will already exist —
     // skip the splash and go straight to home once it's confirmed.
     supabase.auth.getSession().then(({ data }) => {
@@ -117,6 +121,7 @@ function Index() {
         setPhase("home");
         ensureUserRow()
           .then(() => import("@/lib/referrals").then((m) => m.linkReferralIfAny()))
+          .then(() => registerPushForCurrentUser())
           .catch((e) => console.error("post-oauth setup failed:", e));
         return;
       }
