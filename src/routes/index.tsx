@@ -256,6 +256,14 @@ function Index() {
           <WalletScreen onBack={() => setPhase("profile")} />
         </div>
       )}
+      {phase === "rewards" && (
+        <div className="animate-fade-slide-in">
+          <RewardsScreen
+            onOpenHome={() => setPhase("home")}
+            onOpenRewards={() => setPhase("rewards")}
+          />
+        </div>
+      )}
     </div>
   );
 }
