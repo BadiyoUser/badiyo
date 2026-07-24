@@ -129,7 +129,7 @@ export function HomeScreen({
         </div>
 
         {/* Hero banner */}
-        <section className="relative mt-5 overflow-hidden rounded-[20px] bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 p-5">
+        <section className="relative mt-6 overflow-hidden rounded-[20px] bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 p-5">
           <div className="relative z-10 max-w-[62%]">
             <h1 className="text-[22px] font-extrabold leading-tight tracking-tight text-foreground">
               A cleaner home,
@@ -149,34 +149,34 @@ export function HomeScreen({
             width={768}
             height={512}
             loading="lazy"
-            className="pointer-events-none absolute -right-2 bottom-0 top-0 z-0 h-full w-[45%] object-contain object-right"
+            className="pointer-events-none absolute -right-3 bottom-0 top-0 z-0 h-full w-[52%] object-contain object-right"
           />
         </section>
 
         {/* Book Cleaning section */}
-        <h2 className="mt-7 text-xl font-extrabold tracking-tight text-foreground">
+        <h2 className="mt-10 text-xl font-extrabold tracking-tight text-foreground">
           Book Cleaning
         </h2>
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-5 grid grid-cols-3 gap-4">
           {services.map((s) => (
             <article
               key={s.id}
-              className="flex flex-col items-center rounded-[18px] border border-border bg-card p-3 pt-4 shadow-sm"
+              className="flex flex-col items-center rounded-[18px] border border-border bg-card p-5 pt-6 shadow-sm"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                <Icon name={s.icon} className="h-7 w-7 text-primary" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Icon name={s.icon} className="h-8 w-8 text-primary" />
               </div>
-              <div className="mt-3 text-base font-extrabold text-foreground text-center leading-tight">
+              <div className="mt-4 text-lg font-extrabold text-foreground text-center leading-tight">
                 {s.duration_label}
               </div>
               {s.subtitle && (
-                <div className="mt-1 text-[11px] text-muted-foreground text-center leading-tight">
+                <div className="mt-1.5 text-xs text-muted-foreground text-center leading-tight">
                   {s.subtitle}
                 </div>
               )}
-              <div className="mt-2 h-px w-6 bg-primary/40" />
-              <div className="mt-2 text-base font-extrabold text-primary">
+              <div className="mt-3 h-px w-8 bg-primary/40" />
+              <div className="mt-3 text-lg font-extrabold text-primary">
                 Rs {Number(s.price)}
               </div>
               <button
@@ -186,7 +186,7 @@ export function HomeScreen({
                     price: Number(s.price),
                   })
                 }
-                className="mt-3 w-full rounded-[12px] bg-primary px-2 py-2.5 text-xs font-bold text-primary-foreground transition active:scale-[0.98]"
+                className="mt-4 w-full rounded-[12px] bg-primary px-3 py-3 text-sm font-bold text-primary-foreground transition active:scale-[0.98]"
               >
                 Book Now
               </button>
@@ -194,15 +194,15 @@ export function HomeScreen({
           ))}
         </div>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
+        <p className="mt-5 text-center text-xs text-muted-foreground">
           Need it later? Schedule a time inside booking
         </p>
 
         {/* Expert tiles */}
-        <h2 className="mt-8 text-xl font-extrabold tracking-tight text-foreground">
+        <h2 className="mt-10 text-xl font-extrabold tracking-tight text-foreground">
           One Expert who can do it all
         </h2>
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-5 grid grid-cols-3 gap-4">
           {EXPERT_TILES.map((tile) => (
             <div key={tile.label} className="flex flex-col">
               <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
@@ -224,7 +224,7 @@ export function HomeScreen({
 
         {/* Promo banner */}
         {promo && (
-          <div className="mt-7 flex items-center gap-3 rounded-[18px] bg-primary/10 p-4">
+          <div className="mt-10 flex items-center gap-3 rounded-[18px] bg-primary/10 p-4">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/20">
               <Icon name={promo.payload?.icon} className="h-5 w-5 text-primary" />
             </div>
