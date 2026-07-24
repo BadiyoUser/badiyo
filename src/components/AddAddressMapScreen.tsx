@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Crosshair, MapPin, Search } from "lucide-react";
+import { ArrowLeft, Crosshair, Loader2, MapPin, Search } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { reverseGeocode } from "@/lib/geocode.functions";
 
@@ -69,6 +69,7 @@ export function AddAddressMapScreen({
   const [editingAuto, setEditingAuto] = useState(false);
   const [locating, setLocating] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
+  const [geocodeFailed, setGeocodeFailed] = useState(false);
   const geocode = useServerFn(reverseGeocode);
   const centerRef = useRef(center);
   centerRef.current = center;
@@ -111,6 +112,7 @@ export function AddAddressMapScreen({
   useEffect(() => {
     let cancelled = false;
     setGeocoding(true);
+    setGeocodeFailed(false);
     geocode({ data: center })
       .then((r) => {
         if (cancelled) return;
@@ -118,7 +120,14 @@ export function AddAddressMapScreen({
         setArea(r.area);
         setCity(r.city);
       })
-      .catch((e) => console.error(e))
+      .catch((e) => {
+        if (cancelled) return;
+        console.error("Reverse geocode failed:", e);
+        setAutoAddress("");
+        setArea(null);
+        setCity(null);
+        setGeocodeFailed(true);
+      })
       .finally(() => !cancelled && setGeocoding(false));
     return () => {
       cancelled = true;
@@ -143,14 +152,13 @@ export function AddAddressMapScreen({
     );
   };
 
-  const canSave =
-    addressDetails.trim().length > 0 &&
-    autoAddress.trim().length > 0 &&
-    !isSaving;
+  const canSave = addressDetails.trim().length > 0 && !isSaving;
 
   const handleSave = () => {
     if (!canSave) return;
-    const full = `${addressDetails.trim()}, ${autoAddress.trim()}`;
+    const full = autoAddress.trim()
+      ? `${addressDetails.trim()}, ${autoAddress.trim()}`
+      : addressDetails.trim();
     onSave({
       full_address: full,
       area,
@@ -230,15 +238,32 @@ export function AddAddressMapScreen({
                 onClick={() => setEditingAuto(true)}
                 className="flex w-full items-start gap-2 rounded-[14px] border border-border bg-background px-3 py-2.5 text-left"
               >
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span className="flex-1 text-sm text-foreground">
-                  {geocoding && !autoAddress
+                {geocoding ? (
+                  <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-primary" />
+                ) : (
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                )}
+                <span
+                  className={`flex-1 text-sm ${
+                    geocoding || (!autoAddress && !geocodeFailed)
+                      ? "text-muted-foreground"
+                      : geocodeFailed && !autoAddress
+                        ? "text-red-600"
+                        : "text-foreground"
+                  }`}
+                >
+                  {geocoding
                     ? "Finding address…"
-                    : autoAddress || "Move the pin to select a location"}
+                    : autoAddress
+                      ? autoAddress
+                      : geocodeFailed
+                        ? "Unable to fetch address, please enter manually"
+                        : "Move the pin to select a location"}
                 </span>
               </button>
             )}
           </div>
+
 
           <label className="block">
             <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">

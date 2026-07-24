@@ -43,7 +43,8 @@ export const reverseGeocode = createServerFn({ method: "POST" })
       }>;
     };
     if (json.status !== "OK" || !json.results?.length) {
-      return { formatted_address: "", area: null, city: null };
+      const msg = (json as any).error_message || json.status || "No results";
+      throw new Error(`Geocoding failed: ${msg}`);
     }
     const top = json.results[0];
     const findComponent = (types: string[]) =>
