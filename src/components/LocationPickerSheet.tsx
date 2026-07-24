@@ -226,7 +226,7 @@ export function LocationPickerSheet({
               <div className="truncate text-xs text-muted-foreground">
                 {locError
                   ? locError
-                  : currentLoc ?? "Using GPS · reverse geocoded"}
+                  : currentLoc ?? "Get your exact location automatically"}
               </div>
             </div>
           </button>
