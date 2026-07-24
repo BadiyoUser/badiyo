@@ -76,8 +76,8 @@ export function BookingDetailsScreen({
       setStatus("cancelled");
       setConfirmingCancel(false);
       onBack();
-    } catch (e: any) {
-      setError(e?.message ?? "Could not cancel. Try again.");
+    } catch (e) {
+      setError(await getErrorMessage(e));
     } finally {
       setCancelling(false);
     }
