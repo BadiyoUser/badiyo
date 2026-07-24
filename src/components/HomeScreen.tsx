@@ -7,7 +7,6 @@ import {
   MapPin,
   Mic,
   Search,
-  ShieldCheck,
   Sparkles,
   User,
   Wind,
@@ -15,7 +14,6 @@ import {
 } from "lucide-react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { supabase } from "@/integrations/supabase/client";
-import heroCleaning from "@/assets/hero-cleaning.png";
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
 import expertDishes from "@/assets/expert-dishes.jpg";
@@ -127,31 +125,6 @@ export function HomeScreen({
             <Mic className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
-
-        {/* Hero banner */}
-        <section className="relative mt-6 overflow-hidden rounded-[20px] bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 p-5">
-          <div className="relative z-10 max-w-[62%]">
-            <h1 className="text-[22px] font-extrabold leading-tight tracking-tight text-foreground">
-              A cleaner home,
-              <br />
-              <span className="text-primary">a happier you.</span>
-            </h1>
-            <div className="mt-4 flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <p className="text-xs font-medium text-foreground/80">
-                Trusted experts. On time. Every time.
-              </p>
-            </div>
-          </div>
-          <img
-            src={heroCleaning}
-            alt="Cleaning supplies"
-            width={768}
-            height={512}
-            loading="lazy"
-            className="pointer-events-none absolute -right-3 bottom-0 top-0 z-0 h-full w-[52%] object-contain object-right"
-          />
-        </section>
 
         {/* Book Cleaning section */}
         <h2 className="mt-8 text-lg font-extrabold tracking-tight text-foreground">
