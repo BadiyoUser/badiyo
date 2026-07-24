@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { SelectedService, SelectedSlot } from "./SlotSelectionScreen";
 import type { SelectedAddress } from "./BookingSummaryScreen";
 import { creditReferralForBooking } from "@/lib/referrals";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 type RazorpayOptions = {
   key: string;
