@@ -16,6 +16,10 @@ import {
   type SelectedAddress,
 } from "@/components/BookingSummaryScreen";
 import { PaymentScreen } from "@/components/PaymentScreen";
+import { ExpertAssignedScreen } from "@/components/tracking/ExpertAssignedScreen";
+import { OtpScreen } from "@/components/tracking/OtpScreen";
+import { ServiceInProgressScreen } from "@/components/tracking/ServiceInProgressScreen";
+import { RateReviewScreen } from "@/components/tracking/RateReviewScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -39,7 +43,12 @@ type Phase =
   | "slot"
   | "address"
   | "summary"
-  | "payment";
+  | "payment"
+  | "expert-assigned"
+  | "otp-start"
+  | "in-progress"
+  | "otp-end"
+  | "rate-review";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
