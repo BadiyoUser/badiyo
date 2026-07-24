@@ -2,7 +2,7 @@ import { useState } from "react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { GoogleIcon } from "./GoogleIcon";
 
-export function LoginScreen() {
+export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
   const [phone, setPhone] = useState("");
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,10 +16,12 @@ export function LoginScreen() {
     e.preventDefault();
     if (!isValid) return;
     console.log("Continue with phone:", `+91${phone}`);
+    onContinue?.();
   };
 
   const handleGoogle = () => {
     console.log("Continue with Google");
+    onContinue?.();
   };
 
   return (
