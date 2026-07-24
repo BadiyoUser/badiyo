@@ -87,7 +87,7 @@ export function PaymentScreen({
   const [bookingLoadError, setBookingLoadError] = useState<string | null>(null);
   const startedRef = useRef(false);
 
-  const amountPaise = Math.round(Number(service.price) * 100);
+  
 
   async function createBooking(paymentId: string, orderId: string) {
     try {
