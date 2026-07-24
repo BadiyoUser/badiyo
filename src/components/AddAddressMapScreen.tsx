@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Crosshair, Loader2, MapPin, Search } from "lucide-react";
+import { ArrowLeft, Camera, Crosshair, Loader2, MapPin, Search, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { reverseGeocode } from "@/lib/geocode.functions";
 
@@ -11,6 +11,7 @@ export type PickedAddress = {
   longitude: number;
   label: string;
   address_details: string;
+  photo: File | null;
 };
 
 type LatLng = { lat: number; lng: number };
