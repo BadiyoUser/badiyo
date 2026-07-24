@@ -20,6 +20,8 @@ import { ExpertAssignedScreen } from "@/components/tracking/ExpertAssignedScreen
 import { OtpScreen } from "@/components/tracking/OtpScreen";
 import { ServiceInProgressScreen } from "@/components/tracking/ServiceInProgressScreen";
 import { RateReviewScreen } from "@/components/tracking/RateReviewScreen";
+import { MyBookingsScreen, type BookingRow } from "@/components/MyBookingsScreen";
+import { BookingDetailsScreen } from "@/components/BookingDetailsScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -48,7 +50,9 @@ type Phase =
   | "otp-start"
   | "in-progress"
   | "otp-end"
-  | "rate-review";
+  | "rate-review"
+  | "my-bookings"
+  | "booking-details";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
@@ -56,6 +60,7 @@ function Index() {
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
 
   function resetAndGoHome() {
     setActiveBookingId(null);
@@ -109,6 +114,7 @@ function Index() {
               setSelectedService(s);
               setPhase("slot");
             }}
+            onOpenProfile={() => setPhase("my-bookings")}
           />
         </div>
       )}
@@ -206,6 +212,26 @@ function Index() {
           <RateReviewScreen
             bookingId={activeBookingId}
             onSubmit={resetAndGoHome}
+          />
+        </div>
+      )}
+      {phase === "my-bookings" && (
+        <div className="animate-fade-slide-in">
+          <MyBookingsScreen
+            onBack={() => setPhase("home")}
+            onGoHome={() => setPhase("home")}
+            onOpenBooking={(b) => {
+              setSelectedBooking(b);
+              setPhase("booking-details");
+            }}
+          />
+        </div>
+      )}
+      {phase === "booking-details" && selectedBooking && (
+        <div className="animate-fade-slide-in">
+          <BookingDetailsScreen
+            booking={selectedBooking}
+            onBack={() => setPhase("my-bookings")}
           />
         </div>
       )}

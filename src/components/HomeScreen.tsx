@@ -75,8 +75,10 @@ const EXPERT_TILES = [
 
 export function HomeScreen({
   onBookService,
+  onOpenProfile,
 }: {
   onBookService?: (service: { duration_label: string; duration_minutes: number; price: number; subtitle: string | null; icon: string | null }) => void;
+  onOpenProfile?: () => void;
 }) {
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
@@ -108,6 +110,7 @@ export function HomeScreen({
             <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
           </button>
           <button
+            onClick={onOpenProfile}
             aria-label="Profile"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-primary/60 bg-card"
           >
