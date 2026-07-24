@@ -69,7 +69,7 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
       setAvatarUrl(url);
     } catch (err) {
       console.error("Avatar upload failed:", err);
-      setUploadError(err instanceof Error ? err.message : "Upload failed");
+      setUploadError(await getErrorMessage(err));
     } finally {
       setUploading(false);
     }
