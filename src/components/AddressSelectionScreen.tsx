@@ -56,6 +56,12 @@ export function AddressSelectionScreen({
       if (!uid) {
         throw new Error("You need to sign in before saving an address.");
       }
+      // Ensure a matching row exists in public.users to satisfy the FK.
+      const { error: userUpsertError } = await supabase
+        .from("users")
+        .upsert({ id: uid }, { onConflict: "id" });
+      if (userUpsertError) throw userUpsertError;
+
       const { data, error } = await supabase
         .from("addresses")
         .insert({
