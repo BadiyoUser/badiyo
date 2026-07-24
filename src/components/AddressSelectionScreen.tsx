@@ -196,132 +196,15 @@ export function AddressSelectionScreen({
         </div>
       </div>
 
-      {/* Bottom sheet */}
+      {/* Full-screen map picker */}
       {sheetOpen && (
-        <AddAddressSheet
-          onClose={() => setSheetOpen(false)}
+        <AddAddressMapScreen
+          onBack={() => setSheetOpen(false)}
           onSave={(input) => addMutation.mutate(input)}
           isSaving={addMutation.isPending}
           error={addMutation.error?.message ?? null}
         />
       )}
     </main>
-  );
-}
-
-const LABELS = ["Home", "Work", "Other"] as const;
-
-function AddAddressSheet({
-  onClose,
-  onSave,
-  isSaving,
-  error,
-}: {
-  onClose: () => void;
-  onSave: (input: NewAddressInput) => void;
-  isSaving: boolean;
-  error: string | null;
-}) {
-  const [label, setLabel] = useState<(typeof LABELS)[number]>("Home");
-  const [fullAddress, setFullAddress] = useState("");
-  const [area, setArea] = useState("");
-
-  const canSave = fullAddress.trim().length > 0 && !isSaving;
-
-  return (
-    <div className="fixed inset-0 z-20 flex flex-col justify-end bg-black/40">
-      <button
-        aria-label="Close"
-        onClick={onClose}
-        className="flex-1"
-      />
-      <div className="animate-fade-slide-in mx-auto w-full max-w-md rounded-t-[24px] bg-card p-5 pb-8 shadow-2xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-bold text-foreground">
-            Add New Address
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-border"
-          >
-            <X className="h-4 w-4 text-foreground" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Label
-            </div>
-            <div className="flex gap-2">
-              {LABELS.map((l) => {
-                const active = label === l;
-                return (
-                  <button
-                    key={l}
-                    onClick={() => setLabel(l)}
-                    className={`rounded-[14px] border px-4 py-2 text-sm font-semibold transition ${
-                      active
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-card text-foreground"
-                    }`}
-                  >
-                    {l}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <label className="block">
-            <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Full Address
-            </span>
-            <textarea
-              value={fullAddress}
-              onChange={(e) => setFullAddress(e.target.value)}
-              rows={3}
-              placeholder="Flat / House no, Building, Street"
-              className="w-full rounded-[14px] border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Area
-            </span>
-            <input
-              value={area}
-              onChange={(e) => setArea(e.target.value)}
-              placeholder="e.g. Lahoti Compound"
-              className="w-full rounded-[14px] border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-
-          {error && (
-            <p className="text-xs font-semibold text-red-600">{error}</p>
-          )}
-
-          <button
-            disabled={!canSave}
-            onClick={() =>
-              onSave({
-                label,
-                full_address: fullAddress.trim(),
-                area: area.trim(),
-              })
-            }
-            className={`w-full rounded-[14px] px-4 py-3.5 text-sm font-bold transition ${
-              canSave
-                ? "bg-primary text-primary-foreground active:scale-[0.99]"
-                : "bg-primary/30 text-primary-foreground/70"
-            }`}
-          >
-            {isSaving ? "Saving…" : "Save Address"}
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
