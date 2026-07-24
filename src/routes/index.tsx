@@ -54,7 +54,9 @@ type Phase =
   | "otp-end"
   | "rate-review"
   | "my-bookings"
-  | "booking-details";
+  | "booking-details"
+  | "profile"
+  | "wallet";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("splash");
