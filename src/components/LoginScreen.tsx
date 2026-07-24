@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { GoogleIcon } from "./GoogleIcon";
+import { supabase } from "@/integrations/supabase/client";
 
 export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
   const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
@@ -12,11 +15,33 @@ export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
 
   const isValid = phone.length === 10;
 
-  const handleContinue = (e: React.FormEvent) => {
+  const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValid) return;
-    console.log("Continue with phone:", `+91${phone}`);
-    onContinue?.();
+    if (!isValid || loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { data: existing } = await supabase.auth.getSession();
+      let userId = existing.session?.user.id ?? null;
+      if (!userId) {
+        const { data, error: signInError } = await supabase.auth.signInAnonymously();
+        if (signInError) throw signInError;
+        userId = data.user?.id ?? null;
+      }
+      if (!userId) throw new Error("Could not create session");
+
+      const { error: upsertError } = await supabase
+        .from("users")
+        .upsert({ id: userId, phone: `+91${phone}` }, { onConflict: "id" });
+      if (upsertError) throw upsertError;
+
+      onContinue?.();
+    } catch (err) {
+      console.error("Login failed:", err);
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogle = () => {
@@ -67,11 +92,14 @@ export function LoginScreen({ onContinue }: { onContinue?: () => void } = {}) {
 
           <button
             type="submit"
-            disabled={!isValid}
+            disabled={!isValid || loading}
             className="w-full rounded-[14px] bg-primary px-4 py-3.5 text-base font-bold text-primary-foreground transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Continue
+            {loading ? "Please wait…" : "Continue"}
           </button>
+          {error && (
+            <p className="text-center text-sm font-medium text-destructive">{error}</p>
+          )}
         </form>
 
         {/* Divider */}
