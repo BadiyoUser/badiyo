@@ -157,6 +157,7 @@ function Index() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
+      {forceUpdate && <ForceUpdateScreen />}
       {!online && <NoInternetScreen onRetry={() => setOnline(navigator.onLine)} />}
 
       {(phase === "splash" || phase === "splash-out") && (
