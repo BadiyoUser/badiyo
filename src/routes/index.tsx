@@ -9,6 +9,8 @@ import {
 } from "@/components/SlotSelectionScreen";
 import { AddressSelectionScreen } from "@/components/AddressSelectionScreen";
 import { BookingSummaryScreen } from "@/components/BookingSummaryScreen";
+import { ensureUserRow } from "@/lib/ensureUserRow";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,9 +33,17 @@ function Index() {
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("splash-out"), 1800);
     const t2 = setTimeout(() => setPhase("login"), 2300);
+    // Ensure a public.users row exists whenever we already have (or gain) a session.
+    ensureUserRow().catch((e) => console.error("startup ensureUserRow failed:", e));
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        ensureUserRow().catch((e) => console.error("ensureUserRow failed:", e));
+      }
+    });
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
+      sub.subscription.unsubscribe();
     };
   }, []);
 
