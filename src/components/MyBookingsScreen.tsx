@@ -101,7 +101,7 @@ export function MyBookingsScreen({
   onGoHome: () => void;
 }) {
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
-  const { data: bookings = [], isLoading } = useQuery({
+  const { data: bookings = [], isLoading, error } = useQuery({
     queryKey: ["my-bookings"],
     queryFn: fetchBookings,
   });
