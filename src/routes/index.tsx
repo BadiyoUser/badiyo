@@ -416,7 +416,7 @@ function Index() {
         <div className="animate-fade-slide-in">
           <BookingDetailsScreen
             booking={selectedBooking}
-            onBack={() => setPhase("my-bookings")}
+            onBack={() => setPhase("orders")}
           />
         </div>
       )}
