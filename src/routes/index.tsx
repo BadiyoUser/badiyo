@@ -37,6 +37,7 @@ import { AboutScreen } from "@/components/profile/AboutScreen";
 import { ReferralDashboardScreen } from "@/components/ReferralDashboardScreen";
 import { PaymentMethodsScreen } from "@/components/profile/PaymentMethodsScreen";
 import { SearchResultsScreen } from "@/components/SearchResultsScreen";
+import { OrdersScreen } from "@/components/OrdersScreen";
 import { NoInternetScreen } from "@/components/utility/NoInternetScreen";
 import { ForceUpdateScreen } from "@/components/utility/ForceUpdateScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
@@ -84,7 +85,9 @@ type Phase =
   | "about"
   | "referrals"
   | "payment-methods"
-  | "search-results";
+  | "search-results"
+  | "orders";
+
 
 
 function Index() {
@@ -258,6 +261,7 @@ function Index() {
             }}
             onOpenProfile={() => setPhase("profile")}
             onOpenRewards={() => setPhase("rewards")}
+            onOpenOrders={() => setPhase("orders")}
             onSearch={(q) => {
               setSearchQuery(q);
               setPhase("search-results");
@@ -412,7 +416,7 @@ function Index() {
         <div className="animate-fade-slide-in">
           <BookingDetailsScreen
             booking={selectedBooking}
-            onBack={() => setPhase("my-bookings")}
+            onBack={() => setPhase("orders")}
           />
         </div>
       )}
@@ -451,6 +455,42 @@ function Index() {
         </div>
       )}
 
+      {phase === "orders" && (
+        <div className="animate-fade-slide-in">
+          <OrdersScreen
+            onOpenHome={() => setPhase("home")}
+            onOpenRewards={() => setPhase("rewards")}
+            onOpenBooking={(b) => {
+              if (ACTIVE_TRACKING_STATUSES.includes(b.status)) {
+                const addr = b.addresses;
+                if (addr) {
+                  setSelectedAddress({
+                    id: b.address_id ?? "",
+                    label: addr.label,
+                    full_address: addr.full_address,
+                    area: addr.area,
+                    city: addr.city,
+                    is_default: addr.is_default,
+                    latitude: addr.latitude,
+                    longitude: addr.longitude,
+                  });
+                }
+                setActiveBookingId(b.id);
+                setActiveBookingStatus(b.status);
+                if (b.status === "in_progress") {
+                  setPhase("in-progress");
+                } else {
+                  setPhase("expert-assigned");
+                }
+                return;
+              }
+              setSelectedBooking(b);
+              setPhase("booking-details");
+            }}
+          />
+        </div>
+      )}
+
       {phase === "referrals" && (
         <div className="animate-fade-slide-in">
           <ReferralDashboardScreen onBack={() => setPhase("profile")} />
@@ -467,7 +507,7 @@ function Index() {
             onOpenHome={() => setPhase("home")}
             onOpenRewards={() => setPhase("rewards")}
             onOpenReferrals={() => setPhase("referrals")}
-            onOpenBookings={() => setPhase("my-bookings")}
+            onOpenBookings={() => setPhase("orders")}
           />
 
         </div>

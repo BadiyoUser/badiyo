@@ -68,6 +68,7 @@ export function RewardsScreen({
   onOpenReferrals: () => void;
   onOpenBookings: () => void;
 }) {
+
   const { data: coins = 0, isLoading } = useQuery({
     queryKey: ["users_total_coins"],
     queryFn: fetchTotalCoins,
@@ -151,7 +152,13 @@ export function RewardsScreen({
         </div>
       </div>
 
-      <BottomNav activeKey="rewards" onHome={onOpenHome} onRewards={onOpenRewards} />
+      <BottomNav
+        activeKey="rewards"
+        onHome={onOpenHome}
+        onOrders={onOpenBookings}
+        onRewards={onOpenRewards}
+      />
+
     </main>
   );
 }
