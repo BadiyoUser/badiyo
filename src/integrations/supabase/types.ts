@@ -230,6 +230,7 @@ export type Database = {
           assigned_expert_id: string | null
           cancellation_reason: string | null
           created_at: string | null
+          end_otp: string | null
           id: string
           price: number
           rating: number | null
@@ -242,6 +243,7 @@ export type Database = {
           service_end_at: string | null
           service_label: string
           slot_type: string
+          start_otp: string | null
           started_at: string | null
           status: string
           updated_at: string | null
@@ -253,6 +255,7 @@ export type Database = {
           assigned_expert_id?: string | null
           cancellation_reason?: string | null
           created_at?: string | null
+          end_otp?: string | null
           id?: string
           price: number
           rating?: number | null
@@ -265,6 +268,7 @@ export type Database = {
           service_end_at?: string | null
           service_label: string
           slot_type: string
+          start_otp?: string | null
           started_at?: string | null
           status?: string
           updated_at?: string | null
@@ -276,6 +280,7 @@ export type Database = {
           assigned_expert_id?: string | null
           cancellation_reason?: string | null
           created_at?: string | null
+          end_otp?: string | null
           id?: string
           price?: number
           rating?: number | null
@@ -288,6 +293,7 @@ export type Database = {
           service_end_at?: string | null
           service_label?: string
           slot_type?: string
+          start_otp?: string | null
           started_at?: string | null
           status?: string
           updated_at?: string | null
@@ -996,6 +1002,7 @@ export type Database = {
         Args: { _booking_id: string }
         Returns: undefined
       }
+      ensure_start_otp: { Args: { _booking_id: string }; Returns: string }
       extend_booking: {
         Args: {
           _booking_id: string
@@ -1004,6 +1011,7 @@ export type Database = {
         }
         Returns: string
       }
+      generate_otp4: { Args: never; Returns: string }
       get_auth_user_id_by_email: { Args: { _email: string }; Returns: string }
       get_auth_user_id_by_phone: { Args: { _phone: string }; Returns: string }
       is_active_staff: {
@@ -1046,6 +1054,10 @@ export type Database = {
       }
       staff_mark_payout_item_paid: {
         Args: { _item_id: string; _paid: boolean }
+        Returns: undefined
+      }
+      staff_reassign_expert: {
+        Args: { _booking_id: string; _new_expert_id: string }
         Returns: undefined
       }
       staff_reject_booking: {

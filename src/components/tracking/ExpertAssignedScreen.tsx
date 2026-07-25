@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Phone, MapPin, User } from "lucide-react";
+import { Phone, MapPin, User, KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { SelectedAddress } from "../BookingSummaryScreen";
 
@@ -29,11 +29,12 @@ export function ExpertAssignedScreen({
   bookingId,
   address,
   currentStatus,
+  onShowStartOtp,
 }: {
   bookingId: string | null;
   address: SelectedAddress;
-  onSimulateArrived?: () => void;
   currentStatus?: string;
+  onShowStartOtp?: () => void;
 }) {
   const isWaitingForAssignment = currentStatus === "accepted";
 
@@ -122,6 +123,21 @@ export function ExpertAssignedScreen({
                   <Phone className="h-4 w-4" />
                   Call expert
                 </a>
+              </div>
+            )}
+            {onShowStartOtp && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={onShowStartOtp}
+                  className="flex w-full items-center justify-center gap-2 rounded-[14px] border border-primary bg-primary/10 px-4 py-3 text-sm font-bold text-primary active:scale-[0.99]"
+                >
+                  <KeyRound className="h-4 w-4" />
+                  Show start code
+                </button>
+                <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                  Show this to your expert once they arrive.
+                </p>
               </div>
             )}
           </section>

@@ -120,10 +120,10 @@ function formatRemaining(sec: number) {
 
 export function ServiceInProgressScreen({
   bookingId,
+  onShowEndOtp,
 }: {
   bookingId: string | null;
-  /** Deprecated dev-only shim — retained for parent compatibility. */
-  onSimulateComplete?: () => void;
+  onShowEndOtp?: () => void;
 }) {
   const qc = useQueryClient();
 
@@ -319,7 +319,7 @@ export function ServiceInProgressScreen({
 
         {bannerNode && <div className="mt-4">{bannerNode}</div>}
 
-        <div className="mt-auto pt-10">
+        <div className="mt-auto pt-10 space-y-3">
           {canExtend && banner !== "warn" && banner !== "end" && (
             <button
               type="button"
@@ -330,8 +330,17 @@ export function ServiceInProgressScreen({
               Extend time
             </button>
           )}
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">
-            Your expert will ask for the completion OTP to end the service.
+          {onShowEndOtp && (
+            <button
+              type="button"
+              onClick={onShowEndOtp}
+              className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-primary px-4 py-3.5 text-sm font-bold text-primary-foreground active:scale-[0.99]"
+            >
+              Show completion code
+            </button>
+          )}
+          <p className="text-center text-[11px] text-muted-foreground">
+            Your expert will ask for the completion code to end the service.
           </p>
         </div>
       </div>
