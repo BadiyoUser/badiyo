@@ -7,19 +7,25 @@ export function ExpertAssignedScreen({
   bookingId,
   address,
   onSimulateArrived,
+  currentStatus,
 }: {
   bookingId: string | null;
   address: SelectedAddress;
   onSimulateArrived: () => void;
+  currentStatus?: string;
 }) {
+  const isWaitingForAssignment = currentStatus === "accepted";
+
   useEffect(() => {
     if (!bookingId) return;
+    // Don't downgrade or force-advance if staff has only accepted (not yet assigned an expert).
+    if (isWaitingForAssignment) return;
     supabase
       .rpc("advance_booking_status", { _booking_id: bookingId, _new_status: "expert_assigned" })
       .then(({ error }) => {
         if (error) console.error("status update failed:", error);
       });
-  }, [bookingId]);
+  }, [bookingId, isWaitingForAssignment]);
 
   const mapSrc =
     address.latitude && address.longitude
@@ -29,8 +35,11 @@ export function ExpertAssignedScreen({
   return (
     <main className="min-h-screen w-full bg-background pb-8">
       <div className="mx-auto w-full max-w-md px-5 pt-6">
-        <h1 className="text-lg font-bold text-foreground">Expert on the way</h1>
+        <h1 className="text-lg font-bold text-foreground">
+          {isWaitingForAssignment ? "Waiting for expert assignment" : "Expert on the way"}
+        </h1>
         <p className="mt-1 text-xs text-muted-foreground">Booking #{bookingId?.slice(0, 8) ?? "—"}</p>
+
 
         {/* Expert card */}
         <section className="mt-5 rounded-[18px] border border-border bg-card p-4">
