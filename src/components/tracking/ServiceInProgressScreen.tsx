@@ -3,6 +3,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sparkles, Plus, X, Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { StageTracker, stageFromStatus } from "./StageTracker";
+import { usePullToRefresh, PullToRefreshIndicator } from "@/lib/usePullToRefresh";
+
 
 type BookingTiming = {
   id: string;
@@ -121,11 +124,14 @@ function formatRemaining(sec: number) {
 export function ServiceInProgressScreen({
   bookingId,
   onShowEndOtp,
+  onAdvanceCompleted,
 }: {
   bookingId: string | null;
   onShowEndOtp?: () => void;
+  onAdvanceCompleted?: () => void;
 }) {
   const qc = useQueryClient();
+
 
   // Start the service (idempotent) as soon as we arrive here.
   useEffect(() => {
@@ -139,12 +145,42 @@ export function ServiceInProgressScreen({
     });
   }, [bookingId, qc]);
 
-  const { data: timing } = useQuery({
+  const { data: timing, refetch: refetchTiming } = useQuery({
     queryKey: ["booking-timing", bookingId],
     queryFn: () => fetchBookingTiming(bookingId!),
     enabled: !!bookingId,
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
+  });
+
+  // Realtime subscription for instant UI updates + auto-advance to rate-review.
+  const advancedRef = useRef(false);
+  useEffect(() => {
+    if (!bookingId) return;
+    const channel = supabase
+      .channel(`booking-inprog-${bookingId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "bookings", filter: `id=eq.${bookingId}` },
+        (payload) => {
+          const row = payload.new as Partial<BookingTiming>;
+          qc.setQueryData<BookingTiming | null>(["booking-timing", bookingId], (prev) =>
+            prev ? { ...prev, ...row } : (row as BookingTiming),
+          );
+          if (row.status === "completed" && !advancedRef.current && onAdvanceCompleted) {
+            advancedRef.current = true;
+            onAdvanceCompleted();
+          }
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [bookingId, qc, onAdvanceCompleted]);
+
+  const { pull, refreshing } = usePullToRefresh(async () => {
+    await refetchTiming();
   });
 
   // Ticking clock — recomputes every second from service_end_at.
@@ -290,7 +326,11 @@ export function ServiceInProgressScreen({
 
   return (
     <main className="min-h-screen w-full bg-background">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pt-16 pb-8">
+      <PullToRefreshIndicator pull={pull} refreshing={refreshing} />
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pt-6 pb-8">
+        <div className="mb-6">
+          <StageTracker stage={stageFromStatus(timing?.status)} />
+        </div>
         <div className="flex flex-col items-center text-center">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 animate-pulse">
             <Sparkles className="h-10 w-10 text-primary" />
