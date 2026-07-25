@@ -12,6 +12,8 @@ import {
   Check,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
 
 type Txn = {
   id: string;
@@ -195,16 +197,37 @@ export function ReferralDashboardScreen({ onBack }: { onBack: () => void }) {
   }
 
   async function nativeShare() {
-    if (typeof navigator !== "undefined" && "share" in navigator) {
+    // On Capacitor native, use the plugin — WebView navigator.share is
+    // unreliable on Android and often silently unavailable.
+    try {
+      const { Capacitor } = await import("@capacitor/core");
+      if (Capacitor.isNativePlatform()) {
+        const { Share } = await import("@capacitor/share");
+        await Share.share({ title: "badiyo", text: shareText, url: inviteUrl, dialogTitle: "Share badiyo" });
+        return;
+      }
+    } catch {
+      // fall through to web share / clipboard
+    }
+
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
         await navigator.share({ title: "badiyo", text: shareText, url: inviteUrl });
         return;
-      } catch {
-        // fall through
+      } catch (e) {
+        // User cancelled — don't fall back to copy.
+        if ((e as DOMException)?.name === "AbortError") return;
       }
     }
-    await copyText(shareText, "link");
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      toast.success("Invite link copied to clipboard");
+    } catch {
+      toast.error("Could not share or copy the link");
+    }
   }
+
 
   return (
     <main className="min-h-screen w-full bg-background pb-14">
