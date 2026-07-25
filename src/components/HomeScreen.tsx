@@ -70,13 +70,16 @@ export function HomeScreen({
   onBookService,
   onOpenProfile,
   onOpenRewards,
+  onOpenOrders,
   onSearch,
 }: {
   onBookService?: (service: { duration_label: string; duration_minutes: number; price: number; subtitle: string | null; icon: string | null }) => void;
   onOpenProfile?: () => void;
   onOpenRewards?: () => void;
+  onOpenOrders?: () => void;
   onSearch?: (query: string) => void;
 }) {
+
 
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
