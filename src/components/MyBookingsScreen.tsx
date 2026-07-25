@@ -22,11 +22,27 @@ export type BookingRow = {
     full_address: string;
     area: string | null;
     city: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    is_default: boolean | null;
   } | null;
 };
 
-const UPCOMING_STATUSES = ["confirmed", "expert_assigned", "in_progress"];
-const PAST_STATUSES = ["completed", "cancelled"];
+export const UPCOMING_STATUSES = [
+  "confirmed",
+  "accepted",
+  "assigned",
+  "expert_assigned",
+  "in_progress",
+];
+export const PAST_STATUSES = ["completed", "cancelled", "rejected"];
+export const ACTIVE_TRACKING_STATUSES = [
+  "confirmed",
+  "accepted",
+  "assigned",
+  "expert_assigned",
+  "in_progress",
+];
 
 async function fetchBookings(): Promise<BookingRow[]> {
   const { data: userRes } = await supabase.auth.getUser();
@@ -35,11 +51,14 @@ async function fetchBookings(): Promise<BookingRow[]> {
   const { data, error } = await supabase
     .from("bookings")
     .select(
-      "id, service_label, service_duration_minutes, price, status, slot_type, scheduled_date, scheduled_time_slot, created_at, rating, review_text, address_id, razorpay_payment_id, addresses(label, full_address, area, city)",
+      "id, service_label, service_duration_minutes, price, status, slot_type, scheduled_date, scheduled_time_slot, created_at, rating, review_text, address_id, razorpay_payment_id, addresses(label, full_address, area, city, latitude, longitude, is_default)",
     )
     .eq("user_id", uid)
     .order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error) {
+    console.error("fetchBookings failed:", error);
+    throw error;
+  }
   return (data ?? []) as unknown as BookingRow[];
 }
 
@@ -82,7 +101,7 @@ export function MyBookingsScreen({
   onGoHome: () => void;
 }) {
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
-  const { data: bookings = [], isLoading } = useQuery({
+  const { data: bookings = [], isLoading, error } = useQuery({
     queryKey: ["my-bookings"],
     queryFn: fetchBookings,
   });
@@ -128,6 +147,10 @@ export function MyBookingsScreen({
         <section className="mt-5 space-y-3">
           {isLoading ? (
             <p className="py-10 text-center text-sm text-muted-foreground">Loading…</p>
+          ) : error ? (
+            <p className="py-10 text-center text-sm text-destructive">
+              Could not load bookings. Pull to refresh or try again.
+            </p>
           ) : filtered.length === 0 ? (
             <EmptyState onGoHome={onGoHome} />
           ) : (
