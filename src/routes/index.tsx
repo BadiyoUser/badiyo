@@ -322,6 +322,7 @@ function Index() {
             bookingId={activeBookingId}
             address={selectedAddress}
             onSimulateArrived={() => setPhase("otp-start")}
+            currentStatus={activeBookingStatus ?? undefined}
           />
         </div>
       )}
