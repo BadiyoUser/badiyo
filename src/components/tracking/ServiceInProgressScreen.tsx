@@ -156,8 +156,9 @@ export function ServiceInProgressScreen({
     refetchOnWindowFocus: true,
   });
 
-  // Realtime subscription for instant UI updates + auto-advance to rate-review.
+  // Realtime subscription for instant UI updates + auto-advance / cancel handling.
   const advancedRef = useRef(false);
+  const cancelledRef = useRef(false);
   useEffect(() => {
     if (!bookingId) return;
     const channel = supabase
@@ -170,17 +171,35 @@ export function ServiceInProgressScreen({
           qc.setQueryData<BookingTiming | null>(["booking-timing", bookingId], (prev) =>
             prev ? { ...prev, ...row } : (row as BookingTiming),
           );
+          const isCancelled =
+            row.status === "cancelled" ||
+            row.status === "rejected" ||
+            !!row.deleted_at;
+          if (isCancelled && !cancelledRef.current && onCancelled) {
+            cancelledRef.current = true;
+            onCancelled();
+            return;
+          }
           if (row.status === "completed" && !advancedRef.current && onAdvanceCompleted) {
             advancedRef.current = true;
             onAdvanceCompleted();
           }
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "bookings", filter: `id=eq.${bookingId}` },
+        () => {
+          if (cancelledRef.current) return;
+          cancelledRef.current = true;
+          onCancelled?.();
+        },
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [bookingId, qc, onAdvanceCompleted]);
+  }, [bookingId, qc, onAdvanceCompleted, onCancelled]);
 
   const { pull, refreshing } = usePullToRefresh(async () => {
     await refetchTiming();
