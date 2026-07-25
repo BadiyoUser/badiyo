@@ -385,6 +385,7 @@ function Index() {
                   });
                 }
                 setActiveBookingId(b.id);
+                setActiveBookingStatus(b.status);
                 if (b.status === "in_progress") {
                   setPhase("in-progress");
                 } else {
