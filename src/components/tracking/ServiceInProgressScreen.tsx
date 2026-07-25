@@ -326,7 +326,11 @@ export function ServiceInProgressScreen({
 
   return (
     <main className="min-h-screen w-full bg-background">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pt-16 pb-8">
+      <PullToRefreshIndicator pull={pull} refreshing={refreshing} />
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pt-6 pb-8">
+        <div className="mb-6">
+          <StageTracker stage={stageFromStatus(timing?.status)} />
+        </div>
         <div className="flex flex-col items-center text-center">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 animate-pulse">
             <Sparkles className="h-10 w-10 text-primary" />
