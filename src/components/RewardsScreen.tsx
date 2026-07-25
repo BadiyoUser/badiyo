@@ -145,7 +145,7 @@ export function RewardsScreen({
                     </div>
                   )}
                 </div>
-              </article>
+              </button>
             );
           })}
         </div>
