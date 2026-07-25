@@ -322,7 +322,6 @@ function Index() {
           <ExpertAssignedScreen
             bookingId={activeBookingId}
             address={selectedAddress}
-            onSimulateArrived={() => setPhase("otp-start")}
             currentStatus={activeBookingStatus ?? undefined}
           />
         </div>
@@ -340,10 +339,7 @@ function Index() {
       )}
       {phase === "in-progress" && (
         <div className="animate-fade-slide-in">
-          <ServiceInProgressScreen
-            bookingId={activeBookingId}
-            onSimulateComplete={() => setPhase("otp-end")}
-          />
+          <ServiceInProgressScreen bookingId={activeBookingId} />
         </div>
       )}
       {phase === "otp-end" && (
