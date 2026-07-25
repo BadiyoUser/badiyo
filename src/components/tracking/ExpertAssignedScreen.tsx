@@ -1,8 +1,10 @@
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Phone, MapPin, User, KeyRound } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Phone, MapPin, User, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { SelectedAddress } from "../BookingSummaryScreen";
+import { StageTracker, stageFromStatus } from "./StageTracker";
+import { usePullToRefresh, PullToRefreshIndicator } from "@/lib/usePullToRefresh";
 
 type ExpertInfo = {
   id: string;
@@ -11,18 +13,26 @@ type ExpertInfo = {
   photo_url: string | null;
 } | null;
 
-async function fetchAssignedExpert(bookingId: string): Promise<ExpertInfo> {
+type BookingRow = {
+  status: string;
+  assigned_expert_id: string | null;
+  start_otp: string | null;
+  experts: ExpertInfo;
+};
+
+async function fetchBookingRow(bookingId: string): Promise<BookingRow | null> {
   const { data, error } = await supabase
     .from("bookings")
-    .select("assigned_expert_id, experts:assigned_expert_id ( id, name, phone, photo_url )")
+    .select(
+      "status, assigned_expert_id, start_otp, experts:assigned_expert_id ( id, name, phone, photo_url )",
+    )
     .eq("id", bookingId)
     .maybeSingle();
   if (error) {
-    console.error("fetchAssignedExpert failed:", error);
+    console.error("fetchBookingRow failed:", error);
     return null;
   }
-  const e = (data as { experts?: ExpertInfo } | null)?.experts ?? null;
-  return e;
+  return (data as unknown as BookingRow | null) ?? null;
 }
 
 export function ExpertAssignedScreen({
@@ -30,30 +40,104 @@ export function ExpertAssignedScreen({
   address,
   currentStatus,
   onShowStartOtp,
+  onAdvanceInProgress,
+  onAdvanceCompleted,
 }: {
   bookingId: string | null;
   address: SelectedAddress;
   currentStatus?: string;
   onShowStartOtp?: () => void;
+  onAdvanceInProgress?: () => void;
+  onAdvanceCompleted?: () => void;
 }) {
-  const isWaitingForAssignment = currentStatus === "accepted";
+  const qc = useQueryClient();
+  const queryKey = ["tracking-booking", bookingId] as const;
 
+  const { data: booking, refetch } = useQuery({
+    queryKey,
+    queryFn: () => fetchBookingRow(bookingId!),
+    enabled: !!bookingId,
+    initialData: currentStatus
+      ? ({
+          status: currentStatus,
+          assigned_expert_id: null,
+          start_otp: null,
+          experts: null,
+        } as BookingRow)
+      : undefined,
+    staleTime: 15_000,
+  });
+
+  const status = booking?.status ?? currentStatus ?? "confirmed";
+  const expert = booking?.experts ?? null;
+
+  // When status reaches expert_assigned and no otp yet, ensure one exists so the customer
+  // can already read it aloud without tapping anything.
   useEffect(() => {
     if (!bookingId) return;
-    // Don't downgrade or force-advance if staff has only accepted (not yet assigned an expert).
-    if (isWaitingForAssignment) return;
-    supabase
-      .rpc("advance_booking_status", { _booking_id: bookingId, _new_status: "expert_assigned" })
-      .then(({ error }) => {
-        if (error) console.error("status update failed:", error);
-      });
-  }, [bookingId, isWaitingForAssignment]);
+    if (status !== "expert_assigned") return;
+    if (booking?.start_otp) return;
+    supabase.rpc("ensure_start_otp", { _booking_id: bookingId }).then(({ data, error }) => {
+      if (error) {
+        console.error("ensure_start_otp failed:", error);
+        return;
+      }
+      const code = (data as string | null) ?? null;
+      if (!code) return;
+      qc.setQueryData<BookingRow | undefined>(queryKey, (prev) =>
+        prev ? { ...prev, start_otp: code } : prev,
+      );
+    });
+  }, [bookingId, status, booking?.start_otp, qc, queryKey]);
 
-  const { data: expert } = useQuery({
-    queryKey: ["assigned-expert", bookingId],
-    queryFn: () => fetchAssignedExpert(bookingId!),
-    enabled: !!bookingId && !isWaitingForAssignment,
-    staleTime: 30_000,
+  // Realtime: react instantly to status changes on this booking.
+  const advancedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!bookingId) return;
+    const channel = supabase
+      .channel(`booking-track-${bookingId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "bookings", filter: `id=eq.${bookingId}` },
+        (payload) => {
+          const row = payload.new as Partial<BookingRow> & { status?: string };
+          qc.setQueryData<BookingRow | undefined>(queryKey, (prev) =>
+            prev ? { ...prev, ...row } : (row as BookingRow),
+          );
+          // Refetch to hydrate the joined expert row when assignment changes.
+          if (row.assigned_expert_id !== undefined) {
+            refetch();
+          }
+        },
+      )
+      .subscribe();
+
+    // Polling safety net.
+    const poll = setInterval(() => {
+      refetch();
+    }, 15_000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(poll);
+    };
+  }, [bookingId, qc, queryKey, refetch]);
+
+  // Advance UI when status crosses ahead of this screen.
+  useEffect(() => {
+    if (!status) return;
+    if (advancedRef.current === status) return;
+    if (status === "in_progress" && onAdvanceInProgress) {
+      advancedRef.current = status;
+      onAdvanceInProgress();
+    } else if (status === "completed" && onAdvanceCompleted) {
+      advancedRef.current = status;
+      onAdvanceCompleted();
+    }
+  }, [status, onAdvanceInProgress, onAdvanceCompleted]);
+
+  const { pull, refreshing } = usePullToRefresh(async () => {
+    await refetch();
   });
 
   const mapSrc =
@@ -61,36 +145,36 @@ export function ExpertAssignedScreen({
       ? `https://staticmap.openstreetmap.de/staticmap.php?center=${address.latitude},${address.longitude}&zoom=15&size=600x300&markers=${address.latitude},${address.longitude},red-pushpin`
       : null;
 
+  const showExpert = status === "expert_assigned" || status === "in_progress";
+  const isConfirmed = status === "confirmed";
+  const isAccepted = status === "accepted";
+
+  const headline = isConfirmed
+    ? "Finding your expert…"
+    : isAccepted
+      ? "Expert being assigned…"
+      : "Expert assigned";
+
   return (
     <main className="min-h-screen w-full bg-background pb-8">
+      <PullToRefreshIndicator pull={pull} refreshing={refreshing} />
       <div className="mx-auto w-full max-w-md px-5 pt-6">
-        <h1 className="text-lg font-bold text-foreground">
-          {isWaitingForAssignment ? "Waiting for expert assignment" : "Expert assigned"}
-        </h1>
-        <p className="mt-1 text-xs text-muted-foreground">Booking #{bookingId?.slice(0, 8) ?? "—"}</p>
+        <h1 className="text-lg font-bold text-foreground">{headline}</h1>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Booking #{bookingId?.slice(0, 8) ?? "—"}
+        </p>
 
+        {/* Stage progress */}
+        <div className="mt-5">
+          <StageTracker stage={stageFromStatus(status)} />
+        </div>
 
-        {/* Expert card */}
-        {isWaitingForAssignment ? (
-          <section className="mt-5 rounded-[18px] border border-border bg-card p-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                <User className="h-7 w-7 text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="text-base font-bold text-foreground">Assigning your expert</div>
-                <div className="mt-0.5 text-xs text-muted-foreground">
-                  Our team has accepted your booking and is assigning the best expert nearby. You'll be notified as soon as they're on the way.
-                </div>
-              </div>
-            </div>
-          </section>
-        ) : (
+        {/* Expert card / waiting states */}
+        {showExpert ? (
           <section className="mt-5 rounded-[18px] border border-border bg-card p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-primary/10">
                 {expert?.photo_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={expert.photo_url}
                     alt={expert.name}
@@ -107,9 +191,7 @@ export function ExpertAssignedScreen({
                 <div className="truncate text-base font-bold text-foreground">
                   {expert?.name ?? "Your expert"}
                 </div>
-                <div className="mt-0.5 text-xs text-muted-foreground">
-                  Verified Expert
-                </div>
+                <div className="mt-0.5 text-xs text-muted-foreground">Verified Expert</div>
               </div>
             </div>
 
@@ -125,30 +207,63 @@ export function ExpertAssignedScreen({
                 </a>
               </div>
             )}
-            {onShowStartOtp && (
-              <div className="mt-3">
+
+            {/* Start code shown directly — no hidden button */}
+            <div className="mt-4 rounded-[14px] border border-primary/30 bg-primary/5 p-4 text-center">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                Start Code
+              </div>
+              <div className="mt-1 flex items-center justify-center gap-2 font-mono text-3xl font-bold tracking-[0.35em] text-primary">
+                {booking?.start_otp ? (
+                  booking.start_otp
+                ) : (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Preparing code…
+                    </span>
+                  </>
+                )}
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Show this to your expert once they arrive.
+              </p>
+              {onShowStartOtp && (
                 <button
                   type="button"
                   onClick={onShowStartOtp}
-                  className="flex w-full items-center justify-center gap-2 rounded-[14px] border border-primary bg-primary/10 px-4 py-3 text-sm font-bold text-primary active:scale-[0.99]"
+                  className="mt-3 text-xs font-bold text-primary underline"
                 >
-                  <KeyRound className="h-4 w-4" />
-                  Show start code
+                  Open full-screen
                 </button>
-                <p className="mt-2 text-center text-[11px] text-muted-foreground">
-                  Show this to your expert once they arrive.
-                </p>
+              )}
+            </div>
+          </section>
+        ) : (
+          <section className="mt-5 rounded-[18px] border border-border bg-card p-5">
+            <div className="flex items-center gap-3">
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-7 w-7 text-primary" />
+                <Loader2 className="absolute h-14 w-14 animate-spin text-primary/40" />
               </div>
-            )}
+              <div className="flex-1">
+                <div className="text-base font-bold text-foreground">
+                  {isConfirmed ? "Finding your expert" : "Assigning your expert"}
+                </div>
+                <div className="mt-0.5 text-xs text-muted-foreground">
+                  {isConfirmed
+                    ? "We're notifying nearby experts. This usually takes just a moment."
+                    : "Our team has accepted your booking and is picking the best expert for you."}
+                </div>
+              </div>
+            </div>
           </section>
         )}
 
-
-        {/* Map preview */}
+        {/* Map — honest static placeholder of the service address */}
         <section className="mt-5 overflow-hidden rounded-[18px] border border-border bg-card">
           <div className="relative h-48 w-full bg-muted">
             {mapSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={mapSrc}
                 alt="Service location"
@@ -158,8 +273,11 @@ export function ExpertAssignedScreen({
                 }}
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5 text-center">
                 <MapPin className="h-10 w-10 text-primary" />
+                <div className="mt-2 text-xs font-medium text-muted-foreground">
+                  Live tracking coming soon
+                </div>
               </div>
             )}
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -169,11 +287,12 @@ export function ExpertAssignedScreen({
             </div>
           </div>
           <div className="p-4">
-            <div className="text-sm font-bold text-foreground">
-              {isWaitingForAssignment ? "Waiting for expert assignment" : "Expert assigned"}
-            </div>
+            <div className="text-sm font-bold text-foreground">Service location</div>
             <div className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
               {address.full_address}
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">
+              Live expert tracking is coming soon.
             </div>
           </div>
         </section>
