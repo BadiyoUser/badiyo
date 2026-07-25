@@ -24,7 +24,7 @@ import { ExpertAssignedScreen } from "@/components/tracking/ExpertAssignedScreen
 import { OtpScreen } from "@/components/tracking/OtpScreen";
 import { ServiceInProgressScreen } from "@/components/tracking/ServiceInProgressScreen";
 import { RateReviewScreen } from "@/components/tracking/RateReviewScreen";
-import { MyBookingsScreen, type BookingRow } from "@/components/MyBookingsScreen";
+import { MyBookingsScreen, ACTIVE_TRACKING_STATUSES, type BookingRow } from "@/components/MyBookingsScreen";
 import { BookingDetailsScreen } from "@/components/BookingDetailsScreen";
 import { ProfileScreen } from "@/components/ProfileScreen";
 import { WalletScreen } from "@/components/WalletScreen";
