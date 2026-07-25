@@ -4,6 +4,7 @@ import { Check, Loader2, LocateFixed, MapPin, Plus, Search, X } from "lucide-rea
 import { supabase } from "@/integrations/supabase/client";
 import { AddAddressMapScreen, type PickedAddress } from "./AddAddressMapScreen";
 import { reverseGeocode } from "@/lib/geocode.functions";
+import { getCurrentCoords } from "@/lib/nativeGeolocation";
 
 export type SavedAddress = {
   id: string;
@@ -111,41 +112,29 @@ export function LocationPickerSheet({
     },
   });
 
-  const handleUseCurrentLocation = () => {
-    if (!("geolocation" in navigator)) {
-      setLocError("Geolocation is not supported on this device.");
-      return;
-    }
+  const handleUseCurrentLocation = async () => {
     setLocError(null);
     setLocLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const res = await reverseGeocode({
-            data: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-          });
-          const virtual: SavedAddress = {
-            id: `current-${Date.now()}`,
-            label: "Current location",
-            full_address: res.formatted_address,
-            area: res.area,
-            city: res.city,
-            is_default: false,
-          };
-          setCurrentLoc(res.formatted_address);
-          onSelect(virtual);
-        } catch (e) {
-          setLocError((e as Error).message || "Could not resolve location.");
-        } finally {
-          setLocLoading(false);
-        }
-      },
-      (err) => {
-        setLocLoading(false);
-        setLocError(err.message || "Location permission denied.");
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
+    try {
+      const coords = await getCurrentCoords();
+      const res = await reverseGeocode({
+        data: { lat: coords.lat, lng: coords.lng },
+      });
+      const virtual: SavedAddress = {
+        id: `current-${Date.now()}`,
+        label: "Current location",
+        full_address: res.formatted_address,
+        area: res.area,
+        city: res.city,
+        is_default: false,
+      };
+      setCurrentLoc(res.formatted_address);
+      onSelect(virtual);
+    } catch (e) {
+      setLocError((e as Error).message || "Could not resolve location.");
+    } finally {
+      setLocLoading(false);
+    }
   };
 
   if (!open) return null;

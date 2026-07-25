@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Camera, Crosshair, Loader2, MapPin, Search, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { reverseGeocode } from "@/lib/geocode.functions";
+import { getCurrentCoords } from "@/lib/nativeGeolocation";
 
 export type PickedAddress = {
   full_address: string;
@@ -145,21 +146,14 @@ export function AddAddressMapScreen({
   }, [center, geocode]);
 
   const useCurrentLocation = () => {
-    if (!navigator.geolocation) return;
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const c = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    getCurrentCoords()
+      .then((c) => {
         if (mapRef.current) mapRef.current.panTo(c);
         setCenter(c);
-        setLocating(false);
-      },
-      (err) => {
-        console.error(err);
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLocating(false));
   };
 
   const canSave = addressDetails.trim().length > 0 && !isSaving;
