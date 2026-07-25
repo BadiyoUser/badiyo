@@ -72,16 +72,18 @@ Deno.serve(async (req) => {
       return json({ error: "Could not create OTP" }, 500);
     }
 
-    // Record rate-limit attempt (before external call so failed sends still count)
-    await supabase.from("otp_rate_limits").insert({ phone: fullPhone, ip, created_at: nowIso });
-
     const apiKey = Deno.env.get("AISENSY_API_KEY");
     if (!apiKey) return json({ error: "AISENSY_API_KEY not configured" }, 500);
-
     const campaignName = Deno.env.get("AISENSY_CAMPAIGN_NAME");
     if (!campaignName) return json({ error: "AISENSY_CAMPAIGN_NAME not configured" }, 500);
 
-    const aiRes = await fetch("https://backend.aisensy.com/campaign/t1/api/v2", {
+    // Run the rate-limit insert in parallel with the AiSensy send; both must
+    // complete before we return so failed sends still count against the limit.
+    const rateLimitP = supabase
+      .from("otp_rate_limits")
+      .insert({ phone: fullPhone, ip, created_at: nowIso });
+
+    const aiResP = fetch("https://backend.aisensy.com/campaign/t1/api/v2", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -101,6 +103,8 @@ Deno.serve(async (req) => {
       }),
     });
 
+    const [, aiRes] = await Promise.all([rateLimitP, aiResP]);
+
     if (!aiRes.ok) {
       const text = await aiRes.text();
       console.error("AiSensy send failed", aiRes.status, text);
@@ -110,6 +114,7 @@ Deno.serve(async (req) => {
     }
 
     return json({ success: true });
+
   } catch (err) {
     console.error("send-otp error", err);
     return json({ error: (err as Error).message || "Unknown error" }, 500);
