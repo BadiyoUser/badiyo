@@ -277,7 +277,13 @@ export function HomeScreen({
         )}
       </div>
 
-      <BottomNav activeKey="home" onHome={() => {}} onRewards={onOpenRewards ?? (() => {})} />
+      <BottomNav
+        activeKey="home"
+        onHome={() => {}}
+        onOrders={onOpenOrders ?? (() => {})}
+        onRewards={onOpenRewards ?? (() => {})}
+      />
+
 
       <LocationPickerSheet
         open={locationSheetOpen}
