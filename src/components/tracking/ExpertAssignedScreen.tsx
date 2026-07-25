@@ -65,6 +65,7 @@ export function ExpertAssignedScreen({
           status: currentStatus,
           assigned_expert_id: null,
           start_otp: null,
+          deleted_at: null,
           experts: null,
         } as BookingRow)
       : undefined,
