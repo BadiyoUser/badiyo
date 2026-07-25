@@ -12,6 +12,7 @@ type BookingTiming = {
   status: string;
   service_duration_minutes: number;
   service_end_at: string | null;
+  deleted_at: string | null;
 };
 
 type CatalogueItem = {
@@ -81,7 +82,7 @@ function beep(kind: "warning" | "end") {
 async function fetchBookingTiming(id: string): Promise<BookingTiming | null> {
   const { data, error } = await supabase
     .from("bookings")
-    .select("id, status, service_duration_minutes, service_end_at")
+    .select("id, status, service_duration_minutes, service_end_at, deleted_at")
     .eq("id", id)
     .maybeSingle();
   if (error) {
@@ -125,10 +126,12 @@ export function ServiceInProgressScreen({
   bookingId,
   onShowEndOtp,
   onAdvanceCompleted,
+  onCancelled,
 }: {
   bookingId: string | null;
   onShowEndOtp?: () => void;
   onAdvanceCompleted?: () => void;
+  onCancelled?: () => void;
 }) {
   const qc = useQueryClient();
 
