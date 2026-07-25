@@ -37,6 +37,7 @@ import { AboutScreen } from "@/components/profile/AboutScreen";
 import { ReferralDashboardScreen } from "@/components/ReferralDashboardScreen";
 import { PaymentMethodsScreen } from "@/components/profile/PaymentMethodsScreen";
 import { SearchResultsScreen } from "@/components/SearchResultsScreen";
+import { OrdersScreen } from "@/components/OrdersScreen";
 import { NoInternetScreen } from "@/components/utility/NoInternetScreen";
 import { ForceUpdateScreen } from "@/components/utility/ForceUpdateScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
