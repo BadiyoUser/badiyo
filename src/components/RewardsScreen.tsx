@@ -19,7 +19,17 @@ async function fetchTotalCoins(): Promise<number> {
   return Number(data?.total_coins_earned ?? 0);
 }
 
-const MISSIONS = [
+type MissionAction = "bookings" | "refer" | "rate";
+
+const MISSIONS: Array<{
+  id: MissionAction;
+  title: string;
+  description: string;
+  icon: typeof Trophy;
+  reward: number;
+  progress?: { current: number; total: number };
+  cta: string;
+}> = [
   {
     id: "bookings",
     title: "Complete 3 bookings this month",
@@ -27,6 +37,7 @@ const MISSIONS = [
     icon: Trophy,
     reward: 50,
     progress: { current: 1, total: 3 },
+    cta: "Book now",
   },
   {
     id: "refer",
@@ -34,6 +45,7 @@ const MISSIONS = [
     description: "Invite a friend to badiyo and earn when they book.",
     icon: Gift,
     reward: 100,
+    cta: "Invite",
   },
   {
     id: "rate",
@@ -41,20 +53,32 @@ const MISSIONS = [
     description: "Share feedback and unlock bonus coins.",
     icon: Star,
     reward: 20,
+    cta: "Rate",
   },
 ];
 
 export function RewardsScreen({
   onOpenHome,
   onOpenRewards,
+  onOpenReferrals,
+  onOpenBookings,
 }: {
   onOpenHome: () => void;
   onOpenRewards: () => void;
+  onOpenReferrals: () => void;
+  onOpenBookings: () => void;
 }) {
   const { data: coins = 0, isLoading } = useQuery({
     queryKey: ["users_total_coins"],
     queryFn: fetchTotalCoins,
   });
+
+  function handleMissionClick(id: MissionAction) {
+    if (id === "refer") return onOpenReferrals();
+    if (id === "rate") return onOpenBookings();
+    return onOpenHome();
+  }
+
 
   return (
     <main className="min-h-screen w-full bg-background pb-28">
