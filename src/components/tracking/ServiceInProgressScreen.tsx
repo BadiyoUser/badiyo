@@ -1,41 +1,318 @@
-import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Sparkles, Plus, X, Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getErrorMessage } from "@/lib/errorMessage";
 
-function formatTime(sec: number) {
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+type BookingTiming = {
+  id: string;
+  status: string;
+  service_duration_minutes: number;
+  service_end_at: string | null;
+};
+
+type CatalogueItem = {
+  id: string;
+  duration_minutes: number;
+  duration_label: string;
+  price: number;
+};
+
+type RazorpayOptions = {
+  key: string;
+  order_id: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description?: string;
+  prefill?: { contact?: string };
+  theme?: { color?: string };
+  handler: (r: {
+    razorpay_payment_id: string;
+    razorpay_order_id: string;
+    razorpay_signature: string;
+  }) => void;
+  modal?: { ondismiss?: () => void };
+};
+declare global {
+  interface Window {
+    Razorpay?: new (o: RazorpayOptions) => { open: () => void };
+  }
+}
+
+const RAZORPAY_SRC = "https://checkout.razorpay.com/v1/checkout.js";
+function loadRazorpay(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if (window.Razorpay) return resolve(true);
+    const existing = document.querySelector(
+      `script[src="${RAZORPAY_SRC}"]`,
+    ) as HTMLScriptElement | null;
+    if (existing) {
+      existing.addEventListener("load", () => resolve(true));
+      existing.addEventListener("error", () => resolve(false));
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = RAZORPAY_SRC;
+    s.async = true;
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
+
+function beep(kind: "warning" | "end") {
+  try {
+    const AC =
+      (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext })
+        .AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const play = (freq: number, start: number, dur: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + dur + 0.05);
+    };
+    if (kind === "warning") {
+      play(880, 0, 0.25);
+      play(880, 0.3, 0.25);
+    } else {
+      play(660, 0, 0.35);
+      play(520, 0.4, 0.35);
+      play(400, 0.85, 0.5);
+    }
+    setTimeout(() => ctx.close().catch(() => {}), 2000);
+  } catch {
+    // best-effort
+  }
+}
+
+async function fetchBookingTiming(id: string): Promise<BookingTiming | null> {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("id, status, service_duration_minutes, service_end_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.error("fetchBookingTiming failed:", error);
+    return null;
+  }
+  return (data as BookingTiming | null) ?? null;
+}
+
+async function fetchExtensionOptions(): Promise<CatalogueItem[]> {
+  const { data, error } = await supabase
+    .from("service_catalogue_config")
+    .select("id, duration_minutes, duration_label, price, is_active, display_order")
+    .eq("is_active", true)
+    .order("duration_minutes", { ascending: true });
+  if (error) {
+    console.error("fetchExtensionOptions failed:", error);
+    return [];
+  }
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    duration_minutes: r.duration_minutes as number,
+    duration_label: (r.duration_label as string) ?? `${r.duration_minutes} minutes`,
+    price: Number(r.price),
+  }));
+}
+
+function pad(n: number) {
+  return n.toString().padStart(2, "0");
+}
+function formatRemaining(sec: number) {
+  const s = Math.max(0, sec);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const r = s % 60;
+  if (h > 0) return `${pad(h)}:${pad(m)}:${pad(r)}`;
+  return `${pad(m)}:${pad(r)}`;
 }
 
 export function ServiceInProgressScreen({
   bookingId,
-  onSimulateComplete,
 }: {
   bookingId: string | null;
-  onSimulateComplete: () => void;
+  /** Deprecated dev-only shim — retained for parent compatibility. */
+  onSimulateComplete?: () => void;
 }) {
-  const [elapsed, setElapsed] = useState(0);
+  const qc = useQueryClient();
 
+  // Start the service (idempotent) as soon as we arrive here.
   useEffect(() => {
     if (!bookingId) return;
-    supabase
-      .rpc("advance_booking_status", { _booking_id: bookingId, _new_status: "in_progress" })
-      .then(({ error }) => {
-        if (error) console.error("status update failed:", error);
-      });
-  }, [bookingId]);
+    supabase.rpc("start_service", { _booking_id: bookingId }).then(({ error }) => {
+      if (error) {
+        console.error("start_service failed:", error);
+        return;
+      }
+      qc.invalidateQueries({ queryKey: ["booking-timing", bookingId] });
+    });
+  }, [bookingId, qc]);
 
+  const { data: timing } = useQuery({
+    queryKey: ["booking-timing", bookingId],
+    queryFn: () => fetchBookingTiming(bookingId!),
+    enabled: !!bookingId,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+  });
+
+  // Ticking clock — recomputes every second from service_end_at.
+  const [now, setNow] = useState<number>(() => Date.now());
   useEffect(() => {
-    const t = setInterval(() => setElapsed((v) => v + 1), 1000);
+    const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
 
+  const endMs = timing?.service_end_at ? Date.parse(timing.service_end_at) : null;
+  const totalDurationMin = timing?.service_duration_minutes ?? 0;
+  const remainingSec =
+    endMs != null ? Math.max(0, Math.floor((endMs - now) / 1000)) : totalDurationMin * 60;
+  const isEnded = endMs != null && remainingSec === 0;
+  const graceOpen =
+    endMs != null && now <= endMs + 10 * 60 * 1000; // 10 min grace after end
+
+  // Banner + sound state machine
+  const [banner, setBanner] = useState<"none" | "warn" | "end" | "dismissed-warn">("none");
+  const warnedRef = useRef(false);
+  const endedRef = useRef(false);
+  useEffect(() => {
+    if (endMs == null) return;
+    if (!warnedRef.current && remainingSec > 0 && remainingSec <= 300) {
+      warnedRef.current = true;
+      beep("warning");
+      setBanner((b) => (b === "dismissed-warn" ? b : "warn"));
+    }
+    if (!endedRef.current && remainingSec === 0) {
+      endedRef.current = true;
+      beep("end");
+      setBanner("end");
+    }
+  }, [remainingSec, endMs]);
+
+  // Extension sheet
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const { data: extOptions = [] } = useQuery({
+    queryKey: ["extension-options"],
+    queryFn: fetchExtensionOptions,
+    enabled: sheetOpen,
+    staleTime: 5 * 60_000,
+  });
+  const [busyOptionId, setBusyOptionId] = useState<string | null>(null);
+  const [extError, setExtError] = useState<string | null>(null);
+
+  async function buyExtension(opt: CatalogueItem) {
+    if (!bookingId) return;
+    setBusyOptionId(opt.id);
+    setExtError(null);
+    try {
+      const ok = await loadRazorpay();
+      if (!ok || !window.Razorpay) throw new Error("Failed to load Razorpay Checkout");
+
+      const receipt = `ext_${Date.now()}`;
+      const { data, error } = await supabase.functions.invoke("create-razorpay-order", {
+        body: {
+          service_duration_minutes: opt.duration_minutes,
+          currency: "INR",
+          receipt,
+        },
+      });
+      if (error) throw new Error(error.message);
+      if (!data?.order_id || !data?.key_id) throw new Error("Invalid order response");
+
+      const { data: userData } = await supabase.auth.getUser();
+      const contact = userData.user?.phone || undefined;
+
+      await new Promise<void>((resolve, reject) => {
+        const rzp = new window.Razorpay!({
+          key: data.key_id,
+          order_id: data.order_id,
+          amount: data.amount,
+          currency: data.currency,
+          name: "badiyo",
+          description: `Extend by ${opt.duration_label}`,
+          prefill: { contact },
+          theme: { color: "#00B97A" },
+          handler: async (resp) => {
+            const { data: newEnd, error: extErr } = await supabase.rpc("extend_booking", {
+              _booking_id: bookingId,
+              _extra_minutes: opt.duration_minutes,
+              _razorpay_payment_id: resp.razorpay_payment_id,
+            });
+            if (extErr) {
+              reject(new Error(extErr.message));
+              return;
+            }
+            // Optimistically update timing so countdown reflects immediately.
+            qc.setQueryData<BookingTiming | null>(
+              ["booking-timing", bookingId],
+              (prev) =>
+                prev
+                  ? { ...prev, service_end_at: (newEnd as string) ?? prev.service_end_at }
+                  : prev,
+            );
+            qc.invalidateQueries({ queryKey: ["booking-timing", bookingId] });
+            // Reset alert state so we get a fresh 5-min warning next time.
+            warnedRef.current = false;
+            endedRef.current = false;
+            setBanner("none");
+            setSheetOpen(false);
+            resolve();
+          },
+          modal: {
+            ondismiss: () => reject(new Error("Payment cancelled")),
+          },
+        });
+        rzp.open();
+      });
+    } catch (e) {
+      setExtError(await getErrorMessage(e));
+    } finally {
+      setBusyOptionId(null);
+    }
+  }
+
+  const canExtend = timing?.status === "in_progress" && (remainingSec > 0 || graceOpen);
+
+  const bannerNode = useMemo(() => {
+    if (banner === "warn") {
+      return (
+        <BannerCard
+          tone="warn"
+          title="5 minutes left"
+          onExtend={() => setSheetOpen(true)}
+          onDismiss={() => setBanner("dismissed-warn")}
+        />
+      );
+    }
+    if (banner === "end") {
+      return (
+        <BannerCard
+          tone="end"
+          title="Time's up"
+          onExtend={canExtend ? () => setSheetOpen(true) : undefined}
+          onDismiss={() => setBanner("none")}
+        />
+      );
+    }
+    return null;
+  }, [banner, canExtend]);
+
   return (
     <main className="min-h-screen w-full bg-background">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pt-16">
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pt-16 pb-8">
         <div className="flex flex-col items-center text-center">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 animate-pulse">
             <Sparkles className="h-10 w-10 text-primary" />
@@ -50,26 +327,183 @@ export function ServiceInProgressScreen({
 
         <div className="mt-10 rounded-[18px] border border-border bg-card p-6 text-center">
           <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-            Time elapsed
+            Time remaining
           </div>
           <div className="mt-2 font-mono text-4xl font-bold tabular-nums text-foreground">
-            {formatTime(elapsed)}
+            {formatRemaining(remainingSec)}
           </div>
+          {endMs == null && (
+            <div className="mt-2 text-[11px] text-muted-foreground">
+              Waiting for service to start…
+            </div>
+          )}
         </div>
 
-        <div className="mt-auto pb-8 pt-10">
-          <button
-            type="button"
-            onClick={onSimulateComplete}
-            className="w-full rounded-[14px] border-2 border-dashed border-muted-foreground/40 bg-transparent px-4 py-3.5 text-sm font-bold text-muted-foreground active:scale-[0.99]"
-          >
-            Simulate: Service Complete
-          </button>
-          <p className="mt-2 text-center text-[10px] uppercase tracking-wide text-muted-foreground/70">
-            Testing aid · will be removed
+        {bannerNode && <div className="mt-4">{bannerNode}</div>}
+
+        <div className="mt-auto pt-10">
+          {canExtend && banner !== "warn" && banner !== "end" && (
+            <button
+              type="button"
+              onClick={() => setSheetOpen(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-[14px] border border-primary bg-primary/10 px-4 py-3.5 text-sm font-bold text-primary active:scale-[0.99]"
+            >
+              <Plus className="h-4 w-4" />
+              Extend time
+            </button>
+          )}
+          <p className="mt-3 text-center text-[11px] text-muted-foreground">
+            Your expert will ask for the completion OTP to end the service.
           </p>
         </div>
       </div>
+
+      {sheetOpen && (
+        <ExtensionSheet
+          options={extOptions}
+          busyOptionId={busyOptionId}
+          error={extError}
+          onClose={() => {
+            setSheetOpen(false);
+            setExtError(null);
+          }}
+          onPick={buyExtension}
+        />
+      )}
     </main>
+  );
+}
+
+function BannerCard({
+  tone,
+  title,
+  onExtend,
+  onDismiss,
+}: {
+  tone: "warn" | "end";
+  title: string;
+  onExtend?: () => void;
+  onDismiss: () => void;
+}) {
+  const isEnd = tone === "end";
+  return (
+    <div
+      className={`rounded-[16px] border p-4 ${
+        isEnd
+          ? "border-destructive/40 bg-destructive/10"
+          : "border-primary/40 bg-primary/10"
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+            isEnd ? "bg-destructive/20 text-destructive" : "bg-primary/20 text-primary"
+          }`}
+        >
+          <AlertTriangle className="h-5 w-5" />
+        </div>
+        <div className="flex-1">
+          <div className="text-sm font-bold text-foreground">{title}</div>
+          <div className="mt-0.5 text-xs text-muted-foreground">
+            {isEnd
+              ? "Extend now to keep your expert on the job."
+              : "Need more time? Extend before your service wraps up."}
+          </div>
+          <div className="mt-3 flex gap-2">
+            {onExtend && (
+              <button
+                type="button"
+                onClick={onExtend}
+                className={`rounded-[12px] px-3 py-2 text-xs font-bold text-primary-foreground active:scale-[0.99] ${
+                  isEnd ? "bg-destructive" : "bg-primary"
+                }`}
+              >
+                Extend time
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="rounded-[12px] border border-border bg-card px-3 py-2 text-xs font-bold text-foreground"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExtensionSheet({
+  options,
+  busyOptionId,
+  error,
+  onClose,
+  onPick,
+}: {
+  options: CatalogueItem[];
+  busyOptionId: string | null;
+  error: string | null;
+  onClose: () => void;
+  onPick: (o: CatalogueItem) => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center">
+      <div className="w-full max-w-md rounded-t-[22px] bg-card p-5 shadow-xl sm:rounded-[22px]">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-bold text-foreground">Extend service time</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Add more time to your ongoing booking.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-muted"
+          >
+            <X className="h-4 w-4 text-foreground" />
+          </button>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          {options.length === 0 && (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              Loading options…
+            </p>
+          )}
+          {options.map((o) => {
+            const busy = busyOptionId === o.id;
+            return (
+              <button
+                key={o.id}
+                type="button"
+                disabled={!!busyOptionId}
+                onClick={() => onPick(o)}
+                className="flex w-full items-center justify-between rounded-[14px] border border-border bg-background p-4 text-left transition active:scale-[0.99] disabled:opacity-60"
+              >
+                <div>
+                  <div className="text-sm font-bold text-foreground">
+                    +{o.duration_label}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Adds {o.duration_minutes} minutes to your timer
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-primary">Rs {o.price}</span>
+                  {busy && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {error && (
+          <p className="mt-3 text-center text-xs text-destructive">{error}</p>
+        )}
+      </div>
+    </div>
   );
 }
