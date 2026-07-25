@@ -230,6 +230,9 @@ export type Database = {
           assigned_expert_id: string | null
           cancellation_reason: string | null
           created_at: string | null
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           end_otp: string | null
           id: string
           price: number
@@ -255,6 +258,9 @@ export type Database = {
           assigned_expert_id?: string | null
           cancellation_reason?: string | null
           created_at?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           end_otp?: string | null
           id?: string
           price: number
@@ -280,6 +286,9 @@ export type Database = {
           assigned_expert_id?: string | null
           cancellation_reason?: string | null
           created_at?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           end_otp?: string | null
           id?: string
           price?: number
@@ -331,6 +340,60 @@ export type Database = {
           },
         ]
       }
+      emergency_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          booking_id: string | null
+          created_at: string
+          expert_id: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          status: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          booking_id?: string | null
+          created_at?: string
+          expert_id: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          status?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          booking_id?: string | null
+          created_at?: string
+          expert_id?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_alerts_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emergency_alerts_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expert_leads: {
         Row: {
           area: string
@@ -364,11 +427,13 @@ export type Database = {
       experts: {
         Row: {
           address: string | null
+          auth_user_id: string | null
           bank_account_holder_name: string | null
           bank_account_number: string | null
           bank_ifsc: string | null
           created_at: string
           id: string
+          is_online: boolean
           kyc_aadhaar_url: string | null
           kyc_address_proof_url: string | null
           kyc_pan_url: string | null
@@ -385,11 +450,13 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          auth_user_id?: string | null
           bank_account_holder_name?: string | null
           bank_account_number?: string | null
           bank_ifsc?: string | null
           created_at?: string
           id?: string
+          is_online?: boolean
           kyc_aadhaar_url?: string | null
           kyc_address_proof_url?: string | null
           kyc_pan_url?: string | null
@@ -406,11 +473,13 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          auth_user_id?: string | null
           bank_account_holder_name?: string | null
           bank_account_number?: string | null
           bank_ifsc?: string | null
           created_at?: string
           id?: string
+          is_online?: boolean
           kyc_aadhaar_url?: string | null
           kyc_address_proof_url?: string | null
           kyc_pan_url?: string | null
@@ -1003,6 +1072,26 @@ export type Database = {
         Returns: undefined
       }
       ensure_start_otp: { Args: { _booking_id: string }; Returns: string }
+      expert_ensure_booking_codes: {
+        Args: { _booking_id: string }
+        Returns: {
+          end_otp: string
+          start_otp: string
+        }[]
+      }
+      expert_reject_booking: {
+        Args: { _booking_id: string; _reason: string }
+        Returns: undefined
+      }
+      expert_set_online: { Args: { _online: boolean }; Returns: undefined }
+      expert_verify_end_otp: {
+        Args: { _booking_id: string; _otp: string }
+        Returns: number
+      }
+      expert_verify_start_otp: {
+        Args: { _booking_id: string; _otp: string }
+        Returns: string
+      }
       extend_booking: {
         Args: {
           _booking_id: string
@@ -1014,6 +1103,7 @@ export type Database = {
       generate_otp4: { Args: never; Returns: string }
       get_auth_user_id_by_email: { Args: { _email: string }; Returns: string }
       get_auth_user_id_by_phone: { Args: { _phone: string }; Returns: string }
+      get_expert_id_for_auth: { Args: { _auth_uid: string }; Returns: string }
       is_active_staff: {
         Args: { _roles: string[]; _uid: string }
         Returns: boolean
@@ -1041,6 +1131,10 @@ export type Database = {
       }
       staff_cancel_booking: {
         Args: { _booking_id: string; _reason: string }
+        Returns: undefined
+      }
+      staff_edit_booking: {
+        Args: { _booking_id: string; _payload: Json }
         Returns: undefined
       }
       staff_expert_kyc_decision: {
@@ -1076,6 +1170,10 @@ export type Database = {
         Args: { _active: boolean; _id: string }
         Returns: undefined
       }
+      staff_soft_delete_booking: {
+        Args: { _booking_id: string; _reason: string }
+        Returns: undefined
+      }
       staff_update_booking_status: {
         Args: { _booking_id: string; _new_status: string; _note?: string }
         Returns: undefined
@@ -1093,6 +1191,14 @@ export type Database = {
       staff_upsert_homepage_section: {
         Args: { _payload: Json }
         Returns: string
+      }
+      staff_verify_end_otp: {
+        Args: { _booking_id: string; _otp: string }
+        Returns: undefined
+      }
+      staff_verify_start_otp: {
+        Args: { _booking_id: string; _otp: string }
+        Returns: undefined
       }
       staff_wallet_adjust: {
         Args: {
