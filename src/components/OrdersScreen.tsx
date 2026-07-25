@@ -18,6 +18,7 @@ async function fetchBookings(): Promise<BookingRow[]> {
       "id, service_label, service_duration_minutes, price, status, slot_type, scheduled_date, scheduled_time_slot, created_at, rating, review_text, address_id, razorpay_payment_id, addresses(label, full_address, area, city, latitude, longitude, is_default)",
     )
     .eq("user_id", uid)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as unknown as BookingRow[];
