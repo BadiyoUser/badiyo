@@ -123,12 +123,30 @@ export function ExpertAssignedScreen({
             </div>
           </div>
           <div className="p-4">
-            <div className="text-sm font-bold text-foreground">Expert is on the way</div>
+            <div className="text-sm font-bold text-foreground">
+              {isWaitingForAssignment ? "Waiting for expert assignment" : "Expert is on the way"}
+            </div>
             <div className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
               {address.full_address}
             </div>
           </div>
         </section>
+
+        {/* Test-only simulate button */}
+        {!isWaitingForAssignment && (
+          <>
+            <button
+              type="button"
+              onClick={onSimulateArrived}
+              className="mt-8 w-full rounded-[14px] border-2 border-dashed border-muted-foreground/40 bg-transparent px-4 py-3.5 text-sm font-bold text-muted-foreground active:scale-[0.99]"
+            >
+              Simulate: Expert Arrived
+            </button>
+            <p className="mt-2 text-center text-[10px] uppercase tracking-wide text-muted-foreground/70">
+              Testing aid · will be removed
+            </p>
+          </>
+        )}
 
         {/* Test-only simulate button */}
         <button
