@@ -324,6 +324,14 @@ function Index() {
             address={selectedAddress}
             currentStatus={activeBookingStatus ?? undefined}
             onShowStartOtp={() => setPhase("otp-start")}
+            onAdvanceInProgress={() => {
+              setActiveBookingStatus("in_progress");
+              setPhase("in-progress");
+            }}
+            onAdvanceCompleted={() => {
+              setActiveBookingStatus("completed");
+              setPhase("rate-review");
+            }}
           />
         </div>
       )}
@@ -341,6 +349,10 @@ function Index() {
           <ServiceInProgressScreen
             bookingId={activeBookingId}
             onShowEndOtp={() => setPhase("otp-end")}
+            onAdvanceCompleted={() => {
+              setActiveBookingStatus("completed");
+              setPhase("rate-review");
+            }}
           />
         </div>
       )}
