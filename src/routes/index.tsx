@@ -261,6 +261,7 @@ function Index() {
             }}
             onOpenProfile={() => setPhase("profile")}
             onOpenRewards={() => setPhase("rewards")}
+            onOpenOrders={() => setPhase("orders")}
             onSearch={(q) => {
               setSearchQuery(q);
               setPhase("search-results");
