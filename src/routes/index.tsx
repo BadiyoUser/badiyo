@@ -184,17 +184,16 @@ function Index() {
           <OtpVerifyScreen
             phone={pendingPhone}
             onBack={() => setPhase("login")}
-            onVerified={async () => {
-              try {
-                await ensureUserRow(`+91${pendingPhone}`);
-                const { linkReferralIfAny } = await import("@/lib/referrals");
-                await linkReferralIfAny();
-              } catch (e) {
-                console.error("post-otp setup failed:", e);
-              }
+            onVerified={() => {
+              // Navigate immediately; onAuthStateChange('SIGNED_IN') runs
+              // ensureUserRow + linkReferralIfAny in the background.
               setPhase("home");
+              ensureUserRow(`+91${pendingPhone}`)
+                .then(() => import("@/lib/referrals").then((m) => m.linkReferralIfAny()))
+                .catch((e) => console.error("post-otp setup failed:", e));
             }}
           />
+
         </div>
       )}
       {phase === "home" && (

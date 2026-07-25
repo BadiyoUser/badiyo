@@ -48,22 +48,21 @@ Deno.serve(async (req) => {
       return json({ error: "Invalid or expired code" }, 400);
     }
 
-    // Mark verified (single-use).
-    await admin.from("otp_codes").update({ is_verified: true }).eq("id", row.id);
+    // Mark verified (single-use) in parallel with the auth-user lookup.
+    const markVerifiedP = admin
+      .from("otp_codes")
+      .update({ is_verified: true })
+      .eq("id", row.id);
 
-    // Look up existing auth user by synthetic email; fall back to phone lookup
-    // for accounts created before this change.
-    let userId: string | null = null;
-    const { data: byEmail } = await admin.rpc("get_auth_user_id_by_email", {
-      _email: syntheticEmail,
-    });
-    if (byEmail) userId = byEmail as string;
-    if (!userId) {
-      const { data: byPhone } = await admin.rpc("get_auth_user_id_by_phone", {
-        _phone: `91${digits}`,
-      });
-      if (byPhone) userId = byPhone as string;
-    }
+    // Look up existing auth user by synthetic email AND by legacy phone in
+    // parallel; either match wins.
+    const [emailRes, phoneRes] = await Promise.all([
+      admin.rpc("get_auth_user_id_by_email", { _email: syntheticEmail }),
+      admin.rpc("get_auth_user_id_by_phone", { _phone: `91${digits}` }),
+    ]);
+    let userId: string | null =
+      (emailRes.data as string | null) || (phoneRes.data as string | null) || null;
+
 
     const password = crypto.randomUUID() + crypto.randomUUID();
 
@@ -105,10 +104,14 @@ Deno.serve(async (req) => {
       return json({ error: signErr?.message || "Could not sign in" }, 500);
     }
 
+    // Ensure the single-use marker landed before returning.
+    await markVerifiedP;
+
     return json({
       access_token: signIn.session.access_token,
       refresh_token: signIn.session.refresh_token,
     });
+
   } catch (err) {
     console.error("verify-otp error", err);
     return json({ error: (err as Error).message || "Unknown error" }, 500);
