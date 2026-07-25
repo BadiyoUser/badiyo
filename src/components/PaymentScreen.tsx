@@ -100,6 +100,14 @@ export function PaymentScreen({
       const scheduled_time_slot =
         slot.mode === "later" ? `${slot.slotLabel} (${slot.slotRange})` : null;
 
+      const booking_lat = address.latitude ?? null;
+      const booking_lng = address.longitude ?? null;
+      if (booking_lat == null || booking_lng == null) {
+        console.warn(
+          `[booking] Creating booking without coordinates (address_id=${address.id}, label=${address.label}). Expert broadcast will not fire for this booking.`,
+        );
+      }
+
       const { data, error } = await supabase
         .from("bookings")
         .insert({
@@ -114,11 +122,14 @@ export function PaymentScreen({
           status: "confirmed",
           razorpay_order_id: orderId,
           razorpay_payment_id: paymentId,
+          booking_lat,
+          booking_lng,
         })
         .select(
           "id, service_label, service_duration_minutes, price, slot_type, scheduled_date, scheduled_time_slot, razorpay_payment_id",
         )
         .single();
+
 
       if (error) throw error;
       setBookingId(data.id);
