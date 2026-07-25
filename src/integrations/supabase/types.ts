@@ -85,9 +85,115 @@ export type Database = {
         }
         Relationships: []
       }
+      area_partner_leads: {
+        Row: {
+          area: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          area: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          area?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      area_partners: {
+        Row: {
+          commission_rate: number
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          setup_fee_status: string
+          status: string
+          zone_id: string | null
+        }
+        Insert: {
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          name: string
+          phone: string
+          setup_fee_status?: string
+          status?: string
+          zone_id?: string | null
+        }
+        Update: {
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          setup_fee_status?: string
+          status?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "area_partners_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string
+          after_state: Json | null
+          before_state: Json | null
+          created_at: string
+          id: string
+          target_id: string | null
+          target_table: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          target_table: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          target_table?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           address_id: string | null
+          assigned_expert_id: string | null
+          cancellation_reason: string | null
           created_at: string | null
           id: string
           price: number
@@ -103,9 +209,12 @@ export type Database = {
           status: string
           updated_at: string | null
           user_id: string | null
+          zone_id: string | null
         }
         Insert: {
           address_id?: string | null
+          assigned_expert_id?: string | null
+          cancellation_reason?: string | null
           created_at?: string | null
           id?: string
           price: number
@@ -121,9 +230,12 @@ export type Database = {
           status?: string
           updated_at?: string | null
           user_id?: string | null
+          zone_id?: string | null
         }
         Update: {
           address_id?: string | null
+          assigned_expert_id?: string | null
+          cancellation_reason?: string | null
           created_at?: string | null
           id?: string
           price?: number
@@ -139,6 +251,7 @@ export type Database = {
           status?: string
           updated_at?: string | null
           user_id?: string | null
+          zone_id?: string | null
         }
         Relationships: [
           {
@@ -149,10 +262,128 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bookings_assigned_expert_id_fkey"
+            columns: ["assigned_expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bookings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expert_leads: {
+        Row: {
+          area: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          area: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          area?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      experts: {
+        Row: {
+          address: string | null
+          bank_account_holder_name: string | null
+          bank_account_number: string | null
+          bank_ifsc: string | null
+          created_at: string
+          id: string
+          kyc_aadhaar_url: string | null
+          kyc_address_proof_url: string | null
+          kyc_pan_url: string | null
+          kyc_rejection_reason: string | null
+          kyc_status: string
+          level: string
+          name: string
+          phone: string
+          photo_url: string | null
+          security_deposit_status: string
+          status: string
+          wallet_balance: number
+          zone_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          bank_account_holder_name?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
+          created_at?: string
+          id?: string
+          kyc_aadhaar_url?: string | null
+          kyc_address_proof_url?: string | null
+          kyc_pan_url?: string | null
+          kyc_rejection_reason?: string | null
+          kyc_status?: string
+          level?: string
+          name: string
+          phone: string
+          photo_url?: string | null
+          security_deposit_status?: string
+          status?: string
+          wallet_balance?: number
+          zone_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          bank_account_holder_name?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
+          created_at?: string
+          id?: string
+          kyc_aadhaar_url?: string | null
+          kyc_address_proof_url?: string | null
+          kyc_pan_url?: string | null
+          kyc_rejection_reason?: string | null
+          kyc_status?: string
+          level?: string
+          name?: string
+          phone?: string
+          photo_url?: string | null
+          security_deposit_status?: string
+          status?: string
+          wallet_balance?: number
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experts_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
             referencedColumns: ["id"]
           },
         ]
@@ -262,6 +493,80 @@ export type Database = {
         }
         Relationships: []
       }
+      payout_batch_items: {
+        Row: {
+          amount: number
+          batch_id: string
+          booking_ids: string[]
+          created_at: string
+          id: string
+          owner_id: string
+          owner_type: string
+          paid: boolean
+          paid_at: string | null
+        }
+        Insert: {
+          amount?: number
+          batch_id: string
+          booking_ids?: string[]
+          created_at?: string
+          id?: string
+          owner_id: string
+          owner_type: string
+          paid?: boolean
+          paid_at?: string | null
+        }
+        Update: {
+          amount?: number
+          batch_id?: string
+          booking_ids?: string[]
+          created_at?: string
+          id?: string
+          owner_id?: string
+          owner_type?: string
+          paid?: boolean
+          paid_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_batch_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "payout_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_batches: {
+        Row: {
+          created_at: string
+          id: string
+          paid_at: string | null
+          status: string
+          total_amount: number
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          total_amount?: number
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+          total_amount?: number
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       referral_config: {
         Row: {
           id: string
@@ -296,6 +601,8 @@ export type Database = {
           id: string
           referred_user_id: string | null
           referrer_id: string | null
+          reversal_reason: string | null
+          reversed_at: string | null
           reward_amount: number | null
           reward_date: string | null
           status: string
@@ -306,6 +613,8 @@ export type Database = {
           id?: string
           referred_user_id?: string | null
           referrer_id?: string | null
+          reversal_reason?: string | null
+          reversed_at?: string | null
           reward_amount?: number | null
           reward_date?: string | null
           status?: string
@@ -316,6 +625,8 @@ export type Database = {
           id?: string
           referred_user_id?: string | null
           referrer_id?: string | null
+          reversal_reason?: string | null
+          reversed_at?: string | null
           reward_amount?: number | null
           reward_date?: string | null
           status?: string
@@ -386,6 +697,66 @@ export type Database = {
           is_active?: boolean | null
           price?: number
           subtitle?: string | null
+        }
+        Relationships: []
+      }
+      staff_users: {
+        Row: {
+          auth_user_id: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          role: string
+          status: string
+          zone_id: string | null
+        }
+        Insert: {
+          auth_user_id: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          role: string
+          status?: string
+          zone_id?: string | null
+        }
+        Update: {
+          auth_user_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          role?: string
+          status?: string
+          zone_id?: string | null
+        }
+        Relationships: []
+      }
+      support_inquiries: {
+        Row: {
+          contact: string
+          created_at: string
+          id: string
+          message: string
+          name: string
+          status: string
+        }
+        Insert: {
+          contact: string
+          created_at?: string
+          id?: string
+          message: string
+          name: string
+          status?: string
+        }
+        Update: {
+          contact?: string
+          created_at?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string
         }
         Relationships: []
       }
@@ -461,6 +832,47 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_ledger: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          owner_id: string
+          owner_type: string
+          reason: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          owner_id: string
+          owner_type: string
+          reason: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          owner_id?: string
+          owner_type?: string
+          reason?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_ledger_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "staff_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_transactions: {
         Row: {
           amount: number
@@ -488,6 +900,44 @@ export type Database = {
         }
         Relationships: []
       }
+      zones: {
+        Row: {
+          assigned_area_partner_id: string | null
+          boundary: Json
+          city: string
+          created_at: string
+          id: string
+          name: string
+          status: string
+        }
+        Insert: {
+          assigned_area_partner_id?: string | null
+          boundary: Json
+          city: string
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+        }
+        Update: {
+          assigned_area_partner_id?: string | null
+          boundary?: Json
+          city?: string
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zones_assigned_area_partner_fk"
+            columns: ["assigned_area_partner_id"]
+            isOneToOne: false
+            referencedRelation: "area_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -503,7 +953,92 @@ export type Database = {
       }
       get_auth_user_id_by_email: { Args: { _email: string }; Returns: string }
       get_auth_user_id_by_phone: { Args: { _phone: string }; Returns: string }
+      is_active_staff: {
+        Args: { _roles: string[]; _uid: string }
+        Returns: boolean
+      }
       link_referral: { Args: { _code: string }; Returns: undefined }
+      point_in_polygon: {
+        Args: { _lat: number; _lng: number; _poly: Json }
+        Returns: boolean
+      }
+      resolve_zone_for_point: {
+        Args: { _lat: number; _lng: number }
+        Returns: string
+      }
+      staff_accept_booking: {
+        Args: { _booking_id: string }
+        Returns: undefined
+      }
+      staff_assign_area_partner: {
+        Args: { _partner_id: string; _zone_id: string }
+        Returns: undefined
+      }
+      staff_assign_expert: {
+        Args: { _booking_id: string; _expert_id: string }
+        Returns: undefined
+      }
+      staff_cancel_booking: {
+        Args: { _booking_id: string; _reason: string }
+        Returns: undefined
+      }
+      staff_expert_kyc_decision: {
+        Args: { _decision: string; _expert_id: string; _reason: string }
+        Returns: undefined
+      }
+      staff_generate_payout_batch: { Args: never; Returns: string }
+      staff_mark_payout_batch_paid: {
+        Args: { _batch_id: string }
+        Returns: undefined
+      }
+      staff_mark_payout_item_paid: {
+        Args: { _item_id: string; _paid: boolean }
+        Returns: undefined
+      }
+      staff_reject_booking: {
+        Args: { _booking_id: string; _reason: string }
+        Returns: undefined
+      }
+      staff_reorder_homepage_sections: {
+        Args: { _orders: Json }
+        Returns: undefined
+      }
+      staff_reverse_referral_reward: {
+        Args: { _reason: string; _txn_id: string }
+        Returns: undefined
+      }
+      staff_set_homepage_section_active: {
+        Args: { _active: boolean; _id: string }
+        Returns: undefined
+      }
+      staff_update_booking_status: {
+        Args: { _booking_id: string; _new_status: string; _note?: string }
+        Returns: undefined
+      }
+      staff_update_referral_config: {
+        Args: { _is_active: boolean; _reward: number }
+        Returns: undefined
+      }
+      staff_update_service_price: {
+        Args: { _id: string; _payload: Json }
+        Returns: undefined
+      }
+      staff_upsert_area_partner: { Args: { _payload: Json }; Returns: string }
+      staff_upsert_expert: { Args: { _payload: Json }; Returns: string }
+      staff_upsert_homepage_section: {
+        Args: { _payload: Json }
+        Returns: string
+      }
+      staff_wallet_adjust: {
+        Args: {
+          _amount: number
+          _owner_id: string
+          _owner_type: string
+          _reason: string
+          _type: string
+        }
+        Returns: string
+      }
       submit_booking_review: {
         Args: { _booking_id: string; _rating: number; _review: string }
         Returns: undefined

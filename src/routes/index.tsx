@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { initNativeBackButton, setRootBackHandler } from "@/lib/backHandler";
+
 import { BadiyoLogo } from "@/components/BadiyoLogo";
 import { LoginScreen } from "@/components/LoginScreen";
 import { OtpVerifyScreen } from "@/components/OtpVerifyScreen";
@@ -85,7 +88,25 @@ type Phase =
 
 
 function Index() {
-  const [phase, setPhase] = useState<Phase>("splash");
+  const [phase, _setPhase] = useState<Phase>("splash");
+  const historyRef = useRef<Phase[]>([]);
+  const phaseRef = useRef<Phase>("splash");
+  const lastBackAtRef = useRef<number>(0);
+
+  const setPhase = useCallback((next: Phase) => {
+    _setPhase((prev) => {
+      if (next === prev) return prev;
+      // Home is the root — clear history when returning to it.
+      if (next === "home") {
+        historyRef.current = [];
+      } else if (prev !== "splash" && prev !== "splash-out") {
+        historyRef.current.push(prev);
+      }
+      phaseRef.current = next;
+      return next;
+    });
+  }, []);
+
   const [selectedService, setSelectedService] = useState<SelectedService | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
@@ -105,6 +126,37 @@ function Index() {
     setSelectedAddress(null);
     setPhase("home");
   }
+
+  // Wire the native Android back button (no-op on web).
+  useEffect(() => {
+    initNativeBackButton();
+    setRootBackHandler(() => {
+      const cur = phaseRef.current;
+      const hist = historyRef.current;
+      // Login flow: back exits (like a normal auth root).
+      const atRoot =
+        cur === "home" || cur === "login" || cur === "otp-verify" || cur === "splash" || cur === "splash-out";
+
+      if (!atRoot && hist.length > 0) {
+        const prev = hist.pop()!;
+        phaseRef.current = prev;
+        _setPhase(prev);
+        return;
+      }
+
+      // At root — require a second back press within 2s to exit.
+      const now = Date.now();
+      if (now - lastBackAtRef.current < 2000) {
+        import("@capacitor/app").then(({ App }) => App.exitApp()).catch(() => {});
+        return;
+      }
+      lastBackAtRef.current = now;
+      toast("Press back again to exit", { duration: 2000 });
+    });
+    return () => setRootBackHandler(null);
+  }, []);
+
+
 
   useEffect(() => {
     let cancelled = false;
