@@ -18,28 +18,6 @@ type CatalogueItem = {
   price: number;
 };
 
-type RazorpayOptions = {
-  key: string;
-  order_id: string;
-  amount: number;
-  currency: string;
-  name: string;
-  description?: string;
-  prefill?: { contact?: string };
-  theme?: { color?: string };
-  handler: (r: {
-    razorpay_payment_id: string;
-    razorpay_order_id: string;
-    razorpay_signature: string;
-  }) => void;
-  modal?: { ondismiss?: () => void };
-};
-declare global {
-  interface Window {
-    Razorpay?: new (o: RazorpayOptions) => { open: () => void };
-  }
-}
-
 const RAZORPAY_SRC = "https://checkout.razorpay.com/v1/checkout.js";
 function loadRazorpay(): Promise<boolean> {
   return new Promise((resolve) => {
