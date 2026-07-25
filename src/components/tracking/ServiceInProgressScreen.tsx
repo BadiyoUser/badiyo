@@ -124,11 +124,14 @@ function formatRemaining(sec: number) {
 export function ServiceInProgressScreen({
   bookingId,
   onShowEndOtp,
+  onAdvanceCompleted,
 }: {
   bookingId: string | null;
   onShowEndOtp?: () => void;
+  onAdvanceCompleted?: () => void;
 }) {
   const qc = useQueryClient();
+
 
   // Start the service (idempotent) as soon as we arrive here.
   useEffect(() => {
