@@ -323,33 +323,33 @@ function Index() {
             bookingId={activeBookingId}
             address={selectedAddress}
             currentStatus={activeBookingStatus ?? undefined}
+            onShowStartOtp={() => setPhase("otp-start")}
           />
         </div>
       )}
       {phase === "otp-start" && (
         <div className="animate-fade-slide-in">
           <OtpScreen
-            title="Share this OTP with your expert"
-            subtitle="Give this code to your expert to start the service."
-            code="4821"
-            ctaLabel="Service Started"
-            onContinue={() => setPhase("in-progress")}
+            bookingId={activeBookingId}
+            kind="start"
+            onVerified={() => setPhase("in-progress")}
           />
         </div>
       )}
       {phase === "in-progress" && (
         <div className="animate-fade-slide-in">
-          <ServiceInProgressScreen bookingId={activeBookingId} />
+          <ServiceInProgressScreen
+            bookingId={activeBookingId}
+            onShowEndOtp={() => setPhase("otp-end")}
+          />
         </div>
       )}
       {phase === "otp-end" && (
         <div className="animate-fade-slide-in">
           <OtpScreen
-            title="Share end OTP with your expert"
-            subtitle="Give this code to your expert to confirm the service is complete."
-            code="7392"
-            ctaLabel="Confirm Completion"
-            onContinue={() => setPhase("rate-review")}
+            bookingId={activeBookingId}
+            kind="end"
+            onVerified={() => setPhase("rate-review")}
           />
         </div>
       )}
