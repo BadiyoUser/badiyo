@@ -17,6 +17,7 @@ type BookingRow = {
   status: string;
   assigned_expert_id: string | null;
   start_otp: string | null;
+  deleted_at: string | null;
   experts: ExpertInfo;
 };
 
@@ -24,7 +25,7 @@ async function fetchBookingRow(bookingId: string): Promise<BookingRow | null> {
   const { data, error } = await supabase
     .from("bookings")
     .select(
-      "status, assigned_expert_id, start_otp, experts:assigned_expert_id ( id, name, phone, photo_url )",
+      "status, assigned_expert_id, start_otp, deleted_at, experts:assigned_expert_id ( id, name, phone, photo_url )",
     )
     .eq("id", bookingId)
     .maybeSingle();
@@ -42,6 +43,7 @@ export function ExpertAssignedScreen({
   onShowStartOtp,
   onAdvanceInProgress,
   onAdvanceCompleted,
+  onCancelled,
 }: {
   bookingId: string | null;
   address: SelectedAddress;
@@ -49,6 +51,7 @@ export function ExpertAssignedScreen({
   onShowStartOtp?: () => void;
   onAdvanceInProgress?: () => void;
   onAdvanceCompleted?: () => void;
+  onCancelled?: () => void;
 }) {
   const qc = useQueryClient();
   const queryKey = ["tracking-booking", bookingId] as const;
