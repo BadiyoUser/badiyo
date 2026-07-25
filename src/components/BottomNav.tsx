@@ -1,70 +1,83 @@
-import { useQuery } from "@tanstack/react-query";
-import { Home, Gift, Sparkles, type LucideIcon } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Home, ClipboardList, Gift, type LucideIcon } from "lucide-react";
 
-const ICON_MAP: Record<string, LucideIcon> = {
-  home: Home,
-  gift: Gift,
-  sparkles: Sparkles,
+type TabKey = "home" | "orders" | "rewards";
+
+type Tab = {
+  key: TabKey;
+  label: string;
+  Icon: LucideIcon;
+  onClick: () => void;
+  primary?: boolean;
 };
-
-type NavItem = {
-  display_order: number;
-  payload: Record<string, any>;
-};
-
-async function fetchNavItems(): Promise<NavItem[]> {
-  const { data, error } = await supabase
-    .from("homepage_sections")
-    .select("display_order, payload")
-    .eq("section_type", "nav_item")
-    .eq("is_active", true)
-    .order("display_order", { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as NavItem[];
-}
 
 export function BottomNav({
   activeKey,
   onHome,
+  onOrders,
   onRewards,
 }: {
-  activeKey: "home" | "rewards";
+  activeKey: TabKey;
   onHome: () => void;
+  onOrders: () => void;
   onRewards: () => void;
 }) {
-  const { data: items = [] } = useQuery({
-    queryKey: ["homepage_nav_items"],
-    queryFn: fetchNavItems,
-  });
-
-  const handlers: Record<string, () => void> = {
-    home: onHome,
-    rewards: onRewards,
-  };
+  const tabs: Tab[] = [
+    { key: "home", label: "Home", Icon: Home, onClick: onHome },
+    { key: "orders", label: "Orders", Icon: ClipboardList, onClick: onOrders, primary: true },
+    { key: "rewards", label: "Rewards", Icon: Gift, onClick: onRewards },
+  ];
 
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card"
-      style={{ paddingBottom: "max(2px, env(safe-area-inset-bottom))" }}
+      style={{
+        paddingBottom: "max(2px, env(safe-area-inset-bottom))",
+        height: "calc(72px + env(safe-area-inset-bottom, 0px))",
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+      }}
     >
-      <div className="mx-auto flex w-full max-w-md items-stretch justify-around px-4 pt-2 pb-1">
-        {items.map((item, idx) => {
-          const key = (item.payload?.target_screen as string) ?? item.payload?.label?.toLowerCase() ?? idx;
-          const isActive =
-            (activeKey === "home" && key === "home") ||
-            (activeKey === "rewards" && key === "rewards");
-          const Icon = ICON_MAP[(item.payload?.icon as string) ?? ""] ?? Sparkles;
+      <div className="mx-auto flex h-full w-full max-w-md items-stretch justify-around px-4">
+        {tabs.map(({ key, label, Icon, onClick, primary }) => {
+          const isActive = activeKey === key;
+          if (primary) {
+            return (
+              <button
+                key={key}
+                onClick={onClick}
+                aria-label={label}
+                className="relative flex flex-1 flex-col items-center justify-end pb-2"
+              >
+                <div
+                  className={`-mt-6 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition ${
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-primary/90 text-primary-foreground"
+                  }`}
+                >
+                  <Icon className="h-6 w-6" />
+                </div>
+                <span
+                  className={`mt-1 text-[11px] font-semibold ${
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  {label}
+                </span>
+              </button>
+            );
+          }
           return (
             <button
               key={key}
-              onClick={handlers[key] ?? (() => {})}
-              className={`flex flex-1 flex-col items-center gap-1 rounded-[14px] px-3 py-2 text-xs font-semibold transition ${
+              onClick={onClick}
+              aria-label={label}
+              className={`flex flex-1 flex-col items-center justify-center gap-1 text-xs font-semibold transition ${
                 isActive ? "text-primary" : "text-muted-foreground"
               }`}
             >
               <Icon className="h-5 w-5" />
-              <span>{item.payload?.label}</span>
+              <span>{label}</span>
             </button>
           );
         })}
