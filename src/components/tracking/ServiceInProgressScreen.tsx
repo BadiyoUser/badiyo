@@ -145,12 +145,42 @@ export function ServiceInProgressScreen({
     });
   }, [bookingId, qc]);
 
-  const { data: timing } = useQuery({
+  const { data: timing, refetch: refetchTiming } = useQuery({
     queryKey: ["booking-timing", bookingId],
     queryFn: () => fetchBookingTiming(bookingId!),
     enabled: !!bookingId,
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
+  });
+
+  // Realtime subscription for instant UI updates + auto-advance to rate-review.
+  const advancedRef = useRef(false);
+  useEffect(() => {
+    if (!bookingId) return;
+    const channel = supabase
+      .channel(`booking-inprog-${bookingId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "bookings", filter: `id=eq.${bookingId}` },
+        (payload) => {
+          const row = payload.new as Partial<BookingTiming>;
+          qc.setQueryData<BookingTiming | null>(["booking-timing", bookingId], (prev) =>
+            prev ? { ...prev, ...row } : (row as BookingTiming),
+          );
+          if (row.status === "completed" && !advancedRef.current && onAdvanceCompleted) {
+            advancedRef.current = true;
+            onAdvanceCompleted();
+          }
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [bookingId, qc, onAdvanceCompleted]);
+
+  const { pull, refreshing } = usePullToRefresh(async () => {
+    await refetchTiming();
   });
 
   // Ticking clock — recomputes every second from service_end_at.
