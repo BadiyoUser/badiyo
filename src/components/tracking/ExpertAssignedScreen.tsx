@@ -147,18 +147,6 @@ export function ExpertAssignedScreen({
             </p>
           </>
         )}
-
-        {/* Test-only simulate button */}
-        <button
-          type="button"
-          onClick={onSimulateArrived}
-          className="mt-8 w-full rounded-[14px] border-2 border-dashed border-muted-foreground/40 bg-transparent px-4 py-3.5 text-sm font-bold text-muted-foreground active:scale-[0.99]"
-        >
-          Simulate: Expert Arrived
-        </button>
-        <p className="mt-2 text-center text-[10px] uppercase tracking-wide text-muted-foreground/70">
-          Testing aid · will be removed
-        </p>
       </div>
     </main>
   );
