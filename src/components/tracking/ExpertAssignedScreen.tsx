@@ -17,6 +17,7 @@ type BookingRow = {
   status: string;
   assigned_expert_id: string | null;
   start_otp: string | null;
+  deleted_at: string | null;
   experts: ExpertInfo;
 };
 
@@ -24,7 +25,7 @@ async function fetchBookingRow(bookingId: string): Promise<BookingRow | null> {
   const { data, error } = await supabase
     .from("bookings")
     .select(
-      "status, assigned_expert_id, start_otp, experts:assigned_expert_id ( id, name, phone, photo_url )",
+      "status, assigned_expert_id, start_otp, deleted_at, experts:assigned_expert_id ( id, name, phone, photo_url )",
     )
     .eq("id", bookingId)
     .maybeSingle();
@@ -42,6 +43,7 @@ export function ExpertAssignedScreen({
   onShowStartOtp,
   onAdvanceInProgress,
   onAdvanceCompleted,
+  onCancelled,
 }: {
   bookingId: string | null;
   address: SelectedAddress;
@@ -49,6 +51,7 @@ export function ExpertAssignedScreen({
   onShowStartOtp?: () => void;
   onAdvanceInProgress?: () => void;
   onAdvanceCompleted?: () => void;
+  onCancelled?: () => void;
 }) {
   const qc = useQueryClient();
   const queryKey = ["tracking-booking", bookingId] as const;
@@ -62,6 +65,7 @@ export function ExpertAssignedScreen({
           status: currentStatus,
           assigned_expert_id: null,
           start_otp: null,
+          deleted_at: null,
           experts: null,
         } as BookingRow)
       : undefined,
@@ -90,8 +94,9 @@ export function ExpertAssignedScreen({
     });
   }, [bookingId, status, booking?.start_otp, qc, queryKey]);
 
-  // Realtime: react instantly to status changes on this booking.
+  // Realtime: react instantly to status/soft-delete changes on this booking.
   const advancedRef = useRef<string | null>(null);
+  const cancelledRef = useRef(false);
   useEffect(() => {
     if (!bookingId) return;
     const channel = supabase
@@ -110,6 +115,18 @@ export function ExpertAssignedScreen({
           }
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "bookings", filter: `id=eq.${bookingId}` },
+        () => {
+          if (cancelledRef.current) return;
+          cancelledRef.current = true;
+          qc.setQueryData<BookingRow | undefined>(queryKey, (prev) =>
+            prev ? { ...prev, status: "cancelled" } : prev,
+          );
+          onCancelled?.();
+        },
+      )
       .subscribe();
 
     // Polling safety net.
@@ -121,11 +138,18 @@ export function ExpertAssignedScreen({
       supabase.removeChannel(channel);
       clearInterval(poll);
     };
-  }, [bookingId, qc, queryKey, refetch]);
+  }, [bookingId, qc, queryKey, refetch, onCancelled]);
 
-  // Advance UI when status crosses ahead of this screen.
+  // Advance UI when status crosses ahead of this screen, or exit on cancel/soft-delete.
   useEffect(() => {
     if (!status) return;
+    const isCancelled =
+      status === "cancelled" || status === "rejected" || !!booking?.deleted_at;
+    if (isCancelled && !cancelledRef.current && onCancelled) {
+      cancelledRef.current = true;
+      onCancelled();
+      return;
+    }
     if (advancedRef.current === status) return;
     if (status === "in_progress" && onAdvanceInProgress) {
       advancedRef.current = status;
@@ -134,7 +158,8 @@ export function ExpertAssignedScreen({
       advancedRef.current = status;
       onAdvanceCompleted();
     }
-  }, [status, onAdvanceInProgress, onAdvanceCompleted]);
+  }, [status, booking?.deleted_at, onAdvanceInProgress, onAdvanceCompleted, onCancelled]);
+
 
   const { pull, refreshing } = usePullToRefresh(async () => {
     await refetch();

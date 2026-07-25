@@ -228,6 +228,8 @@ export type Database = {
         Row: {
           address_id: string | null
           assigned_expert_id: string | null
+          booking_lat: number | null
+          booking_lng: number | null
           cancellation_reason: string | null
           created_at: string | null
           delete_reason: string | null
@@ -256,6 +258,8 @@ export type Database = {
         Insert: {
           address_id?: string | null
           assigned_expert_id?: string | null
+          booking_lat?: number | null
+          booking_lng?: number | null
           cancellation_reason?: string | null
           created_at?: string | null
           delete_reason?: string | null
@@ -284,6 +288,8 @@ export type Database = {
         Update: {
           address_id?: string | null
           assigned_expert_id?: string | null
+          booking_lat?: number | null
+          booking_lng?: number | null
           cancellation_reason?: string | null
           created_at?: string | null
           delete_reason?: string | null
@@ -339,6 +345,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      dispatch_config: {
+        Row: {
+          broadcast_radius_km: number
+          broadcast_timeout_seconds: number
+          city: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          broadcast_radius_km?: number
+          broadcast_timeout_seconds?: number
+          city?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          broadcast_radius_km?: number
+          broadcast_timeout_seconds?: number
+          city?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       emergency_alerts: {
         Row: {
@@ -432,6 +465,8 @@ export type Database = {
           bank_account_number: string | null
           bank_ifsc: string | null
           created_at: string
+          current_lat: number | null
+          current_lng: number | null
           id: string
           is_online: boolean
           kyc_aadhaar_url: string | null
@@ -440,6 +475,7 @@ export type Database = {
           kyc_rejection_reason: string | null
           kyc_status: string
           level: string
+          location_updated_at: string | null
           name: string
           phone: string
           photo_url: string | null
@@ -455,6 +491,8 @@ export type Database = {
           bank_account_number?: string | null
           bank_ifsc?: string | null
           created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
           id?: string
           is_online?: boolean
           kyc_aadhaar_url?: string | null
@@ -463,6 +501,7 @@ export type Database = {
           kyc_rejection_reason?: string | null
           kyc_status?: string
           level?: string
+          location_updated_at?: string | null
           name: string
           phone: string
           photo_url?: string | null
@@ -478,6 +517,8 @@ export type Database = {
           bank_account_number?: string | null
           bank_ifsc?: string | null
           created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
           id?: string
           is_online?: boolean
           kyc_aadhaar_url?: string | null
@@ -486,6 +527,7 @@ export type Database = {
           kyc_rejection_reason?: string | null
           kyc_status?: string
           level?: string
+          location_updated_at?: string | null
           name?: string
           phone?: string
           photo_url?: string | null
@@ -1063,10 +1105,50 @@ export type Database = {
         Args: { _booking_id: string; _new_status: string }
         Returns: undefined
       }
-      claim_booking_as_expert: {
-        Args: { _booking_id: string; _expert_id: string }
-        Returns: undefined
-      }
+      claim_booking_as_expert:
+        | {
+            Args: { _booking_id: string; _expert_id: string }
+            Returns: undefined
+          }
+        | {
+            Args: { p_booking_id: string }
+            Returns: {
+              address_id: string | null
+              assigned_expert_id: string | null
+              booking_lat: number | null
+              booking_lng: number | null
+              cancellation_reason: string | null
+              created_at: string | null
+              delete_reason: string | null
+              deleted_at: string | null
+              deleted_by: string | null
+              end_otp: string | null
+              id: string
+              price: number
+              rating: number | null
+              razorpay_order_id: string | null
+              razorpay_payment_id: string | null
+              review_text: string | null
+              scheduled_date: string | null
+              scheduled_time_slot: string | null
+              service_duration_minutes: number
+              service_end_at: string | null
+              service_label: string
+              slot_type: string
+              start_otp: string | null
+              started_at: string | null
+              status: string
+              updated_at: string | null
+              user_id: string | null
+              zone_id: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "bookings"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       credit_referral_for_booking: {
         Args: { _booking_id: string }
         Returns: undefined
@@ -1084,6 +1166,11 @@ export type Database = {
         Returns: undefined
       }
       expert_set_online: { Args: { _online: boolean }; Returns: undefined }
+      expert_update_location: {
+        Args: { p_lat: number; p_lng: number }
+        Returns: undefined
+      }
+      expert_update_photo_url: { Args: { _url: string }; Returns: undefined }
       expert_verify_end_otp: {
         Args: { _booking_id: string; _otp: string }
         Returns: number
@@ -1101,9 +1188,32 @@ export type Database = {
         Returns: string
       }
       generate_otp4: { Args: never; Returns: string }
+      get_assigned_expert_public: {
+        Args: { _booking_id: string }
+        Returns: {
+          id: string
+          level: string
+          name: string
+          phone: string
+          photo_url: string
+          status: string
+          zone_id: string
+        }[]
+      }
       get_auth_user_id_by_email: { Args: { _email: string }; Returns: string }
       get_auth_user_id_by_phone: { Args: { _phone: string }; Returns: string }
+      get_eligible_experts_for_booking: {
+        Args: { p_booking_id: string }
+        Returns: {
+          distance_km: number
+          expert_id: string
+        }[]
+      }
       get_expert_id_for_auth: { Args: { _auth_uid: string }; Returns: string }
+      haversine_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
       is_active_staff: {
         Args: { _roles: string[]; _uid: string }
         Returns: boolean

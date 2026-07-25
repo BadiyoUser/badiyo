@@ -336,6 +336,10 @@ function Index() {
               setActiveBookingStatus("completed");
               setPhase("rate-review");
             }}
+            onCancelled={() => {
+              toast("This booking was cancelled");
+              resetAndGoHome();
+            }}
           />
         </div>
       )}
@@ -356,6 +360,10 @@ function Index() {
             onAdvanceCompleted={() => {
               setActiveBookingStatus("completed");
               setPhase("rate-review");
+            }}
+            onCancelled={() => {
+              toast("This booking was cancelled");
+              resetAndGoHome();
             }}
           />
         </div>
