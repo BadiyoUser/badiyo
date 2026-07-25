@@ -1,0 +1,1 @@
+CREATE POLICY "Users can read expert assigned to their booking" ON public.experts FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM public.bookings b WHERE b.assigned_expert_id = experts.id AND b.user_id = auth.uid()));
