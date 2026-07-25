@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AddAddressMapScreen, type PickedAddress } from "./AddAddressMapScreen";
 import { reverseGeocode } from "@/lib/geocode.functions";
 import { getCurrentCoords } from "@/lib/nativeGeolocation";
+import { pushBackHandler } from "@/lib/backHandler";
+
 
 export type SavedAddress = {
   id: string;
@@ -59,6 +61,14 @@ export function LocationPickerSheet({
       setLocError(null);
     }
   }, [open]);
+
+  // Native back closes the map layer first, then the sheet itself.
+  useEffect(() => {
+    if (!open) return;
+    if (showMap) return pushBackHandler(() => setShowMap(false));
+    return pushBackHandler(() => onClose());
+  }, [open, showMap, onClose]);
+
 
   const addMutation = useMutation({
     mutationFn: async (input: PickedAddress) => {
