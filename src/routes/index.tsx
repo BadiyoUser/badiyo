@@ -84,7 +84,9 @@ type Phase =
   | "about"
   | "referrals"
   | "payment-methods"
-  | "search-results";
+  | "search-results"
+  | "orders";
+
 
 
 function Index() {
