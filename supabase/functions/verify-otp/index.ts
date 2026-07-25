@@ -104,10 +104,14 @@ Deno.serve(async (req) => {
       return json({ error: signErr?.message || "Could not sign in" }, 500);
     }
 
+    // Ensure the single-use marker landed before returning.
+    await markVerifiedP;
+
     return json({
       access_token: signIn.session.access_token,
       refresh_token: signIn.session.refresh_token,
     });
+
   } catch (err) {
     console.error("verify-otp error", err);
     return json({ error: (err as Error).message || "Unknown error" }, 500);
