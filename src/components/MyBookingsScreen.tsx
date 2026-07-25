@@ -31,7 +31,6 @@ export type BookingRow = {
 export const UPCOMING_STATUSES = [
   "confirmed",
   "accepted",
-  "assigned",
   "expert_assigned",
   "in_progress",
 ];
@@ -39,7 +38,6 @@ export const PAST_STATUSES = ["completed", "cancelled", "rejected"];
 export const ACTIVE_TRACKING_STATUSES = [
   "confirmed",
   "accepted",
-  "assigned",
   "expert_assigned",
   "in_progress",
 ];
