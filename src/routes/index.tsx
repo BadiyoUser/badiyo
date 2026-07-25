@@ -455,6 +455,42 @@ function Index() {
         </div>
       )}
 
+      {phase === "orders" && (
+        <div className="animate-fade-slide-in">
+          <OrdersScreen
+            onOpenHome={() => setPhase("home")}
+            onOpenRewards={() => setPhase("rewards")}
+            onOpenBooking={(b) => {
+              if (ACTIVE_TRACKING_STATUSES.includes(b.status)) {
+                const addr = b.addresses;
+                if (addr) {
+                  setSelectedAddress({
+                    id: b.address_id ?? "",
+                    label: addr.label,
+                    full_address: addr.full_address,
+                    area: addr.area,
+                    city: addr.city,
+                    is_default: addr.is_default,
+                    latitude: addr.latitude,
+                    longitude: addr.longitude,
+                  });
+                }
+                setActiveBookingId(b.id);
+                setActiveBookingStatus(b.status);
+                if (b.status === "in_progress") {
+                  setPhase("in-progress");
+                } else {
+                  setPhase("expert-assigned");
+                }
+                return;
+              }
+              setSelectedBooking(b);
+              setPhase("booking-details");
+            }}
+          />
+        </div>
+      )}
+
       {phase === "referrals" && (
         <div className="animate-fade-slide-in">
           <ReferralDashboardScreen onBack={() => setPhase("profile")} />
