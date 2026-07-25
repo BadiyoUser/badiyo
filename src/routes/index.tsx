@@ -111,6 +111,7 @@ function Index() {
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
+  const [activeBookingStatus, setActiveBookingStatus] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
@@ -310,6 +311,7 @@ function Index() {
             onDone={resetAndGoHome}
             onTrackBooking={(id) => {
               setActiveBookingId(id);
+              setActiveBookingStatus(null);
               setPhase("expert-assigned");
             }}
           />
@@ -321,6 +323,7 @@ function Index() {
             bookingId={activeBookingId}
             address={selectedAddress}
             onSimulateArrived={() => setPhase("otp-start")}
+            currentStatus={activeBookingStatus ?? undefined}
           />
         </div>
       )}
@@ -383,6 +386,7 @@ function Index() {
                   });
                 }
                 setActiveBookingId(b.id);
+                setActiveBookingStatus(b.status);
                 if (b.status === "in_progress") {
                   setPhase("in-progress");
                 } else {
