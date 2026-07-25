@@ -471,7 +471,7 @@ function Index() {
             onOpenHome={() => setPhase("home")}
             onOpenRewards={() => setPhase("rewards")}
             onOpenReferrals={() => setPhase("referrals")}
-            onOpenBookings={() => setPhase("my-bookings")}
+            onOpenBookings={() => setPhase("orders")}
           />
 
         </div>
