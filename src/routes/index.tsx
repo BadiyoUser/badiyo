@@ -381,7 +381,10 @@ function Index() {
           <RewardsScreen
             onOpenHome={() => setPhase("home")}
             onOpenRewards={() => setPhase("rewards")}
+            onOpenReferrals={() => setPhase("referrals")}
+            onOpenBookings={() => setPhase("my-bookings")}
           />
+
         </div>
       )}
       {phase === "edit-profile" && (

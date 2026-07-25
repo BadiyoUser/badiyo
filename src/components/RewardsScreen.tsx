@@ -19,7 +19,17 @@ async function fetchTotalCoins(): Promise<number> {
   return Number(data?.total_coins_earned ?? 0);
 }
 
-const MISSIONS = [
+type MissionAction = "bookings" | "refer" | "rate";
+
+const MISSIONS: Array<{
+  id: MissionAction;
+  title: string;
+  description: string;
+  icon: typeof Trophy;
+  reward: number;
+  progress?: { current: number; total: number };
+  cta: string;
+}> = [
   {
     id: "bookings",
     title: "Complete 3 bookings this month",
@@ -27,6 +37,7 @@ const MISSIONS = [
     icon: Trophy,
     reward: 50,
     progress: { current: 1, total: 3 },
+    cta: "Book now",
   },
   {
     id: "refer",
@@ -34,6 +45,7 @@ const MISSIONS = [
     description: "Invite a friend to badiyo and earn when they book.",
     icon: Gift,
     reward: 100,
+    cta: "Invite",
   },
   {
     id: "rate",
@@ -41,20 +53,32 @@ const MISSIONS = [
     description: "Share feedback and unlock bonus coins.",
     icon: Star,
     reward: 20,
+    cta: "Rate",
   },
 ];
 
 export function RewardsScreen({
   onOpenHome,
   onOpenRewards,
+  onOpenReferrals,
+  onOpenBookings,
 }: {
   onOpenHome: () => void;
   onOpenRewards: () => void;
+  onOpenReferrals: () => void;
+  onOpenBookings: () => void;
 }) {
   const { data: coins = 0, isLoading } = useQuery({
     queryKey: ["users_total_coins"],
     queryFn: fetchTotalCoins,
   });
+
+  function handleMissionClick(id: MissionAction) {
+    if (id === "refer") return onOpenReferrals();
+    if (id === "rate") return onOpenBookings();
+    return onOpenHome();
+  }
+
 
   return (
     <main className="min-h-screen w-full bg-background pb-28">
@@ -88,10 +112,14 @@ export function RewardsScreen({
             const Icon = m.icon;
             const pct = m.progress ? Math.round((m.progress.current / m.progress.total) * 100) : 0;
             return (
-              <article
+              <button
+                type="button"
                 key={m.id}
-                className="flex items-start gap-3 rounded-[18px] border border-border bg-card p-4 shadow-sm"
+                onClick={() => handleMissionClick(m.id)}
+                aria-label={m.title}
+                className="flex w-full items-start gap-3 rounded-[18px] border border-border bg-card p-4 text-left shadow-sm transition active:scale-[0.98] active:bg-muted/60"
               >
+
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
                   <Icon className="h-5 w-5 text-primary" />
                 </div>
@@ -117,7 +145,7 @@ export function RewardsScreen({
                     </div>
                   )}
                 </div>
-              </article>
+              </button>
             );
           })}
         </div>
