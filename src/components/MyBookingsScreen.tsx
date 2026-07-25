@@ -147,6 +147,10 @@ export function MyBookingsScreen({
         <section className="mt-5 space-y-3">
           {isLoading ? (
             <p className="py-10 text-center text-sm text-muted-foreground">Loading…</p>
+          ) : error ? (
+            <p className="py-10 text-center text-sm text-destructive">
+              Could not load bookings. Pull to refresh or try again.
+            </p>
           ) : filtered.length === 0 ? (
             <EmptyState onGoHome={onGoHome} />
           ) : (
