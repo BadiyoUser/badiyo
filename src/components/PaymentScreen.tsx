@@ -134,6 +134,23 @@ export function PaymentScreen({
       if (error) throw error;
       setBookingId(data.id);
       setBooking(data as BookingRow);
+
+      // Auto-advance from 'confirmed' -> 'accepted' so the expert broadcast
+      // fires without a manual staff Accept in Command Center. The RPC writes
+      // both audit_logs rows atomically (system_payment_confirmed +
+      // system_auto_accept). If it fails, the booking stays in 'confirmed'
+      // and staff can still Accept manually as a fallback.
+      const { error: acceptErr } = await supabase.rpc(
+        "system_accept_booking_after_payment",
+        { _booking_id: data.id },
+      );
+      if (acceptErr) {
+        console.error(
+          "[booking] Auto-accept after payment failed; booking left in 'confirmed' for staff fallback:",
+          acceptErr,
+        );
+      }
+
       void creditReferralForBooking(data.id);
     } catch (e) {
       console.error("Failed to create booking record:", e);
