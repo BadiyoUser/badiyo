@@ -127,16 +127,19 @@ function formatRemaining(sec: number) {
 
 export function ServiceInProgressScreen({
   bookingId,
+  address,
   onShowEndOtp,
   onAdvanceCompleted,
   onCancelled,
 }: {
   bookingId: string | null;
+  address?: SelectedAddress | null;
   onShowEndOtp?: () => void;
   onAdvanceCompleted?: () => void;
   onCancelled?: () => void;
 }) {
   const qc = useQueryClient();
+
 
 
   // Start the service (idempotent) as soon as we arrive here.
