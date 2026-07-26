@@ -7,8 +7,10 @@ import { getErrorMessage } from "@/lib/errorMessage";
 
 export function LoginScreen({
   onOtpSent,
+  onPinLogin,
 }: {
   onOtpSent?: (phone: string) => void;
+  onPinLogin?: (phone: string) => void;
 } = {}) {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
