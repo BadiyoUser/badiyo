@@ -65,9 +65,17 @@ export function PinSetScreen({
     }
     setSaving(true);
     try {
-      const { error: rpcErr } = await supabase.rpc("set_login_pin", { p_pin: first });
+      const rpcPromise = supabase.rpc("set_login_pin", { p_pin: first });
+      const { error: rpcErr } = (await Promise.race([
+        rpcPromise,
+        new Promise((_, rej) => setTimeout(() => rej(new Error("Network timeout. Please try again.")), 12000)),
+      ])) as { error: unknown };
       if (rpcErr) throw rpcErr;
-      await saveDevicePin(phone, first);
+      // Don't block navigation on device secure-storage — it can hang on some devices.
+      void Promise.race([
+        saveDevicePin(phone, first),
+        new Promise((res) => setTimeout(res, 1500)),
+      ]).catch(() => {});
       onDone();
     } catch (err) {
       console.error("set_login_pin failed", err);
@@ -79,6 +87,7 @@ export function PinSetScreen({
       setSaving(false);
     }
   };
+
 
   return (
     <main className="min-h-screen w-full bg-background">
