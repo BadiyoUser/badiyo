@@ -185,6 +185,14 @@ export function SearchingForExpertScreen({
             </span>
           </div>
         </section>
+
+        <CancelBookingButton
+          bookingId={bookingId}
+          stage="searching"
+          price={service?.price ?? null}
+          onCancelled={onCancelled}
+        />
+
       </div>
     </main>
   );
