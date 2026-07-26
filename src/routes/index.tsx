@@ -323,6 +323,25 @@ function Index() {
           />
         </div>
       )}
+      {phase === "searching-expert" && selectedAddress && (
+        <div className="animate-fade-slide-in">
+          <SearchingForExpertScreen
+            bookingId={activeBookingId}
+            address={selectedAddress}
+            service={selectedService}
+            slot={selectedSlot}
+            currentStatus={activeBookingStatus ?? undefined}
+            onExpertAssigned={() => {
+              setActiveBookingStatus("expert_assigned");
+              setPhase("expert-assigned");
+            }}
+            onCancelled={() => {
+              toast("This booking was cancelled");
+              resetAndGoHome();
+            }}
+          />
+        </div>
+      )}
       {phase === "expert-assigned" && selectedAddress && (
         <div className="animate-fade-slide-in">
           <ExpertAssignedScreen
