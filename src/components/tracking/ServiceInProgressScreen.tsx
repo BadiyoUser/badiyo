@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { StageTracker, stageFromStatus } from "./StageTracker";
 import { usePullToRefresh, PullToRefreshIndicator } from "@/lib/usePullToRefresh";
+import { ServiceLocationMap } from "./ServiceLocationMap";
+import type { SelectedAddress } from "../BookingSummaryScreen";
+
 
 
 type BookingTiming = {
@@ -124,16 +127,19 @@ function formatRemaining(sec: number) {
 
 export function ServiceInProgressScreen({
   bookingId,
+  address,
   onShowEndOtp,
   onAdvanceCompleted,
   onCancelled,
 }: {
   bookingId: string | null;
+  address?: SelectedAddress | null;
   onShowEndOtp?: () => void;
   onAdvanceCompleted?: () => void;
   onCancelled?: () => void;
 }) {
   const qc = useQueryClient();
+
 
 
   // Start the service (idempotent) as soon as we arrive here.
@@ -380,6 +386,9 @@ export function ServiceInProgressScreen({
         </div>
 
         {bannerNode && <div className="mt-4">{bannerNode}</div>}
+
+        {address && <ServiceLocationMap address={address} />}
+
 
         <div className="mt-auto pt-10 space-y-3">
           {canExtend && banner !== "warn" && banner !== "end" && (

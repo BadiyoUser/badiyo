@@ -408,6 +408,7 @@ function Index() {
         <div className="animate-fade-slide-in">
           <ServiceInProgressScreen
             bookingId={activeBookingId}
+            address={selectedAddress}
             onShowEndOtp={() => setPhase("otp-end")}
             onAdvanceCompleted={() => {
               setActiveBookingStatus("completed");
