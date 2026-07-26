@@ -101,13 +101,52 @@ export function PaymentScreen({
       const scheduled_time_slot =
         slot.mode === "later" ? `${slot.slotLabel} (${slot.slotRange})` : null;
 
-      const booking_lat = address.latitude ?? null;
-      const booking_lng = address.longitude ?? null;
+      let booking_lat = address.latitude ?? null;
+      let booking_lng = address.longitude ?? null;
+      let coordSource: "address" | "address-refetch" | "gps" | "none" = "address";
+
+      // Safety net #1: cached address may lack coords. Re-fetch fresh from DB.
+      if ((booking_lat == null || booking_lng == null) && address.id) {
+        console.warn(
+          `[booking] Selected address ${address.id} missing coords in-memory; re-fetching from DB`,
+        );
+        const { data: freshAddr } = await supabase
+          .from("addresses")
+          .select("latitude, longitude")
+          .eq("id", address.id)
+          .maybeSingle();
+        if (freshAddr?.latitude != null && freshAddr?.longitude != null) {
+          booking_lat = freshAddr.latitude;
+          booking_lng = freshAddr.longitude;
+          coordSource = "address-refetch";
+        }
+      }
+
+      // Safety net #2: fall back to device GPS.
       if (booking_lat == null || booking_lng == null) {
         console.warn(
-          `[booking] Creating booking without coordinates (address_id=${address.id}, label=${address.label}). Expert broadcast will not fire for this booking.`,
+          `[booking] Address ${address.id} has no coords in DB either; falling back to device GPS`,
+        );
+        try {
+          const gps = await getCurrentCoords();
+          booking_lat = gps.lat;
+          booking_lng = gps.lng;
+          coordSource = "gps";
+        } catch (gpsErr) {
+          console.error("[booking] GPS fallback failed:", gpsErr);
+          coordSource = "none";
+        }
+      }
+
+      if (booking_lat == null || booking_lng == null) {
+        throw new Error(
+          "We couldn't confirm your address location — please try selecting your address again.",
         );
       }
+
+      console.info(
+        `[booking] Creating booking with coords from ${coordSource} (${booking_lat}, ${booking_lng})`,
+      );
 
       const { data, error } = await supabase
         .from("bookings")
@@ -132,7 +171,16 @@ export function PaymentScreen({
         .single();
 
 
-      if (error) throw error;
+      if (error) {
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("booking_lat") || msg.includes("booking_lng") || msg.includes("coord")) {
+          throw new Error(
+            "We couldn't confirm your address location — please try selecting your address again.",
+          );
+        }
+        throw error;
+      }
+
       setBookingId(data.id);
       setBooking(data as BookingRow);
 
