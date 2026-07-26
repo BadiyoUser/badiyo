@@ -42,7 +42,7 @@ import { OrdersScreen } from "@/components/OrdersScreen";
 import { NoInternetScreen } from "@/components/utility/NoInternetScreen";
 import { ForceUpdateScreen } from "@/components/utility/ForceUpdateScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
-import { registerPushForCurrentUser } from "@/lib/push";
+import { registerPushForCurrentUser, setPushNavigator } from "@/lib/push";
 import { APP_VERSION, fetchMinSupportedVersion, isBelow } from "@/lib/version";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -161,6 +161,37 @@ function Index() {
     });
     return () => setRootBackHandler(null);
   }, []);
+
+  // Route pushes tapped from a notification (data.route) into an app phase.
+  useEffect(() => {
+    const ROUTE_TO_PHASE: Record<string, Phase> = {
+      "/": "home",
+      home: "home",
+      orders: "orders",
+      "my-bookings": "my-bookings",
+      rewards: "rewards",
+      referrals: "referrals",
+      wallet: "wallet",
+      profile: "profile",
+    };
+    setPushNavigator((route, data) => {
+      const phase = ROUTE_TO_PHASE[route];
+      if (phase) {
+        setPhase(phase);
+        return;
+      }
+      // Booking deep link: "/booking/<id>" or data.bookingId
+      const bookingId =
+        (typeof data?.bookingId === "string" && (data.bookingId as string)) ||
+        (route.startsWith("booking/") ? route.slice("booking/".length) : null) ||
+        (route.startsWith("/booking/") ? route.slice("/booking/".length) : null);
+      if (bookingId) {
+        setActiveBookingId(bookingId);
+        setPhase("expert-assigned");
+      }
+    });
+    return () => setPushNavigator(null);
+  }, [setPhase]);
 
 
 
