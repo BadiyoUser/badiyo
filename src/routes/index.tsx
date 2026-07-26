@@ -21,6 +21,7 @@ import {
 } from "@/components/BookingSummaryScreen";
 import { PaymentScreen } from "@/components/PaymentScreen";
 import { ExpertAssignedScreen } from "@/components/tracking/ExpertAssignedScreen";
+import { SearchingForExpertScreen } from "@/components/tracking/SearchingForExpertScreen";
 import { OtpScreen } from "@/components/tracking/OtpScreen";
 import { ServiceInProgressScreen } from "@/components/tracking/ServiceInProgressScreen";
 import { RateReviewScreen } from "@/components/tracking/RateReviewScreen";
