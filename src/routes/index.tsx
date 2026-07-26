@@ -66,6 +66,8 @@ type Phase =
   | "splash-out"
   | "login"
   | "otp-verify"
+  | "pin-login"
+  | "pin-set"
   | "home"
   | "slot"
   | "address"
