@@ -167,8 +167,9 @@ export function PinLoginScreen({
   };
 
   return (
-    <main className="min-h-screen w-full bg-background">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-6 pt-16 pb-10">
+    <main className="min-h-screen w-full overflow-y-auto bg-background">
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-6 pt-10 pb-10">
+
         <div className="flex justify-center">
           <BadiyoLogo variant="green" className="h-12 w-auto" />
         </div>

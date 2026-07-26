@@ -250,7 +250,7 @@ function Index() {
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="relative min-h-screen w-full">
       {forceUpdate && <ForceUpdateScreen />}
       {!online && <NoInternetScreen onRetry={() => setOnline(navigator.onLine)} />}
 
