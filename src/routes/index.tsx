@@ -124,6 +124,7 @@ function Index() {
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
+  const [forceResetPin, setForceResetPin] = useState(false);
   const [online, setOnline] = useState(
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
