@@ -294,21 +294,23 @@ function Index() {
                 .catch((e) => console.error("post-pin-login setup failed:", e));
             }}
             onFallbackOtp={async () => {
+              setPhase("otp-verify");
               try {
                 await supabase.functions.invoke("send-otp", { body: { phone: pendingPhone } });
               } catch (e) {
                 console.error("otp fallback send-otp failed", e);
+                toast.error("Couldn't send OTP. Please tap Resend OTP.");
               }
-              setPhase("otp-verify");
             }}
             onForgotPin={async () => {
               setForceResetPin(true);
+              setPhase("otp-verify");
               try {
                 await supabase.functions.invoke("send-otp", { body: { phone: pendingPhone } });
               } catch (e) {
                 console.error("forgot-pin send-otp failed", e);
+                toast.error("Couldn't send OTP. Please tap Resend OTP.");
               }
-              setPhase("otp-verify");
             }}
           />
         </div>
