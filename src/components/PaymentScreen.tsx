@@ -5,6 +5,7 @@ import type { SelectedService, SelectedSlot } from "./SlotSelectionScreen";
 import type { SelectedAddress } from "./BookingSummaryScreen";
 import { creditReferralForBooking } from "@/lib/referrals";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { getCurrentCoords } from "@/lib/nativeGeolocation";
 
 type RazorpayOptions = {
   key: string;
