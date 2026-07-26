@@ -21,6 +21,7 @@ import {
 } from "@/components/BookingSummaryScreen";
 import { PaymentScreen } from "@/components/PaymentScreen";
 import { ExpertAssignedScreen } from "@/components/tracking/ExpertAssignedScreen";
+import { SearchingForExpertScreen } from "@/components/tracking/SearchingForExpertScreen";
 import { OtpScreen } from "@/components/tracking/OtpScreen";
 import { ServiceInProgressScreen } from "@/components/tracking/ServiceInProgressScreen";
 import { RateReviewScreen } from "@/components/tracking/RateReviewScreen";
@@ -68,6 +69,7 @@ type Phase =
   | "address"
   | "summary"
   | "payment"
+  | "searching-expert"
   | "expert-assigned"
   | "otp-start"
   | "in-progress"
@@ -315,8 +317,27 @@ function Index() {
             onDone={resetAndGoHome}
             onTrackBooking={(id) => {
               setActiveBookingId(id);
-              setActiveBookingStatus(null);
+              setActiveBookingStatus("accepted");
+              setPhase("searching-expert");
+            }}
+          />
+        </div>
+      )}
+      {phase === "searching-expert" && selectedAddress && (
+        <div className="animate-fade-slide-in">
+          <SearchingForExpertScreen
+            bookingId={activeBookingId}
+            address={selectedAddress}
+            service={selectedService}
+            slot={selectedSlot}
+            currentStatus={activeBookingStatus ?? undefined}
+            onExpertAssigned={() => {
+              setActiveBookingStatus("expert_assigned");
               setPhase("expert-assigned");
+            }}
+            onCancelled={() => {
+              toast("This booking was cancelled");
+              resetAndGoHome();
             }}
           />
         </div>
@@ -409,6 +430,8 @@ function Index() {
                 setActiveBookingStatus(b.status);
                 if (b.status === "in_progress") {
                   setPhase("in-progress");
+                } else if (b.status === "confirmed" || b.status === "accepted") {
+                  setPhase("searching-expert");
                 } else {
                   setPhase("expert-assigned");
                 }
@@ -487,6 +510,8 @@ function Index() {
                 setActiveBookingStatus(b.status);
                 if (b.status === "in_progress") {
                   setPhase("in-progress");
+                } else if (b.status === "confirmed" || b.status === "accepted") {
+                  setPhase("searching-expert");
                 } else {
                   setPhase("expert-assigned");
                 }
