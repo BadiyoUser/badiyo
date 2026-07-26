@@ -386,7 +386,17 @@ export function ServiceInProgressScreen({
 
         {bannerNode && <div className="mt-4">{bannerNode}</div>}
 
-        {address && <ServiceLocationMap address={address} />}
+        {address && (
+          <section className="mt-5 overflow-hidden rounded-[18px] border border-border bg-card p-4">
+            <div className="text-sm font-bold text-foreground">Service location</div>
+            <div className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+              {address.full_address}
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">
+              Live expert tracking is coming soon.
+            </div>
+          </section>
+        )}
 
 
         <div className="mt-auto pt-10 space-y-3">
