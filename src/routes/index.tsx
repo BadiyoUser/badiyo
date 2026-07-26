@@ -69,6 +69,7 @@ type Phase =
   | "address"
   | "summary"
   | "payment"
+  | "searching-expert"
   | "expert-assigned"
   | "otp-start"
   | "in-progress"
