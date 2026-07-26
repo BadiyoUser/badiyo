@@ -7,8 +7,10 @@ import { getErrorMessage } from "@/lib/errorMessage";
 
 export function LoginScreen({
   onOtpSent,
+  onPinLogin,
 }: {
   onOtpSent?: (phone: string) => void;
+  onPinLogin?: (phone: string) => void;
 } = {}) {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,6 +33,17 @@ export function LoginScreen({
     setLoading(true);
     setError(null);
     try {
+      // If this phone already has a PIN, skip OTP and go straight to
+      // biometric/PIN entry.
+      const { data: hasPin, error: chkErr } = await supabase.rpc("has_login_pin", {
+        p_phone: `+91${phone}`,
+      });
+      if (chkErr) console.warn("has_login_pin check failed", chkErr);
+      if (hasPin === true) {
+        onPinLogin?.(phone);
+        return;
+      }
+
       const { data, error: fnErr } = await supabase.functions.invoke("send-otp", {
         body: { phone },
       });
@@ -38,7 +51,7 @@ export function LoginScreen({
       if (data?.error) throw new Error(data.error);
       onOtpSent?.(phone);
     } catch (err) {
-      console.error("send-otp failed:", err);
+      console.error("login continue failed:", err);
       setError(await getErrorMessage(err));
     } finally {
       setLoading(false);
