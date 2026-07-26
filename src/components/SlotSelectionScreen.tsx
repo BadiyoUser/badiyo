@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, Clock } from "lucide-react";
+import {
+  getAllHourSlots,
+  isHourBookable,
+  toDateKey,
+} from "@/lib/hourSlots";
 
 export type SelectedService = {
   duration_label: string;
@@ -11,19 +16,18 @@ export type SelectedService = {
 
 export type SelectedSlot =
   | { mode: "now" }
-  | { mode: "later"; day: string; slotId: "morning" | "afternoon" | "evening"; slotLabel: string; slotRange: string };
+  | {
+      mode: "later";
+      day: string;
+      slotId: number; // hour in 24h
+      slotLabel: string;
+      slotRange: string;
+    };
 
 type Mode = "now" | "later";
-type TimeSlot = "morning" | "afternoon" | "evening";
-
-const TIME_SLOTS: { id: TimeSlot; label: string; range: string }[] = [
-  { id: "morning", label: "Morning", range: "9 – 12" },
-  { id: "afternoon", label: "Afternoon", range: "12 – 4" },
-  { id: "evening", label: "Evening", range: "4 – 8" },
-];
 
 function getNext7Days() {
-  const days = [];
+  const days: Date[] = [];
   const today = new Date();
   for (let i = 0; i < 7; i++) {
     const d = new Date(today);
@@ -43,18 +47,22 @@ export function SlotSelectionScreen({
   onContinue: (slot: SelectedSlot) => void;
 }) {
   const [mode, setMode] = useState<Mode>("now");
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
-
   const days = useMemo(getNext7Days, []);
+  const allSlots = useMemo(getAllHourSlots, []);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedHour, setSelectedHour] = useState<number | null>(null);
+
+  const visibleSlots = useMemo(() => {
+    if (!selectedDay) return allSlots;
+    return allSlots.filter((s) => isHourBookable(selectedDay, s.hour));
+  }, [selectedDay, allSlots]);
 
   const canContinue =
-    mode === "now" || (selectedDay !== null && selectedSlot !== null);
+    mode === "now" || (selectedDay !== null && selectedHour !== null);
 
   return (
     <main className="min-h-screen w-full bg-background pb-28">
       <div className="mx-auto w-full max-w-md px-5 pt-6">
-        {/* Header */}
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -68,7 +76,6 @@ export function SlotSelectionScreen({
           </h1>
         </div>
 
-        {/* Tabs */}
         <div className="mt-6 grid grid-cols-2 gap-2 rounded-[14px] border border-border bg-card p-1">
           {(["now", "later"] as Mode[]).map((m) => (
             <button
@@ -85,7 +92,6 @@ export function SlotSelectionScreen({
           ))}
         </div>
 
-        {/* Book Now content */}
         {mode === "now" && (
           <div className="mt-6 flex items-start gap-4 rounded-[18px] border border-border bg-card p-5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-primary/10">
@@ -102,7 +108,6 @@ export function SlotSelectionScreen({
           </div>
         )}
 
-        {/* Schedule Later content */}
         {mode === "later" && (
           <>
             <h2 className="mt-6 text-sm font-bold text-foreground">
@@ -111,7 +116,7 @@ export function SlotSelectionScreen({
             <div className="mt-3 -mx-5 overflow-x-auto px-5">
               <div className="flex gap-2 pb-1">
                 {days.map((d) => {
-                  const key = d.toDateString();
+                  const key = toDateKey(d);
                   const active = selectedDay === key;
                   const weekday = d.toLocaleDateString("en-US", {
                     weekday: "short",
@@ -119,7 +124,15 @@ export function SlotSelectionScreen({
                   return (
                     <button
                       key={key}
-                      onClick={() => setSelectedDay(key)}
+                      onClick={() => {
+                        setSelectedDay(key);
+                        if (
+                          selectedHour !== null &&
+                          !isHourBookable(key, selectedHour)
+                        ) {
+                          setSelectedHour(null);
+                        }
+                      }}
                       className={`flex min-w-[64px] flex-col items-center rounded-[14px] border px-3 py-3 text-center transition ${
                         active
                           ? "border-primary bg-primary/10 text-primary"
@@ -141,32 +154,34 @@ export function SlotSelectionScreen({
             <h2 className="mt-6 text-sm font-bold text-foreground">
               Choose a time
             </h2>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {TIME_SLOTS.map((slot) => {
-                const active = selectedSlot === slot.id;
-                return (
-                  <button
-                    key={slot.id}
-                    onClick={() => setSelectedSlot(slot.id)}
-                    className={`rounded-[14px] border px-4 py-3 text-sm font-semibold transition ${
-                      active
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-card text-foreground"
-                    }`}
-                  >
-                    {slot.label}{" "}
-                    <span className="font-normal text-muted-foreground">
-                      {slot.range}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            {selectedDay && visibleSlots.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                No time slots left for today. Please pick another day.
+              </p>
+            ) : (
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {visibleSlots.map((slot) => {
+                  const active = selectedHour === slot.hour;
+                  return (
+                    <button
+                      key={slot.hour}
+                      onClick={() => setSelectedHour(slot.hour)}
+                      className={`rounded-[14px] border px-3 py-3 text-sm font-semibold transition ${
+                        active
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-card text-foreground"
+                      }`}
+                    >
+                      {slot.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </>
         )}
       </div>
 
-      {/* Fixed continue button */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card">
         <div className="mx-auto w-full max-w-md px-5 py-4">
           <button
@@ -174,12 +189,12 @@ export function SlotSelectionScreen({
             onClick={() => {
               if (mode === "now") {
                 onContinue({ mode: "now" });
-              } else if (selectedDay && selectedSlot) {
-                const s = TIME_SLOTS.find((x) => x.id === selectedSlot)!;
+              } else if (selectedDay && selectedHour !== null) {
+                const s = allSlots.find((x) => x.hour === selectedHour)!;
                 onContinue({
                   mode: "later",
                   day: selectedDay,
-                  slotId: selectedSlot,
+                  slotId: selectedHour,
                   slotLabel: s.label,
                   slotRange: s.range,
                 });
