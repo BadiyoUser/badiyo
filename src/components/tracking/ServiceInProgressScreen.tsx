@@ -387,6 +387,9 @@ export function ServiceInProgressScreen({
 
         {bannerNode && <div className="mt-4">{bannerNode}</div>}
 
+        {address && <ServiceLocationMap address={address} />}
+
+
         <div className="mt-auto pt-10 space-y-3">
           {canExtend && banner !== "warn" && banner !== "end" && (
             <button
