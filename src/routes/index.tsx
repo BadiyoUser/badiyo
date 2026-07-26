@@ -42,7 +42,7 @@ import { OrdersScreen } from "@/components/OrdersScreen";
 import { NoInternetScreen } from "@/components/utility/NoInternetScreen";
 import { ForceUpdateScreen } from "@/components/utility/ForceUpdateScreen";
 import { ensureUserRow } from "@/lib/ensureUserRow";
-import { registerPushForCurrentUser } from "@/lib/push";
+import { registerPushForCurrentUser, setPushNavigator } from "@/lib/push";
 import { APP_VERSION, fetchMinSupportedVersion, isBelow } from "@/lib/version";
 import { supabase } from "@/integrations/supabase/client";
 
