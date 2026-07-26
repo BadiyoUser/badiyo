@@ -182,14 +182,10 @@ export function PinLoginScreen({
           </p>
         </div>
 
-        {(biometricStatus === "checking" || biometricStatus === "prompting") && (
+        {biometricStatus === "prompting" && (
           <div className="mt-8 flex flex-col items-center gap-2 text-muted-foreground">
             <Fingerprint className="h-10 w-10 text-primary" />
-            <p className="text-sm">
-              {biometricStatus === "prompting"
-                ? "Use biometric unlock, or enter your PIN below."
-                : "Checking biometric unlock…"}
-            </p>
+            <p className="text-sm">Use biometric unlock, or enter your PIN below.</p>
           </div>
         )}
 
@@ -214,7 +210,7 @@ export function PinLoginScreen({
             />
           ))}
         </div>
-        {biometricStatus !== "unavailable" && (
+        {biometricStatus !== "checking" && biometricStatus !== "unavailable" && (
           <div className="mt-4 flex justify-center">
             <button
               type="button"
