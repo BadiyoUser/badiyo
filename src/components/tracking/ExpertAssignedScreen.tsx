@@ -284,42 +284,8 @@ export function ExpertAssignedScreen({
           </section>
         )}
 
-        {/* Map — honest static placeholder of the service address */}
-        <section className="mt-5 overflow-hidden rounded-[18px] border border-border bg-card">
-          <div className="relative h-48 w-full bg-muted">
-            {mapSrc ? (
-              <img
-                src={mapSrc}
-                alt="Service location"
-                className="h-full w-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5 text-center">
-                <MapPin className="h-10 w-10 text-primary" />
-                <div className="mt-2 text-xs font-medium text-muted-foreground">
-                  Live tracking coming soon
-                </div>
-              </div>
-            )}
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="rounded-full bg-primary p-2 shadow-lg">
-                <MapPin className="h-5 w-5 text-primary-foreground" />
-              </div>
-            </div>
-          </div>
-          <div className="p-4">
-            <div className="text-sm font-bold text-foreground">Service location</div>
-            <div className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
-              {address.full_address}
-            </div>
-            <div className="mt-1 text-[11px] text-muted-foreground">
-              Live expert tracking is coming soon.
-            </div>
-          </div>
-        </section>
+        <ServiceLocationMap address={address} />
+
       </div>
     </main>
   );
