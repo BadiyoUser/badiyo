@@ -166,6 +166,13 @@ export function PinLoginScreen({
     if (ok) void submit(stored);
   };
 
+  const handleForgotPin = () => {
+    setError(null);
+    setDigits(["", "", "", ""]);
+    onForgotPin();
+    void withTimeout(clearDevicePin(phone), 1500, undefined);
+  };
+
   return (
     <main className="min-h-screen w-full overflow-y-auto bg-background">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-6 pt-10 pb-10">
@@ -239,11 +246,8 @@ export function PinLoginScreen({
         <div className="mt-8 flex flex-col items-center gap-3 text-sm">
           <button
             type="button"
-            onClick={async () => {
-              await clearDevicePin(phone);
-              onForgotPin();
-            }}
-            className="font-semibold text-primary"
+            onClick={handleForgotPin}
+            className="relative z-10 min-h-11 px-4 py-2 font-semibold text-primary active:scale-[0.98]"
           >
             Forgot PIN?
           </button>
