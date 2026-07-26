@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { StageTracker, stageFromStatus } from "./StageTracker";
 import { usePullToRefresh, PullToRefreshIndicator } from "@/lib/usePullToRefresh";
-import { ServiceLocationMap } from "./ServiceLocationMap";
 import type { SelectedAddress } from "../BookingSummaryScreen";
 
 
