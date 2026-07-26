@@ -29,8 +29,9 @@ export function PinLoginScreen({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [locked, setLocked] = useState<number>(0); // seconds remaining
-  const [biometricTried, setBiometricTried] = useState(false);
-  const [showManual, setShowManual] = useState(false);
+  const [biometricStatus, setBiometricStatus] = useState<
+    "checking" | "prompting" | "unavailable" | "failed" | "success"
+  >("checking");
   const inputs = useRef<Array<HTMLInputElement | null>>([]);
   const autoTriedRef = useRef(false);
 
@@ -103,27 +104,25 @@ export function PinLoginScreen({
   useEffect(() => {
     if (autoTriedRef.current) return;
     autoTriedRef.current = true;
+    setTimeout(() => inputs.current[0]?.focus(), 50);
     (async () => {
       const stored = await loadDevicePin(phone);
       if (!stored) {
-        setBiometricTried(true);
-        setShowManual(true);
-        setTimeout(() => inputs.current[0]?.focus(), 50);
+        setBiometricStatus("unavailable");
         return;
       }
       const status = await checkBiometric();
       if (status !== "available") {
-        setBiometricTried(true);
-        setShowManual(true);
-        setTimeout(() => inputs.current[0]?.focus(), 50);
+        setBiometricStatus("unavailable");
         return;
       }
-      const ok = await authenticateBiometric("Log in to badiyo");
-      setBiometricTried(true);
+      setBiometricStatus("prompting");
+      const ok = await authenticateBiometric("Log in to badiyo", 8000);
       if (ok) {
+        setBiometricStatus("success");
         await submit(stored);
       } else {
-        setShowManual(true);
+        setBiometricStatus("failed");
         setTimeout(() => inputs.current[0]?.focus(), 50);
       }
     })();
@@ -166,46 +165,49 @@ export function PinLoginScreen({
           </p>
         </div>
 
-        {!biometricTried && (
-          <div className="mt-10 flex flex-col items-center gap-3 text-muted-foreground">
-            <Fingerprint className="h-14 w-14 text-primary" />
-            <p className="text-sm">Waiting for biometric…</p>
+        {(biometricStatus === "checking" || biometricStatus === "prompting") && (
+          <div className="mt-8 flex flex-col items-center gap-2 text-muted-foreground">
+            <Fingerprint className="h-10 w-10 text-primary" />
+            <p className="text-sm">
+              {biometricStatus === "prompting"
+                ? "Use biometric unlock, or enter your PIN below."
+                : "Checking biometric unlock…"}
+            </p>
           </div>
         )}
 
-        {biometricTried && showManual && (
-          <>
-            <p className="mt-10 text-center text-sm font-semibold text-foreground">
-              Enter your 4-digit PIN
-            </p>
-            <div className="mt-4 flex justify-center gap-3">
-              {digits.map((d, i) => (
-                <input
-                  key={i}
-                  ref={(el) => {
-                    inputs.current[i] = el;
-                  }}
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={d ? "•" : ""}
-                  disabled={locked > 0 || loading}
-                  onChange={(e) => handleChange(i, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="h-16 w-14 rounded-[14px] border-2 border-border bg-card text-center text-3xl font-bold text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
-                />
-              ))}
-            </div>
-            <div className="mt-4 flex justify-center">
-              <button
-                type="button"
-                onClick={retryBiometric}
-                className="flex items-center gap-2 text-sm font-semibold text-primary"
-              >
-                <Fingerprint className="h-4 w-4" /> Use biometric
-              </button>
-            </div>
-          </>
+        <p className="mt-8 text-center text-sm font-semibold text-foreground">
+          Enter your 4-digit PIN
+        </p>
+        <div className="mt-4 flex justify-center gap-3">
+          {digits.map((d, i) => (
+            <input
+              key={i}
+              ref={(el) => {
+                inputs.current[i] = el;
+              }}
+              type="tel"
+              inputMode="numeric"
+              maxLength={1}
+              value={d ? "•" : ""}
+              disabled={locked > 0 || loading}
+              onChange={(e) => handleChange(i, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(i, e)}
+              className="h-16 w-14 rounded-[14px] border-2 border-border bg-card text-center text-3xl font-bold text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+            />
+          ))}
+        </div>
+        {biometricStatus !== "unavailable" && (
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={retryBiometric}
+              disabled={loading || locked > 0 || biometricStatus === "prompting"}
+              className="flex items-center gap-2 text-sm font-semibold text-primary disabled:opacity-50"
+            >
+              <Fingerprint className="h-4 w-4" /> Use biometric
+            </button>
+          </div>
         )}
 
         {error && (
