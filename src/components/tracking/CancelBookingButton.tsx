@@ -33,6 +33,7 @@ export function CancelBookingButton({
 }) {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const qc = useQueryClient();
 
   const estimatedRefund =
     stage === "assigned" && typeof price === "number"
