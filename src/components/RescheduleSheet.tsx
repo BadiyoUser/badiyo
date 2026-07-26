@@ -1,13 +1,10 @@
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
-
-type TimeSlot = "morning" | "afternoon" | "evening";
-
-const TIME_SLOTS: { id: TimeSlot; label: string; range: string }[] = [
-  { id: "morning", label: "Morning", range: "9 – 12" },
-  { id: "afternoon", label: "Afternoon", range: "12 – 4" },
-  { id: "evening", label: "Evening", range: "4 – 8" },
-];
+import {
+  getAllHourSlots,
+  isHourBookable,
+  toDateKey,
+} from "@/lib/hourSlots";
 
 function getNext7Days() {
   const days: Date[] = [];
@@ -18,13 +15,6 @@ function getNext7Days() {
     days.push(d);
   }
   return days;
-}
-
-function toDateKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
 }
 
 export function RescheduleSheet({
@@ -43,15 +33,21 @@ export function RescheduleSheet({
   saving?: boolean;
 }) {
   const days = useMemo(getNext7Days, []);
+  const allSlots = useMemo(getAllHourSlots, []);
   const [selectedDay, setSelectedDay] = useState<string | null>(initialDate);
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(() => {
-    const match = TIME_SLOTS.find((t) => t.label === initialSlot);
-    return match?.id ?? null;
+  const [selectedHour, setSelectedHour] = useState<number | null>(() => {
+    const match = allSlots.find((s) => s.label === initialSlot);
+    return match?.hour ?? null;
   });
+
+  const visibleSlots = useMemo(() => {
+    if (!selectedDay) return allSlots;
+    return allSlots.filter((s) => isHourBookable(selectedDay, s.hour));
+  }, [selectedDay, allSlots]);
 
   if (!open) return null;
 
-  const canContinue = selectedDay && selectedSlot;
+  const canContinue = selectedDay && selectedHour !== null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40">
@@ -77,7 +73,15 @@ export function RescheduleSheet({
               return (
                 <button
                   key={key}
-                  onClick={() => setSelectedDay(key)}
+                  onClick={() => {
+                    setSelectedDay(key);
+                    if (
+                      selectedHour !== null &&
+                      !isHourBookable(key, selectedHour)
+                    ) {
+                      setSelectedHour(null);
+                    }
+                  }}
                   className={`flex min-w-[60px] flex-col items-center rounded-[14px] border px-3 py-2.5 text-center transition ${
                     active
                       ? "border-primary bg-primary/10 text-primary"
@@ -93,31 +97,36 @@ export function RescheduleSheet({
         </div>
 
         <h3 className="mt-5 text-sm font-bold text-foreground">Choose a time</h3>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {TIME_SLOTS.map((slot) => {
-            const active = selectedSlot === slot.id;
-            return (
-              <button
-                key={slot.id}
-                onClick={() => setSelectedSlot(slot.id)}
-                className={`rounded-[14px] border px-4 py-2.5 text-sm font-semibold transition ${
-                  active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-card text-foreground"
-                }`}
-              >
-                {slot.label}{" "}
-                <span className="font-normal text-muted-foreground">{slot.range}</span>
-              </button>
-            );
-          })}
-        </div>
+        {selectedDay && visibleSlots.length === 0 ? (
+          <p className="mt-2 text-sm text-muted-foreground">
+            No time slots left for today. Please pick another day.
+          </p>
+        ) : (
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {visibleSlots.map((slot) => {
+              const active = selectedHour === slot.hour;
+              return (
+                <button
+                  key={slot.hour}
+                  onClick={() => setSelectedHour(slot.hour)}
+                  className={`rounded-[14px] border px-3 py-2.5 text-sm font-semibold transition ${
+                    active
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-foreground"
+                  }`}
+                >
+                  {slot.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <button
           disabled={!canContinue || saving}
           onClick={() => {
-            if (!selectedDay || !selectedSlot) return;
-            const s = TIME_SLOTS.find((x) => x.id === selectedSlot)!;
+            if (!selectedDay || selectedHour === null) return;
+            const s = allSlots.find((x) => x.hour === selectedHour)!;
             onConfirm(selectedDay, s.label);
           }}
           className={`mt-6 w-full rounded-[14px] px-4 py-3.5 text-sm font-bold transition ${
