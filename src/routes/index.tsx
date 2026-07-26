@@ -302,6 +302,7 @@ function Index() {
               setPhase("otp-verify");
             }}
             onForgotPin={async () => {
+              setForceResetPin(true);
               try {
                 await supabase.functions.invoke("send-otp", { body: { phone: pendingPhone } });
               } catch (e) {
