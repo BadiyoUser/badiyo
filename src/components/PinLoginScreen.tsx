@@ -119,7 +119,6 @@ export function PinLoginScreen({
   useEffect(() => {
     if (autoTriedRef.current) return;
     autoTriedRef.current = true;
-    setTimeout(() => inputs.current[0]?.focus(), 50);
     (async () => {
       const stored = await withTimeout(loadDevicePin(phone), 5000, null);
       if (!stored) {
