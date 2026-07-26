@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errorMessage";
+import type { BookingRow } from "@/components/MyBookingsScreen";
 
 type Stage = "searching" | "assigned";
 
@@ -31,6 +33,7 @@ export function CancelBookingButton({
 }) {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const qc = useQueryClient();
 
   const estimatedRefund =
     stage === "assigned" && typeof price === "number"
@@ -59,6 +62,28 @@ export function CancelBookingButton({
       if (error) throw error;
       const refund =
         (data as { refund_amount?: number } | null)?.refund_amount ?? estimatedRefund;
+
+      // Optimistically reflect cancellation across list/tracking caches so
+      // Home/Orders don't render a stale "active" card before realtime lands.
+      qc.setQueryData<BookingRow[] | undefined>(["my-bookings"], (prev) =>
+        prev
+          ? prev.map((b) =>
+              b.id === bookingId ? { ...b, status: "cancelled" } : b,
+            )
+          : prev,
+      );
+      qc.setQueryData(["searching-booking", bookingId], (prev: unknown) =>
+        prev
+          ? { ...(prev as object), status: "cancelled", deleted_at: new Date().toISOString() }
+          : prev,
+      );
+      qc.setQueryData(["expert-assigned-booking", bookingId], (prev: unknown) =>
+        prev
+          ? { ...(prev as object), status: "cancelled", deleted_at: new Date().toISOString() }
+          : prev,
+      );
+      await qc.invalidateQueries({ queryKey: ["my-bookings"] });
+
       toast.success(
         refund !== null && refund !== undefined
           ? `Booking cancelled. Refund of ₹${refund} is on its way.`
