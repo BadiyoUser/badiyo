@@ -69,9 +69,11 @@ export function ExpertAssignedScreen({
           assigned_expert_id: null,
           start_otp: null,
           deleted_at: null,
+          price: null,
           experts: null,
         } as BookingRow)
       : undefined,
+
     staleTime: 15_000,
   });
 
