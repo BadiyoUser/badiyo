@@ -77,16 +77,6 @@ export function OtpScreen({
       }
     };
 
-    // Poll as safety net (in case realtime is unreachable).
-    const poll = setInterval(async () => {
-      const { data } = await supabase
-        .from("bookings")
-        .select("status")
-        .eq("id", bookingId)
-        .maybeSingle();
-      advanceIfMatch(data as { status?: string | null } | null);
-    }, 5000);
-
     const channel = supabase
       .channel(`booking-otp-${bookingId}`)
       .on(
@@ -97,7 +87,6 @@ export function OtpScreen({
       .subscribe();
 
     return () => {
-      clearInterval(poll);
       supabase.removeChannel(channel);
     };
   }, [bookingId, targetStatus, onVerified]);

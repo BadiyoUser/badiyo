@@ -87,11 +87,8 @@ export function SearchingForExpertScreen({
       )
       .subscribe();
 
-    const poll = setInterval(() => refetch(), 15_000);
-
     return () => {
       supabase.removeChannel(channel);
-      clearInterval(poll);
     };
   }, [bookingId, qc, queryKey, refetch, onCancelled]);
 
