@@ -124,6 +124,7 @@ function Index() {
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
+  const [forceResetPin, setForceResetPin] = useState(false);
   const [online, setOnline] = useState(
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
@@ -301,6 +302,7 @@ function Index() {
               setPhase("otp-verify");
             }}
             onForgotPin={async () => {
+              setForceResetPin(true);
               try {
                 await supabase.functions.invoke("send-otp", { body: { phone: pendingPhone } });
               } catch (e) {
@@ -333,10 +335,11 @@ function Index() {
                 const { data: hasPin } = await supabase.rpc("has_login_pin", {
                   p_phone: `+91${pendingPhone}`,
                 });
-                if (hasPin === true) {
-                  setPhase("home");
-                } else {
+                if (forceResetPin || hasPin !== true) {
+                  setForceResetPin(false);
                   setPhase("pin-set");
+                } else {
+                  setPhase("home");
                 }
               } catch (e) {
                 console.error("post-otp setup failed:", e);
