@@ -166,10 +166,8 @@ export function ExpertAssignedScreen({
     await refetch();
   });
 
-  const mapSrc =
-    address.latitude && address.longitude
-      ? `https://staticmap.openstreetmap.de/staticmap.php?center=${address.latitude},${address.longitude}&zoom=15&size=600x300&markers=${address.latitude},${address.longitude},red-pushpin`
-      : null;
+  // map rendering moved to <ServiceLocationMap />
+
 
   const showExpert = status === "expert_assigned" || status === "in_progress";
   const isConfirmed = status === "confirmed";
