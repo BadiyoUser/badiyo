@@ -32,7 +32,10 @@ export async function checkBiometric(): Promise<BiometricStatus> {
   if (!mod) return "unavailable";
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const info = await withTimeout((mod as any).BiometricAuth.checkBiometry(), 5000);
+    const info = await withTimeout<{ isAvailable?: boolean }>(
+      (mod as any).BiometricAuth.checkBiometry(),
+      5000,
+    );
     return info?.isAvailable ? "available" : "unavailable";
   } catch {
     return "unavailable";
