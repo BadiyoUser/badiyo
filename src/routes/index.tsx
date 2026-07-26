@@ -145,7 +145,7 @@ function Index() {
       const hist = historyRef.current;
       // Login flow: back exits (like a normal auth root).
       const atRoot =
-        cur === "home" || cur === "login" || cur === "otp-verify" || cur === "splash" || cur === "splash-out";
+        cur === "home" || cur === "login" || cur === "otp-verify" || cur === "pin-login" || cur === "pin-set" || cur === "splash" || cur === "splash-out";
 
       if (!atRoot && hist.length > 0) {
         const prev = hist.pop()!;
