@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { SelectedAddress } from "../BookingSummaryScreen";
 import type { SelectedService, SelectedSlot } from "../SlotSelectionScreen";
 import { StageTracker, stageFromStatus } from "./StageTracker";
+import { CancelBookingButton } from "./CancelBookingButton";
+
 
 type BookingRow = {
   status: string;
@@ -183,6 +185,14 @@ export function SearchingForExpertScreen({
             </span>
           </div>
         </section>
+
+        <CancelBookingButton
+          bookingId={bookingId}
+          stage="searching"
+          price={service?.price ?? null}
+          onCancelled={onCancelled}
+        />
+
       </div>
     </main>
   );

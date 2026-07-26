@@ -6,6 +6,8 @@ import type { SelectedAddress } from "../BookingSummaryScreen";
 import { StageTracker, stageFromStatus } from "./StageTracker";
 import { usePullToRefresh, PullToRefreshIndicator } from "@/lib/usePullToRefresh";
 import { ServiceLocationMap } from "./ServiceLocationMap";
+import { CancelBookingButton } from "./CancelBookingButton";
+
 
 type ExpertInfo = {
   id: string;
@@ -19,6 +21,7 @@ type BookingRow = {
   assigned_expert_id: string | null;
   start_otp: string | null;
   deleted_at: string | null;
+  price: number | null;
   experts: ExpertInfo;
 };
 
@@ -26,7 +29,7 @@ async function fetchBookingRow(bookingId: string): Promise<BookingRow | null> {
   const { data, error } = await supabase
     .from("bookings")
     .select(
-      "status, assigned_expert_id, start_otp, deleted_at, experts:assigned_expert_id ( id, name, phone, photo_url )",
+      "status, assigned_expert_id, start_otp, deleted_at, price, experts:assigned_expert_id ( id, name, phone, photo_url )",
     )
     .eq("id", bookingId)
     .maybeSingle();
@@ -36,6 +39,7 @@ async function fetchBookingRow(bookingId: string): Promise<BookingRow | null> {
   }
   return (data as unknown as BookingRow | null) ?? null;
 }
+
 
 export function ExpertAssignedScreen({
   bookingId,
@@ -67,9 +71,11 @@ export function ExpertAssignedScreen({
           assigned_expert_id: null,
           start_otp: null,
           deleted_at: null,
+          price: null,
           experts: null,
         } as BookingRow)
       : undefined,
+
     staleTime: 15_000,
   });
 
@@ -279,6 +285,17 @@ export function ExpertAssignedScreen({
         )}
 
         <ServiceLocationMap address={address} />
+
+        {(status === "expert_assigned" || status === "accepted" || status === "confirmed") && (
+          <CancelBookingButton
+            bookingId={bookingId}
+            stage={status === "expert_assigned" ? "assigned" : "searching"}
+            price={booking?.price ?? null}
+            onCancelled={onCancelled}
+          />
+        )}
+
+
 
       </div>
     </main>
