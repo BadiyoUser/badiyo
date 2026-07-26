@@ -158,7 +158,6 @@ export function ServiceInProgressScreen({
     queryKey: ["booking-timing", bookingId],
     queryFn: () => fetchBookingTiming(bookingId!),
     enabled: !!bookingId,
-    refetchInterval: 30_000,
     refetchOnWindowFocus: true,
   });
 
