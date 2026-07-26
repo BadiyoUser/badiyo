@@ -335,10 +335,11 @@ function Index() {
                 const { data: hasPin } = await supabase.rpc("has_login_pin", {
                   p_phone: `+91${pendingPhone}`,
                 });
-                if (hasPin === true) {
-                  setPhase("home");
-                } else {
+                if (forceResetPin || hasPin !== true) {
+                  setForceResetPin(false);
                   setPhase("pin-set");
+                } else {
+                  setPhase("home");
                 }
               } catch (e) {
                 console.error("post-otp setup failed:", e);
