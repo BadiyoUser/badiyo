@@ -164,15 +164,18 @@ export function SearchingForExpertScreen({
           </div>
           {service && (
             <div className="mt-2 flex items-start justify-between gap-3">
-              <div className="text-sm font-bold text-foreground">{service.label}</div>
+              <div className="text-sm font-bold text-foreground">
+                {service.duration_label}
+                {service.subtitle ? ` · ${service.subtitle}` : ""}
+              </div>
               <div className="text-sm font-bold text-primary">Rs {service.price}</div>
             </div>
           )}
           {slot && (
             <div className="mt-1 text-xs text-muted-foreground">
-              {slot.type === "asap"
+              {slot.mode === "now"
                 ? "As soon as possible"
-                : `${slot.date ?? ""}${slot.timeSlot ? ` · ${slot.timeSlot}` : ""}`}
+                : `${slot.day} · ${slot.slotLabel} (${slot.slotRange})`}
             </div>
           )}
           <div className="mt-3 flex items-start gap-1.5 text-xs text-muted-foreground">
