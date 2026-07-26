@@ -317,8 +317,8 @@ function Index() {
             onDone={resetAndGoHome}
             onTrackBooking={(id) => {
               setActiveBookingId(id);
-              setActiveBookingStatus(null);
-              setPhase("expert-assigned");
+              setActiveBookingStatus("accepted");
+              setPhase("searching-expert");
             }}
           />
         </div>
