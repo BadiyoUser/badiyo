@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Phone, MapPin, User, Loader2 } from "lucide-react";
+import { Phone, User, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { SelectedAddress } from "../BookingSummaryScreen";
 import { StageTracker, stageFromStatus } from "./StageTracker";
 import { usePullToRefresh, PullToRefreshIndicator } from "@/lib/usePullToRefresh";
+import { ServiceLocationMap } from "./ServiceLocationMap";
 
 type ExpertInfo = {
   id: string;
