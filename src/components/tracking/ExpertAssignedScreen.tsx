@@ -19,6 +19,7 @@ type BookingRow = {
   assigned_expert_id: string | null;
   start_otp: string | null;
   deleted_at: string | null;
+  price: number | null;
   experts: ExpertInfo;
 };
 
@@ -26,7 +27,7 @@ async function fetchBookingRow(bookingId: string): Promise<BookingRow | null> {
   const { data, error } = await supabase
     .from("bookings")
     .select(
-      "status, assigned_expert_id, start_otp, deleted_at, experts:assigned_expert_id ( id, name, phone, photo_url )",
+      "status, assigned_expert_id, start_otp, deleted_at, price, experts:assigned_expert_id ( id, name, phone, photo_url )",
     )
     .eq("id", bookingId)
     .maybeSingle();
@@ -36,6 +37,7 @@ async function fetchBookingRow(bookingId: string): Promise<BookingRow | null> {
   }
   return (data as unknown as BookingRow | null) ?? null;
 }
+
 
 export function ExpertAssignedScreen({
   bookingId,
