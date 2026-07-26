@@ -269,7 +269,54 @@ function Index() {
       )}
       {phase === "login" && (
         <div className="animate-fade-slide-in">
-          <LoginScreen onOtpSent={(p) => { setPendingPhone(p); setPhase("otp-verify"); }} />
+          <LoginScreen
+            onOtpSent={(p) => {
+              setPendingPhone(p);
+              setPhase("otp-verify");
+            }}
+            onPinLogin={(p) => {
+              setPendingPhone(p);
+              setPhase("pin-login");
+            }}
+          />
+        </div>
+      )}
+      {phase === "pin-login" && pendingPhone && (
+        <div className="animate-fade-slide-in">
+          <PinLoginScreen
+            phone={pendingPhone}
+            onBack={() => setPhase("login")}
+            onVerified={() => {
+              setPhase("home");
+              ensureUserRow(`+91${pendingPhone}`)
+                .then(() => import("@/lib/referrals").then((m) => m.linkReferralIfAny()))
+                .catch((e) => console.error("post-pin-login setup failed:", e));
+            }}
+            onFallbackOtp={async () => {
+              try {
+                await supabase.functions.invoke("send-otp", { body: { phone: pendingPhone } });
+              } catch (e) {
+                console.error("otp fallback send-otp failed", e);
+              }
+              setPhase("otp-verify");
+            }}
+            onForgotPin={async () => {
+              try {
+                await supabase.functions.invoke("send-otp", { body: { phone: pendingPhone } });
+              } catch (e) {
+                console.error("forgot-pin send-otp failed", e);
+              }
+              setPhase("otp-verify");
+            }}
+          />
+        </div>
+      )}
+      {phase === "pin-set" && pendingPhone && (
+        <div className="animate-fade-slide-in">
+          <PinSetScreen
+            phone={pendingPhone}
+            onDone={() => setPhase("home")}
+          />
         </div>
       )}
       {phase === "otp-verify" && pendingPhone && (
@@ -277,13 +324,24 @@ function Index() {
           <OtpVerifyScreen
             phone={pendingPhone}
             onBack={() => setPhase("login")}
-            onVerified={() => {
-              // Navigate immediately; onAuthStateChange('SIGNED_IN') runs
-              // ensureUserRow + linkReferralIfAny in the background.
-              setPhase("home");
-              ensureUserRow(`+91${pendingPhone}`)
-                .then(() => import("@/lib/referrals").then((m) => m.linkReferralIfAny()))
-                .catch((e) => console.error("post-otp setup failed:", e));
+            onVerified={async () => {
+              // Ensure profile row exists, then check whether the customer
+              // already has a PIN. If not, force the PIN-set screen.
+              try {
+                await ensureUserRow(`+91${pendingPhone}`);
+                import("@/lib/referrals").then((m) => m.linkReferralIfAny()).catch(() => {});
+                const { data: hasPin } = await supabase.rpc("has_login_pin", {
+                  p_phone: `+91${pendingPhone}`,
+                });
+                if (hasPin === true) {
+                  setPhase("home");
+                } else {
+                  setPhase("pin-set");
+                }
+              } catch (e) {
+                console.error("post-otp setup failed:", e);
+                setPhase("home");
+              }
             }}
           />
 
