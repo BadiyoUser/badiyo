@@ -6,6 +6,21 @@ import { getErrorMessage } from "@/lib/errorMessage";
 import { authenticateBiometric, checkBiometric } from "@/lib/biometric";
 import { loadDevicePin, clearDevicePin } from "@/lib/pinStorage";
 
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = window.setTimeout(() => resolve(fallback), ms);
+    promise
+      .then((value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      })
+      .catch(() => {
+        window.clearTimeout(timer);
+        resolve(fallback);
+      });
+  });
+}
+
 /**
  * PIN entry screen for returning customers. Auto-triggers a biometric prompt
  * on mount when hardware is available AND a device-stored PIN exists — the
@@ -106,7 +121,7 @@ export function PinLoginScreen({
     autoTriedRef.current = true;
     setTimeout(() => inputs.current[0]?.focus(), 50);
     (async () => {
-      const stored = await loadDevicePin(phone);
+      const stored = await withTimeout(loadDevicePin(phone), 5000, null);
       if (!stored) {
         setBiometricStatus("unavailable");
         return;
@@ -143,7 +158,7 @@ export function PinLoginScreen({
   };
 
   const retryBiometric = async () => {
-    const stored = await loadDevicePin(phone);
+    const stored = await withTimeout(loadDevicePin(phone), 5000, null);
     if (!stored) return;
     const ok = await authenticateBiometric("Log in to badiyo");
     if (ok) void submit(stored);
