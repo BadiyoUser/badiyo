@@ -49,10 +49,12 @@ export function PinLoginScreen({
   >("checking");
   const inputs = useRef<Array<HTMLInputElement | null>>([]);
   const autoTriedRef = useRef(false);
+  const submittingRef = useRef(false);
 
   const submit = useCallback(
     async (code: string) => {
-      if (loading) return;
+      if (loading || submittingRef.current) return;
+      submittingRef.current = true;
       setLoading(true);
       setError(null);
       try {
@@ -102,6 +104,7 @@ export function PinLoginScreen({
         setDigits(["", "", "", ""]);
         inputs.current[0]?.focus();
       } finally {
+        submittingRef.current = false;
         setLoading(false);
       }
     },
