@@ -510,6 +510,8 @@ function Index() {
                 setActiveBookingStatus(b.status);
                 if (b.status === "in_progress") {
                   setPhase("in-progress");
+                } else if (b.status === "confirmed" || b.status === "accepted") {
+                  setPhase("searching-expert");
                 } else {
                   setPhase("expert-assigned");
                 }
