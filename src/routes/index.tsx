@@ -6,6 +6,8 @@ import { initNativeBackButton, setRootBackHandler } from "@/lib/backHandler";
 import { BadiyoLogo } from "@/components/BadiyoLogo";
 import { LoginScreen } from "@/components/LoginScreen";
 import { OtpVerifyScreen } from "@/components/OtpVerifyScreen";
+import { PinLoginScreen } from "@/components/PinLoginScreen";
+import { PinSetScreen } from "@/components/PinSetScreen";
 import { HomeScreen } from "@/components/HomeScreen";
 import {
   SlotSelectionScreen,
