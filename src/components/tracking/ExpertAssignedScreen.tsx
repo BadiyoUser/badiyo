@@ -286,6 +286,17 @@ export function ExpertAssignedScreen({
 
         <ServiceLocationMap address={address} />
 
+        {(status === "expert_assigned" || status === "accepted" || status === "confirmed") && (
+          <CancelBookingButton
+            bookingId={bookingId}
+            stage={status === "expert_assigned" ? "assigned" : "searching"}
+            price={booking?.price ?? null}
+            onCancelled={onCancelled}
+          />
+        )}
+
+
+
       </div>
     </main>
   );
