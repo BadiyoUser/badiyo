@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Camera, Crosshair, Loader2, MapPin, Search, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { reverseGeocode } from "@/lib/geocode.functions";
+import {
+  reverseGeocode,
+  searchPlaces,
+  getPlaceDetails,
+  type PlaceSuggestion,
+} from "@/lib/geocode.functions";
 import { getCurrentCoords } from "@/lib/nativeGeolocation";
 
 export type PickedAddress = {
@@ -76,8 +81,58 @@ export function AddAddressMapScreen({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const geocode = useServerFn(reverseGeocode);
+  const placeSearch = useServerFn(searchPlaces);
+  const placeDetails = useServerFn(getPlaceDetails);
   const centerRef = useRef(center);
   centerRef.current = center;
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [searching, setSearching] = useState(false);
+  const skipGeocodeRef = useRef(false);
+
+  // Debounced place autocomplete
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 3) {
+      setSuggestions([]);
+      setSearching(false);
+      return;
+    }
+    let cancelled = false;
+    setSearching(true);
+    const t = setTimeout(() => {
+      placeSearch({ data: { query: q, lat: centerRef.current.lat, lng: centerRef.current.lng } })
+        .then((r) => !cancelled && setSuggestions(r))
+        .catch((e) => {
+          if (cancelled) return;
+          console.error("Place search failed:", e);
+          setSuggestions([]);
+        })
+        .finally(() => !cancelled && setSearching(false));
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+      setSearching(false);
+    };
+  }, [query, placeSearch]);
+
+  const handleSelectSuggestion = async (s: PlaceSuggestion) => {
+    setSuggestions([]);
+    setQuery(s.primary);
+    try {
+      const d = await placeDetails({ data: { placeId: s.placeId } });
+      const next = { lat: d.latitude, lng: d.longitude };
+      skipGeocodeRef.current = true;
+      if (mapRef.current) mapRef.current.panTo(next);
+      setCenter(next);
+      setGeocodeFailed(false);
+      setAutoAddress(d.formatted_address || [s.primary, s.secondary].filter(Boolean).join(", "));
+    } catch (e) {
+      console.error("Place details failed:", e);
+    }
+  };
+
 
   // Init map
   useEffect(() => {
@@ -119,26 +174,31 @@ export function AddAddressMapScreen({
   // Reverse geocode when center settles (debounced to coalesce rapid idles)
   useEffect(() => {
     let cancelled = false;
+    const fromPlace = skipGeocodeRef.current;
+    skipGeocodeRef.current = false;
     const t = setTimeout(() => {
       setGeocoding(true);
       setGeocodeFailed(false);
       geocode({ data: center })
         .then((r) => {
           if (cancelled) return;
-          setAutoAddress(r.formatted_address);
+          if (!fromPlace) setAutoAddress(r.formatted_address);
           setArea(r.area);
           setCity(r.city);
         })
         .catch((e) => {
           if (cancelled) return;
           console.error("Reverse geocode failed:", e);
-          setAutoAddress("");
+          if (!fromPlace) {
+            setAutoAddress("");
+            setGeocodeFailed(true);
+          }
           setArea(null);
           setCity(null);
-          setGeocodeFailed(true);
         })
         .finally(() => !cancelled && setGeocoding(false));
     }, 400);
+
     return () => {
       cancelled = true;
       clearTimeout(t);
@@ -217,15 +277,60 @@ export function AddAddressMapScreen({
             >
               <ArrowLeft className="h-5 w-5 text-foreground" />
             </button>
-            <div className="pointer-events-auto flex flex-1 items-center gap-2 rounded-[14px] border border-border bg-card px-3 py-2.5 shadow-sm">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <input
-                placeholder="Search for area, street name..."
-                className="flex-1 bg-transparent text-sm text-foreground outline-none"
-                readOnly
-              />
+            <div className="pointer-events-auto relative flex-1">
+              <div className="flex items-center gap-2 rounded-[14px] border border-border bg-card px-3 py-2.5 shadow-sm">
+                {searching ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                ) : (
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                )}
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search for area, street name..."
+                  className="flex-1 bg-transparent text-sm text-foreground outline-none"
+                />
+                {query && (
+                  <button
+                    type="button"
+                    aria-label="Clear search"
+                    onClick={() => {
+                      setQuery("");
+                      setSuggestions([]);
+                    }}
+                  >
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+              {suggestions.length > 0 && (
+                <ul className="absolute inset-x-0 top-full z-20 mt-2 max-h-64 overflow-y-auto rounded-[14px] border border-border bg-card shadow-lg">
+                  {suggestions.map((s) => (
+                    <li key={s.placeId}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectSuggestion(s)}
+                        className="flex w-full items-start gap-2 border-b border-border/60 px-3 py-2.5 text-left last:border-b-0 active:bg-muted"
+                      >
+                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-semibold text-foreground">
+                            {s.primary}
+                          </span>
+                          {s.secondary && (
+                            <span className="block truncate text-xs text-muted-foreground">
+                              {s.secondary}
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
+
         </div>
 
         {/* Center pin */}
