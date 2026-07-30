@@ -81,8 +81,58 @@ export function AddAddressMapScreen({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const geocode = useServerFn(reverseGeocode);
+  const placeSearch = useServerFn(searchPlaces);
+  const placeDetails = useServerFn(getPlaceDetails);
   const centerRef = useRef(center);
   centerRef.current = center;
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [searching, setSearching] = useState(false);
+  const skipGeocodeRef = useRef(false);
+
+  // Debounced place autocomplete
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 3) {
+      setSuggestions([]);
+      setSearching(false);
+      return;
+    }
+    let cancelled = false;
+    setSearching(true);
+    const t = setTimeout(() => {
+      placeSearch({ data: { query: q, lat: centerRef.current.lat, lng: centerRef.current.lng } })
+        .then((r) => !cancelled && setSuggestions(r))
+        .catch((e) => {
+          if (cancelled) return;
+          console.error("Place search failed:", e);
+          setSuggestions([]);
+        })
+        .finally(() => !cancelled && setSearching(false));
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+      setSearching(false);
+    };
+  }, [query, placeSearch]);
+
+  const handleSelectSuggestion = async (s: PlaceSuggestion) => {
+    setSuggestions([]);
+    setQuery(s.primary);
+    try {
+      const d = await placeDetails({ data: { placeId: s.placeId } });
+      const next = { lat: d.latitude, lng: d.longitude };
+      skipGeocodeRef.current = true;
+      if (mapRef.current) mapRef.current.panTo(next);
+      setCenter(next);
+      setGeocodeFailed(false);
+      setAutoAddress(d.formatted_address || [s.primary, s.secondary].filter(Boolean).join(", "));
+    } catch (e) {
+      console.error("Place details failed:", e);
+    }
+  };
+
 
   // Init map
   useEffect(() => {
