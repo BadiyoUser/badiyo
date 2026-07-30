@@ -277,15 +277,60 @@ export function AddAddressMapScreen({
             >
               <ArrowLeft className="h-5 w-5 text-foreground" />
             </button>
-            <div className="pointer-events-auto flex flex-1 items-center gap-2 rounded-[14px] border border-border bg-card px-3 py-2.5 shadow-sm">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <input
-                placeholder="Search for area, street name..."
-                className="flex-1 bg-transparent text-sm text-foreground outline-none"
-                readOnly
-              />
+            <div className="pointer-events-auto relative flex-1">
+              <div className="flex items-center gap-2 rounded-[14px] border border-border bg-card px-3 py-2.5 shadow-sm">
+                {searching ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                ) : (
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                )}
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search for area, street name..."
+                  className="flex-1 bg-transparent text-sm text-foreground outline-none"
+                />
+                {query && (
+                  <button
+                    type="button"
+                    aria-label="Clear search"
+                    onClick={() => {
+                      setQuery("");
+                      setSuggestions([]);
+                    }}
+                  >
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+              {suggestions.length > 0 && (
+                <ul className="absolute inset-x-0 top-full z-20 mt-2 max-h-64 overflow-y-auto rounded-[14px] border border-border bg-card shadow-lg">
+                  {suggestions.map((s) => (
+                    <li key={s.placeId}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectSuggestion(s)}
+                        className="flex w-full items-start gap-2 border-b border-border/60 px-3 py-2.5 text-left last:border-b-0 active:bg-muted"
+                      >
+                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-semibold text-foreground">
+                            {s.primary}
+                          </span>
+                          {s.secondary && (
+                            <span className="block truncate text-xs text-muted-foreground">
+                              {s.secondary}
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
+
         </div>
 
         {/* Center pin */}
