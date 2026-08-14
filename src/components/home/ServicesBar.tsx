@@ -13,7 +13,7 @@ export function ServicesBar({
   const t = useT();
   const tabs: { id: string | null; label: string }[] = [
     { id: null, label: t("home.tabAll") },
-    ...segments.map((s) => ({ id: s.id, label: s.name })),
+    ...segments.map((s) => ({ id: s.id, label: s.short_name || s.name })),
   ];
 
   return (
