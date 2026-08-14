@@ -155,7 +155,7 @@ export function OtpVerifyScreen({
         </button>
 
         <p className="mt-auto pt-10 text-center text-xs text-muted-foreground">
-          By continuing, you agree to badiyo's Terms & Privacy Policy.
+          By continuing, you agree to badiyos' Terms & Privacy Policy.
         </p>
       </div>
     </main>

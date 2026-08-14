@@ -67,7 +67,7 @@ export function WalletScreen({ onBack }: { onBack: () => void }) {
                 Rs {balance}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Badiyo coins can be used on your next booking.
+                Badiyos coins can be used on your next booking.
               </p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">

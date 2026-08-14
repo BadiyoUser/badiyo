@@ -61,10 +61,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "badiyo — Home cleaning, on demand" },
-      { name: "description", content: "Book trusted home cleaning services in Latur with badiyo. Fast, reliable experts — just a tap away." },
-      { property: "og:title", content: "badiyo — Home cleaning, on demand" },
-      { property: "og:description", content: "Book trusted home cleaning services in Latur with badiyo. Fast, reliable experts — just a tap away." },
+      { title: "badiyos — Home cleaning, on demand" },
+      { name: "description", content: "Book trusted home cleaning services in Latur with badiyos. Fast, reliable experts — just a tap away." },
+      { property: "og:title", content: "badiyos — Home cleaning, on demand" },
+      { property: "og:description", content: "Book trusted home cleaning services in Latur with badiyos. Fast, reliable experts — just a tap away." },
     ],
   }),
   component: Index,

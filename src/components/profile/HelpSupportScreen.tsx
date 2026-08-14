@@ -17,7 +17,7 @@ const FAQS = [
     a: "Payments are handled securely through Razorpay. You'll only be charged after your booking is confirmed.",
   },
   {
-    q: "What are Badiyo coins?",
+    q: "What are Badiyos coins?",
     a: "Coins are rewards earned by completing missions and referring friends. Use them to get discounts on future bookings.",
   },
   {

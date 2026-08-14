@@ -168,8 +168,8 @@ export function ReferralDashboardScreen({ onBack }: { onBack: () => void }) {
   const code = user?.referral_code ?? "";
   const inviteUrl = code ? `https://badiyo.in/invite/${code}` : "https://badiyo.in";
   const shareText = code
-    ? `Join badiyo and get trusted home cleaning! Use my code ${code}: ${inviteUrl}`
-    : `Join badiyo and get trusted home cleaning! ${inviteUrl}`;
+    ? `Join badiyos and get trusted home cleaning! Use my code ${code}: ${inviteUrl}`
+    : `Join badiyos and get trusted home cleaning! ${inviteUrl}`;
 
   const milestone = Number(config?.milestone_referrals ?? 5) || 5;
   const progressCount = Math.min(successful.length, milestone);
@@ -203,7 +203,7 @@ export function ReferralDashboardScreen({ onBack }: { onBack: () => void }) {
       const { Capacitor } = await import("@capacitor/core");
       if (Capacitor.isNativePlatform()) {
         const { Share } = await import("@capacitor/share");
-        await Share.share({ title: "badiyo", text: shareText, url: inviteUrl, dialogTitle: "Share badiyo" });
+        await Share.share({ title: "badiyos", text: shareText, url: inviteUrl, dialogTitle: "Share badiyos" });
         return;
       }
     } catch {
@@ -212,7 +212,7 @@ export function ReferralDashboardScreen({ onBack }: { onBack: () => void }) {
 
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
-        await navigator.share({ title: "badiyo", text: shareText, url: inviteUrl });
+        await navigator.share({ title: "badiyos", text: shareText, url: inviteUrl });
         return;
       } catch (e) {
         // User cancelled — don't fall back to copy.
@@ -261,7 +261,7 @@ export function ReferralDashboardScreen({ onBack }: { onBack: () => void }) {
                 <div className="min-w-0">
                   <p className="text-base font-extrabold leading-snug text-foreground">
                     You&apos;ve helped {familiesHelped}{" "}
-                    {familiesHelped === 1 ? "family" : "families"} discover badiyo
+                    {familiesHelped === 1 ? "family" : "families"} discover badiyos
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Keep sharing to earn more rewards

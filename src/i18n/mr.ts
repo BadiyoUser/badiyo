@@ -162,7 +162,7 @@ export const mr: Partial<Record<keyof typeof en, string>> = {
   "settings.devices": "सक्रिय डिव्हाइस",
   "settings.privacy": "गोपनीयता धोरण",
   "language.title": "भाषा",
-  "language.subtitle": "badiyo मध्ये तुम्हाला वापरायची भाषा निवडा.",
+  "language.subtitle": "badiyos मध्ये तुम्हाला वापरायची भाषा निवडा.",
   "language.english": "English",
   "language.marathi": "मराठी",
   "language.saved": "भाषा बदलली",
@@ -170,7 +170,7 @@ export const mr: Partial<Record<keyof typeof en, string>> = {
 
   "notServiceable.title": "सेवा क्षेत्र",
   "notServiceable.heading": "आम्ही अजून तुमच्या भागात नाही",
-  "notServiceable.sub": "badiyo अजून इथे सुरू झालेली नाही — पण आम्ही वेगाने विस्तार करत आहोत.",
+  "notServiceable.sub": "badiyos अजून इथे सुरू झालेली नाही — पण आम्ही वेगाने विस्तार करत आहोत.",
   "notServiceable.subSegment": "{segment} अजून तुमच्या भागात सुरू झालेली नाही — पण आम्ही वेगाने विस्तार करत आहोत.",
   "notServiceable.join": "वेटलिस्टमध्ये सामील व्हा",
   "notServiceable.joining": "जोडत आहोत…",
