@@ -73,24 +73,6 @@ export type Database = {
         }
         Relationships: []
       }
-      _device_test_log: {
-        Row: {
-          at: string | null
-          result: Json | null
-          step: string | null
-        }
-        Insert: {
-          at?: string | null
-          result?: Json | null
-          step?: string | null
-        }
-        Update: {
-          at?: string | null
-          result?: Json | null
-          step?: string | null
-        }
-        Relationships: []
-      }
       addresses: {
         Row: {
           area: string | null
