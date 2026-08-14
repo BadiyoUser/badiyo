@@ -297,17 +297,16 @@ export function HomeScreen({
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
-                  <div className="-mx-5 mt-3 overflow-x-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    <div className="flex w-max gap-3">
-                      {items.map((s) => (
-                        <ServiceMiniCard
-                          key={s.id}
-                          s={s}
-                          onBook={() => onBookService?.(toPayload(s))}
-                        />
-                      ))}
-                    </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2.5">
+                    {items.map((s) => (
+                      <ServiceMiniCard
+                        key={s.id}
+                        s={s}
+                        onBook={() => onBookService?.(toPayload(s))}
+                      />
+                    ))}
                   </div>
+
                 </section>
               );
             })}
