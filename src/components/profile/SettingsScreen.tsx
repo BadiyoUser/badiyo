@@ -1,20 +1,23 @@
-import { ArrowLeft, ChevronRight, Globe, Bell, Shield, Trash2, X } from "lucide-react";
+import { ArrowLeft, ChevronRight, Globe, Bell, Shield, Smartphone, Trash2, X } from "lucide-react";
 import { useState } from "react";
 
 export function SettingsScreen({
   onBack,
   onOpenNotifications,
   onOpenAbout,
+  onOpenDevices,
 }: {
   onBack: () => void;
   onOpenNotifications: () => void;
   onOpenAbout: () => void;
+  onOpenDevices: () => void;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const items = [
     { key: "lang", label: "Language", value: "English", icon: Globe, onClick: () => {} },
     { key: "notif", label: "Notification Preferences", icon: Bell, onClick: onOpenNotifications },
+    { key: "devices", label: "Active Devices", icon: Smartphone, onClick: onOpenDevices },
     { key: "privacy", label: "Privacy Policy", icon: Shield, onClick: onOpenAbout },
   ];
 
