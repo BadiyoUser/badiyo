@@ -1,5 +1,5 @@
-import logoWhite from "@/assets/badiyo-logo.png.asset.json";
-import logoGreen from "@/assets/badiyo-logo-green.png.asset.json";
+import logoWhite from "@/assets/badiyos-logo-white.png.asset.json";
+import logoGreen from "@/assets/badiyos-logo-green.png.asset.json";
 
 export function BadiyoLogo({
   className = "",
@@ -9,6 +9,5 @@ export function BadiyoLogo({
   variant?: "white" | "green";
 }) {
   const src = variant === "green" ? logoGreen.url : logoWhite.url;
-  return <img src={src} alt="badiyo" className={className} draggable={false} />;
+  return <img src={src} alt="badiyos" className={className} draggable={false} />;
 }
-
