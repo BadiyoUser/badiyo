@@ -6,6 +6,7 @@ import type { SelectedAddress } from "./BookingSummaryScreen";
 import { creditReferralForBooking } from "@/lib/referrals";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { getCurrentCoords } from "@/lib/nativeGeolocation";
+import { useT } from "@/i18n";
 
 type RazorpayOptions = {
   key: string;
@@ -81,6 +82,7 @@ export function PaymentScreen({
   onDone: () => void;
   onTrackBooking: (bookingId: string | null) => void;
 }) {
+  const t = useT();
   const [status, setStatus] = useState<Status>("loading");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
