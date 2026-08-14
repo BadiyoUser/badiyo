@@ -125,9 +125,13 @@ function Index() {
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
   const [forceResetPin, setForceResetPin] = useState(false);
-  const [online, setOnline] = useState(
-    typeof navigator === "undefined" ? true : navigator.onLine,
-  );
+  // Always start "online" so SSR and first client render match; a real offline
+  // state is picked up in the effect below after hydration.
+  const [online, setOnline] = useState(true);
+  useEffect(() => {
+    setOnline(navigator.onLine);
+  }, []);
+
   const [forceUpdate, setForceUpdate] = useState(false);
 
   function resetAndGoHome() {
