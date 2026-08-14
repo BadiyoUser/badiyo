@@ -37,6 +37,9 @@ import { NotificationsScreen } from "@/components/profile/NotificationsScreen";
 import { SettingsScreen } from "@/components/profile/SettingsScreen";
 import { HelpSupportScreen } from "@/components/profile/HelpSupportScreen";
 import { AboutScreen } from "@/components/profile/AboutScreen";
+import { ActiveDevicesScreen } from "@/components/profile/ActiveDevicesScreen";
+import { DeviceLimitScreen } from "@/components/DeviceLimitScreen";
+import { registerThisDevice, type DeviceSession } from "@/lib/devices";
 import { ReferralDashboardScreen } from "@/components/ReferralDashboardScreen";
 import { PaymentMethodsScreen } from "@/components/profile/PaymentMethodsScreen";
 import { SearchResultsScreen } from "@/components/SearchResultsScreen";
@@ -92,7 +95,9 @@ type Phase =
   | "referrals"
   | "payment-methods"
   | "search-results"
-  | "orders";
+  | "orders"
+  | "active-devices"
+  | "device-limit";
 
 
 
@@ -133,6 +138,25 @@ function Index() {
   }, []);
 
   const [forceUpdate, setForceUpdate] = useState(false);
+  const [limitDevices, setLimitDevices] = useState<DeviceSession[]>([]);
+
+  // Enforce the max-2-device rule right after any successful login.
+  const enterAppAfterAuth = useCallback(
+    async (fallbackPhase: Phase = "home") => {
+      try {
+        const res = await registerThisDevice();
+        if (res.status === "limit_reached") {
+          setLimitDevices(res.devices);
+          setPhase("device-limit");
+          return;
+        }
+      } catch (e) {
+        console.error("device registration failed:", e);
+      }
+      setPhase(fallbackPhase);
+    },
+    [setPhase],
+  );
 
   function resetAndGoHome() {
     setActiveBookingId(null);
@@ -217,6 +241,7 @@ function Index() {
       if (cancelled) return;
       if (data.session?.user && !data.session.user.is_anonymous) {
         setPhase("home");
+        enterAppAfterAuth("home");
         ensureUserRow()
           .then(() => import("@/lib/referrals").then((m) => m.linkReferralIfAny()))
           .then(() => registerPushForCurrentUser())
@@ -292,7 +317,7 @@ function Index() {
             phone={pendingPhone}
             onBack={() => setPhase("login")}
             onVerified={() => {
-              setPhase("home");
+              enterAppAfterAuth("home");
               ensureUserRow(`+91${pendingPhone}`)
                 .then(() => import("@/lib/referrals").then((m) => m.linkReferralIfAny()))
                 .catch((e) => console.error("post-pin-login setup failed:", e));
@@ -343,9 +368,9 @@ function Index() {
                 });
                 if (forceResetPin || hasPin !== true) {
                   setForceResetPin(false);
-                  setPhase("pin-set");
+                  await enterAppAfterAuth("pin-set");
                 } else {
-                  setPhase("home");
+                  await enterAppAfterAuth("home");
                 }
               } catch (e) {
                 console.error("post-otp setup failed:", e);
@@ -664,12 +689,30 @@ function Index() {
             onBack={() => setPhase("profile")}
             onOpenNotifications={() => setPhase("notifications")}
             onOpenAbout={() => setPhase("about")}
+            onOpenDevices={() => setPhase("active-devices")}
           />
         </div>
       )}
       {phase === "help" && (
         <div className="animate-fade-slide-in">
           <HelpSupportScreen onBack={() => setPhase("profile")} />
+        </div>
+      )}
+      {phase === "active-devices" && (
+        <div className="animate-fade-slide-in">
+          <ActiveDevicesScreen
+            onBack={() => setPhase("settings")}
+            onSignedOut={() => setPhase("login")}
+          />
+        </div>
+      )}
+      {phase === "device-limit" && (
+        <div className="animate-fade-slide-in">
+          <DeviceLimitScreen
+            devices={limitDevices}
+            onContinue={() => setPhase("home")}
+            onCancel={() => setPhase("login")}
+          />
         </div>
       )}
       {phase === "about" && (
