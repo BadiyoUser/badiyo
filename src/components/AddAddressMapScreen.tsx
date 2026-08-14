@@ -8,6 +8,8 @@ import {
   type PlaceSuggestion,
 } from "@/lib/geocode.functions";
 import { getCurrentCoords } from "@/lib/nativeGeolocation";
+import { loadMapsScript } from "@/lib/googleMapsLoader";
+
 
 export type PickedAddress = {
   full_address: string;
