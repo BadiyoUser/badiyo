@@ -50,7 +50,7 @@ export function DeviceLimitScreen({
       <div className="mx-auto w-full max-w-md px-5 pt-10">
         <h1 className="text-xl font-extrabold text-foreground">Device limit reached</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Your badiyo account can be used on 2 devices at a time. Log out of one to continue on this
+          Your badiyos account can be used on 2 devices at a time. Log out of one to continue on this
           device.
         </p>
 

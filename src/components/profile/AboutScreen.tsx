@@ -6,20 +6,20 @@ type Tab = (typeof TABS)[number];
 
 const CONTENT: Record<Tab, { title: string; paragraphs: string[] }> = {
   About: {
-    title: "About badiyo",
+    title: "About badiyos",
     paragraphs: [
-      "badiyo is your trusted home cleaning companion. We connect households with verified, background-checked cleaning experts who deliver quality service on demand.",
+      "badiyos is your trusted home cleaning companion. We connect households with verified, background-checked cleaning experts who deliver quality service on demand.",
       "Our mission is to make home care effortless — book in seconds, pay securely, and relax while our experts handle the rest.",
-      "Founded with a focus on quality and reliability, badiyo serves thousands of homes across the region.",
+      "Founded with a focus on quality and reliability, badiyos serves thousands of homes across the region.",
     ],
   },
   Terms: {
     title: "Terms of Service",
     paragraphs: [
-      "By using badiyo, you agree to these Terms. Services are provided by independent experts partnered with badiyo.",
+      "By using badiyos, you agree to these Terms. Services are provided by independent experts partnered with badiyos.",
       "You are responsible for providing accurate address details and being available at the scheduled time.",
       "Cancellations within 1 hour of the scheduled slot may incur a small fee. Refunds are processed within 5-7 business days.",
-      "badiyo reserves the right to update pricing, service coverage, and these terms with prior notice.",
+      "badiyos reserves the right to update pricing, service coverage, and these terms with prior notice.",
     ],
   },
   Privacy: {

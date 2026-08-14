@@ -89,7 +89,7 @@ export function LoginScreen({
         {/* Heading */}
         <div className="mt-10 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Welcome to badiyo
+            Welcome to badiyos
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign in to book trusted home cleaning services
@@ -151,7 +151,7 @@ export function LoginScreen({
         </button>
 
         <p className="mt-auto pt-10 text-center text-xs text-muted-foreground">
-          By continuing, you agree to badiyo's Terms & Privacy Policy.
+          By continuing, you agree to badiyos' Terms & Privacy Policy.
         </p>
       </div>
     </main>

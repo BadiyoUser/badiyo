@@ -134,7 +134,7 @@ export function PinLoginScreen({
         return;
       }
       setBiometricStatus("prompting");
-      const ok = await authenticateBiometric("Log in to badiyo", 8000);
+      const ok = await authenticateBiometric("Log in to badiyos", 8000);
       if (ok) {
         setBiometricStatus("success");
         await submit(stored);
@@ -162,7 +162,7 @@ export function PinLoginScreen({
   const retryBiometric = async () => {
     const stored = await withTimeout(loadDevicePin(phone), 5000, null);
     if (!stored) return;
-    const ok = await authenticateBiometric("Log in to badiyo");
+    const ok = await authenticateBiometric("Log in to badiyos");
     if (ok) void submit(stored);
   };
 
@@ -268,7 +268,7 @@ export function PinLoginScreen({
         </div>
 
         <p className="mt-auto pt-10 text-center text-xs text-muted-foreground">
-          By continuing, you agree to badiyo's Terms & Privacy Policy.
+          By continuing, you agree to badiyos' Terms & Privacy Policy.
         </p>
       </div>
     </main>

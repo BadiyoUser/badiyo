@@ -283,7 +283,7 @@ export function ServiceInProgressScreen({
           order_id: data.order_id,
           amount: data.amount,
           currency: data.currency,
-          name: "badiyo",
+          name: "badiyos",
           description: `Extend by ${opt.duration_label}`,
           prefill: { contact },
           theme: { color: "#00B97A" },

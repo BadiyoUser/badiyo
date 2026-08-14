@@ -44,7 +44,7 @@ export async function checkBiometric(): Promise<BiometricStatus> {
 
 /** Prompts the OS biometric dialog. Resolves true on success. */
 export async function authenticateBiometric(
-  reason = "Unlock badiyo",
+  reason = "Unlock badiyos",
   timeoutMs = 8000,
 ): Promise<boolean> {
   const mod = await biom();
@@ -56,7 +56,7 @@ export async function authenticateBiometric(
       cancelTitle: "Use PIN instead",
       allowDeviceCredential: false,
       iosFallbackTitle: "Use PIN",
-      androidTitle: "Unlock badiyo",
+      androidTitle: "Unlock badiyos",
       androidSubtitle: "Use your fingerprint or face",
       androidConfirmationRequired: false,
     }), timeoutMs);

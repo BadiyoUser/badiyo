@@ -86,7 +86,7 @@ export function ProfileScreen({
       title: "Activity",
       items: [
         { key: "bookings", label: "My Bookings", desc: "View past and upcoming services", icon: CalendarCheck, onClick: onOpenBookings },
-        { key: "wallet", label: "Wallet", desc: "Badiyo coins & transactions", icon: WalletIcon, onClick: onOpenWallet },
+        { key: "wallet", label: "Wallet", desc: "Badiyos coins & transactions", icon: WalletIcon, onClick: onOpenWallet },
         { key: "referrals", label: "Refer & Earn", desc: "Invite friends and earn rewards", icon: Gift, onClick: onOpenReferrals },
       ],
     },
@@ -106,7 +106,7 @@ export function ProfileScreen({
     {
       title: "Other",
       items: [
-        { key: "about", label: "About, Terms & Privacy", desc: "Learn more about badiyo", icon: FileText, onClick: onOpenAbout },
+        { key: "about", label: "About, Terms & Privacy", desc: "Learn more about badiyos", icon: FileText, onClick: onOpenAbout },
       ],
     },
   ];

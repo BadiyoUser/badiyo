@@ -160,7 +160,7 @@ export const en = {
   "settings.devices": "Active Devices",
   "settings.privacy": "Privacy Policy",
   "language.title": "Language",
-  "language.subtitle": "Choose the language you'd like to use in badiyo.",
+  "language.subtitle": "Choose the language you'd like to use in badiyos.",
   "language.english": "English",
   "language.marathi": "मराठी",
   "language.saved": "Language updated",
@@ -169,7 +169,7 @@ export const en = {
   // ── Not serviceable / waitlist ───────────────────────────
   "notServiceable.title": "Service Area",
   "notServiceable.heading": "We're not in your area yet",
-  "notServiceable.sub": "badiyo hasn't launched here yet — but we're expanding fast.",
+  "notServiceable.sub": "badiyos hasn't launched here yet — but we're expanding fast.",
   "notServiceable.subSegment": "{segment} hasn't launched in your area yet — but we're expanding fast.",
   "notServiceable.join": "Join Waitlist",
   "notServiceable.joining": "Adding you…",

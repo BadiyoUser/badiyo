@@ -8,7 +8,7 @@ export function ForceUpdateScreen() {
       </div>
       <h1 className="mt-6 text-xl font-extrabold text-foreground">Update required</h1>
       <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-        A newer version of badiyo is available. Please update to continue.
+        A newer version of badiyos is available. Please update to continue.
       </p>
       <a
         href="https://play.google.com/store"

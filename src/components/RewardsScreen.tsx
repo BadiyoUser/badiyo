@@ -42,7 +42,7 @@ const MISSIONS: Array<{
   {
     id: "refer",
     title: "Refer a friend",
-    description: "Invite a friend to badiyo and earn when they book.",
+    description: "Invite a friend to badiyos and earn when they book.",
     icon: Gift,
     reward: 100,
     cta: "Invite",
