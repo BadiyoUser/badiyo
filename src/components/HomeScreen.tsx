@@ -363,13 +363,14 @@ function SegmentView({
   services: SegmentService[];
   onBookService?: (s: BookServicePayload) => void;
 }) {
+  const t = useT();
   if (segment.display_template !== "CATEGORY_FIRST") {
     return (
       <div className="mt-8 rounded-[18px] border border-dashed border-border bg-card px-6 py-12 text-center">
-        <p className="text-base font-bold text-foreground">{segment.name} is coming soon</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          We're getting this section ready for you.
+        <p className="text-base font-bold text-foreground">
+          {t("home.comingSoon", { segment: segment.name })}
         </p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("home.comingSoonSub")}</p>
       </div>
     );
   }
@@ -377,7 +378,7 @@ function SegmentView({
   return (
     <>
       <h2 className="mt-5 text-lg font-extrabold tracking-tight text-foreground">
-        Book {segment.name}
+        {t("home.bookSegment", { segment: segment.name })}
       </h2>
 
       <div className="mt-4 flex flex-col gap-3">
@@ -387,31 +388,13 @@ function SegmentView({
       </div>
 
       <p className="mt-4 text-center text-xs text-muted-foreground">
-        Need it later? Schedule a time inside booking
+        {t("home.scheduleHint")}
       </p>
 
       <h2 className="mt-6 text-xl font-extrabold tracking-tight text-foreground">
-        One Expert who can do it all
+        {t("home.oneExpert")}
       </h2>
-      <div className="mt-5 grid grid-cols-3 gap-4">
-        {EXPERT_TILES.map((tile) => (
-          <div key={tile.label} className="flex flex-col">
-            <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
-              <img
-                src={tile.image}
-                alt={tile.label}
-                width={512}
-                height={512}
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
-              {tile.label}
-            </p>
-          </div>
-        ))}
-      </div>
+      <ExpertTiles />
     </>
   );
 }
