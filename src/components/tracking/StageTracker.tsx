@@ -35,6 +35,7 @@ export function stageFromStatus(status: string | null | undefined): TrackingStag
 }
 
 export function StageTracker({ stage }: { stage: TrackingStage }) {
+  const t = useT();
   const currentIdx = STAGES.findIndex((s) => s.key === stage);
   return (
     <div className="w-full">
