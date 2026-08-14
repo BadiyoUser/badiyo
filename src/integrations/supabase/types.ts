@@ -1637,6 +1637,7 @@ export type Database = {
         Args: { _device_id: string }
         Returns: undefined
       }
+      customer_set_language: { Args: { _lang: string }; Returns: undefined }
       ensure_start_otp: { Args: { _booking_id: string }; Returns: string }
       expand_stale_broadcasts: { Args: never; Returns: number }
       expert_ensure_booking_codes: {
