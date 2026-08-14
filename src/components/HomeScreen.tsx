@@ -118,30 +118,35 @@ function ServiceCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
   );
 }
 
-/** Compact card used inside the horizontal rows of the "All" tab. */
+/** Compact card used inside the 3-up service grids (All tab + segment page). */
 function ServiceMiniCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
   const t = useT();
   return (
-    <article className="flex w-[150px] shrink-0 flex-col rounded-[18px] border border-border bg-card p-4 shadow-sm">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-        <Icon name={s.icon} className="h-5 w-5 text-primary" />
+    <article className="flex h-[190px] w-full min-w-0 flex-col rounded-[18px] border border-border bg-card p-3 shadow-sm">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+        <Icon name={s.icon} className="h-[18px] w-[18px] text-primary" />
       </div>
-      <div className="mt-3 text-sm font-bold leading-tight text-foreground">{s.duration_label}</div>
+      <div className="mt-2 line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
+        {s.duration_label}
+      </div>
       {s.subtitle && (
-        <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{s.subtitle}</div>
+        <div className="mt-0.5 line-clamp-2 text-[11px] leading-tight text-muted-foreground">
+          {s.subtitle}
+        </div>
       )}
-      <div className="mt-1 text-sm font-bold text-primary">
+      <div className="mt-1 text-[13px] font-bold text-primary">
         {t("common.rupees", { amount: Number(s.price) })}
       </div>
       <button
         onClick={onBook}
-        className="mt-3 rounded-[12px] bg-primary px-3 py-2 text-xs font-bold text-primary-foreground transition active:scale-[0.98]"
+        className="mt-auto w-full rounded-[12px] bg-primary px-2 py-2 text-[11px] font-bold text-primary-foreground transition active:scale-[0.98]"
       >
         {t("home.bookNow")}
       </button>
     </article>
   );
 }
+
 
 export function HomeScreen({
   onBookService,
