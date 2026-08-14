@@ -7,6 +7,7 @@ import { StageTracker, stageFromStatus } from "./StageTracker";
 import { usePullToRefresh, PullToRefreshIndicator } from "@/lib/usePullToRefresh";
 import { ServiceLocationMap } from "./ServiceLocationMap";
 import { CancelBookingButton } from "./CancelBookingButton";
+import { useT } from "@/i18n";
 
 
 type ExpertInfo = {
@@ -58,6 +59,7 @@ export function ExpertAssignedScreen({
   onAdvanceCompleted?: () => void;
   onCancelled?: () => void;
 }) {
+  const t = useT();
   const qc = useQueryClient();
   const queryKey = ["tracking-booking", bookingId] as const;
 
