@@ -1,4 +1,6 @@
 import { Check } from "lucide-react";
+import { useT } from "@/i18n";
+import type { TranslationKey } from "@/i18n/en";
 
 export type TrackingStage =
   | "booking_placed"
@@ -7,12 +9,12 @@ export type TrackingStage =
   | "service_started"
   | "completed";
 
-const STAGES: { key: TrackingStage; label: string }[] = [
-  { key: "booking_placed", label: "Placed" },
-  { key: "confirming", label: "Confirming" },
-  { key: "expert_assigned", label: "Assigned" },
-  { key: "service_started", label: "Started" },
-  { key: "completed", label: "Completed" },
+const STAGES: { key: TrackingStage; labelKey: TranslationKey }[] = [
+  { key: "booking_placed", labelKey: "stage.placed" },
+  { key: "confirming", labelKey: "stage.confirming" },
+  { key: "expert_assigned", labelKey: "stage.assigned" },
+  { key: "service_started", labelKey: "stage.started" },
+  { key: "completed", labelKey: "stage.completed" },
 ];
 
 export function stageFromStatus(status: string | null | undefined): TrackingStage {

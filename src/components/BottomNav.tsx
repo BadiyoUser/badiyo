@@ -1,4 +1,5 @@
 import { Home, ClipboardList, Gift, type LucideIcon } from "lucide-react";
+import { useT } from "@/i18n";
 
 type TabKey = "home" | "orders" | "rewards";
 
@@ -21,10 +22,11 @@ export function BottomNav({
   onOrders: () => void;
   onRewards: () => void;
 }) {
+  const t = useT();
   const tabs: Tab[] = [
-    { key: "home", label: "Home", Icon: Home, onClick: onHome },
-    { key: "orders", label: "Orders", Icon: ClipboardList, onClick: onOrders, primary: true },
-    { key: "rewards", label: "Rewards", Icon: Gift, onClick: onRewards },
+    { key: "home", label: t("nav.home"), Icon: Home, onClick: onHome },
+    { key: "orders", label: t("nav.orders"), Icon: ClipboardList, onClick: onOrders, primary: true },
+    { key: "rewards", label: t("nav.rewards"), Icon: Gift, onClick: onRewards },
   ];
 
   return (

@@ -1,4 +1,5 @@
 import type { Segment } from "@/lib/segments";
+import { useT } from "@/i18n";
 
 export function ServicesBar({
   segments,
@@ -9,14 +10,15 @@ export function ServicesBar({
   activeSegmentId: string | null;
   onSelect: (segmentId: string | null) => void;
 }) {
+  const t = useT();
   const tabs: { id: string | null; label: string }[] = [
-    { id: null, label: "All" },
+    { id: null, label: t("home.tabAll") },
     ...segments.map((s) => ({ id: s.id, label: s.name })),
   ];
 
   return (
     <nav
-      aria-label="Services"
+      aria-label={t("home.servicesBar")}
       className="-mx-5 mt-4 overflow-x-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       <div className="flex w-max items-center gap-2">
