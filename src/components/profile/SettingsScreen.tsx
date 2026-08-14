@@ -1,24 +1,35 @@
 import { ArrowLeft, ChevronRight, Globe, Bell, Shield, Smartphone, Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { useT, useLanguage } from "@/i18n";
 
 export function SettingsScreen({
   onBack,
   onOpenNotifications,
   onOpenAbout,
   onOpenDevices,
+  onOpenLanguage,
 }: {
   onBack: () => void;
   onOpenNotifications: () => void;
   onOpenAbout: () => void;
   onOpenDevices: () => void;
+  onOpenLanguage: () => void;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const t = useT();
+  const { lang } = useLanguage();
 
   const items = [
-    { key: "lang", label: "Language", value: "English", icon: Globe, onClick: () => {} },
-    { key: "notif", label: "Notification Preferences", icon: Bell, onClick: onOpenNotifications },
-    { key: "devices", label: "Active Devices", icon: Smartphone, onClick: onOpenDevices },
-    { key: "privacy", label: "Privacy Policy", icon: Shield, onClick: onOpenAbout },
+    {
+      key: "lang",
+      label: t("settings.language"),
+      value: lang === "mr" ? t("language.marathi") : t("language.english"),
+      icon: Globe,
+      onClick: onOpenLanguage,
+    },
+    { key: "notif", label: t("settings.notifications"), icon: Bell, onClick: onOpenNotifications },
+    { key: "devices", label: t("settings.devices"), icon: Smartphone, onClick: onOpenDevices },
+    { key: "privacy", label: t("settings.privacy"), icon: Shield, onClick: onOpenAbout },
   ];
 
   return (
@@ -27,12 +38,12 @@ export function SettingsScreen({
         <header className="flex items-center gap-3">
           <button
             onClick={onBack}
-            aria-label="Back"
+            aria-label={t("common.back")}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card"
           >
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
-          <h1 className="text-lg font-bold text-foreground">Settings</h1>
+          <h1 className="text-lg font-bold text-foreground">{t("settings.title")}</h1>
         </header>
 
         <section className="mt-6 divide-y divide-border overflow-hidden rounded-[18px] border border-border bg-card shadow-sm">
