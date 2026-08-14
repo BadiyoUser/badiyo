@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sparkles, Plus, X, Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/i18n";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { StageTracker, stageFromStatus } from "./StageTracker";
 import { usePullToRefresh, PullToRefreshIndicator } from "@/lib/usePullToRefresh";
@@ -137,6 +138,7 @@ export function ServiceInProgressScreen({
   onAdvanceCompleted?: () => void;
   onCancelled?: () => void;
 }) {
+  const t = useT();
   const qc = useQueryClient();
 
 
@@ -451,6 +453,7 @@ function BannerCard({
   onExtend?: () => void;
   onDismiss: () => void;
 }) {
+  const t = useT();
   const isEnd = tone === "end";
   return (
     <div
@@ -514,6 +517,7 @@ function ExtensionSheet({
   onClose: () => void;
   onPick: (o: CatalogueItem) => void;
 }) {
+  const t = useT();
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center">
       <div className="w-full max-w-md rounded-t-[22px] bg-card p-5 shadow-xl sm:rounded-[22px]">
