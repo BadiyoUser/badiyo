@@ -6,6 +6,7 @@ import type { SelectedAddress } from "../BookingSummaryScreen";
 import type { SelectedService, SelectedSlot } from "../SlotSelectionScreen";
 import { StageTracker, stageFromStatus } from "./StageTracker";
 import { CancelBookingButton } from "./CancelBookingButton";
+import { useT } from "@/i18n";
 
 
 type BookingRow = {
@@ -44,6 +45,7 @@ export function SearchingForExpertScreen({
   onExpertAssigned: () => void;
   onCancelled?: () => void;
 }) {
+  const t = useT();
   const qc = useQueryClient();
   const queryKey = ["searching-booking", bookingId] as const;
 
