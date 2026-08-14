@@ -30,7 +30,7 @@ export function DeviceLimitScreen({
         setList(res.devices);
       }
     } catch (e) {
-      toast.error(getErrorMessage(e));
+      toast.error(await getErrorMessage(e));
     } finally {
       setBusy(null);
     }
