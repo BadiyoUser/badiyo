@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     const fullPhone = `+91${digits}`;
     // Synthetic email used as the auth identity since Supabase phone provider
     // is disabled. Kept internal — never shown to the user.
-    const syntheticEmail = `phone_91${digits}@badiyo.phone.local`;
+    const syntheticEmail = `phone_91${digits}@badiyos.phone.local`;
 
     const url = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       return json({ error: "Invalid phone or PIN" }, 400);
     }
     const fullPhone = `+91${digits}`;
-    const syntheticEmail = `phone_91${digits}@badiyo.phone.local`;
+    const syntheticEmail = `phone_91${digits}@badiyos.phone.local`;
 
     const url = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
