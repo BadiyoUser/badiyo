@@ -5,7 +5,6 @@ import {
   joinWaitlist,
   type WaitlistLocation,
 } from "@/lib/serviceability";
-import { friendlyError } from "@/lib/errorMessage";
 import { useT } from "@/i18n";
 
 export type NotServiceableLocation = WaitlistLocation & {
@@ -115,7 +114,7 @@ export function NotServiceableScreen({
               </button>
               {join.error && (
                 <p className="mt-2 text-xs text-destructive">
-                  {friendlyError(join.error)}
+                  {(join.error as Error)?.message ?? t("notServiceable.joinFailed")}
                 </p>
               )}
             </>

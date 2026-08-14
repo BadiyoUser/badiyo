@@ -167,4 +167,15 @@ export const mr: Partial<Record<keyof typeof en, string>> = {
   "language.marathi": "मराठी",
   "language.saved": "भाषा बदलली",
   "language.saveFailed": "भाषा सेव्ह होऊ शकली नाही. कृपया पुन्हा प्रयत्न करा.",
+
+  "notServiceable.title": "सेवा क्षेत्र",
+  "notServiceable.heading": "आम्ही अजून तुमच्या भागात नाही",
+  "notServiceable.sub": "badiyo अजून इथे सुरू झालेली नाही — पण आम्ही वेगाने विस्तार करत आहोत.",
+  "notServiceable.subSegment": "{segment} अजून तुमच्या भागात सुरू झालेली नाही — पण आम्ही वेगाने विस्तार करत आहोत.",
+  "notServiceable.join": "वेटलिस्टमध्ये सामील व्हा",
+  "notServiceable.joining": "जोडत आहोत…",
+  "notServiceable.joinFailed": "वेटलिस्टमध्ये जोडता आले नाही. कृपया पुन्हा प्रयत्न करा.",
+  "notServiceable.onTheList": "तुम्ही यादीत आहात!",
+  "notServiceable.confirmation": "तुमच्या भागात सुरू होताच आम्ही तुम्हाला कळवू!",
+  "notServiceable.changeAddress": "दुसरा पत्ता वापरा",
 };
