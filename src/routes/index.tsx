@@ -38,6 +38,7 @@ import { SettingsScreen } from "@/components/profile/SettingsScreen";
 import { HelpSupportScreen } from "@/components/profile/HelpSupportScreen";
 import { AboutScreen } from "@/components/profile/AboutScreen";
 import { ActiveDevicesScreen } from "@/components/profile/ActiveDevicesScreen";
+import { LanguageScreen } from "@/components/profile/LanguageScreen";
 import { DeviceLimitScreen } from "@/components/DeviceLimitScreen";
 import { registerThisDevice, type DeviceSession } from "@/lib/devices";
 import { ReferralDashboardScreen } from "@/components/ReferralDashboardScreen";
@@ -97,6 +98,7 @@ type Phase =
   | "search-results"
   | "orders"
   | "active-devices"
+  | "language"
   | "device-limit";
 
 
@@ -690,6 +692,7 @@ function Index() {
             onOpenNotifications={() => setPhase("notifications")}
             onOpenAbout={() => setPhase("about")}
             onOpenDevices={() => setPhase("active-devices")}
+            onOpenLanguage={() => setPhase("language")}
           />
         </div>
       )}
@@ -704,6 +707,11 @@ function Index() {
             onBack={() => setPhase("settings")}
             onSignedOut={() => setPhase("login")}
           />
+        </div>
+      )}
+      {phase === "language" && (
+        <div className="animate-fade-slide-in">
+          <LanguageScreen onBack={() => setPhase("settings")} />
         </div>
       )}
       {phase === "device-limit" && (

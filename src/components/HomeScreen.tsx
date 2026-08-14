@@ -8,6 +8,8 @@ import { ServicesBar } from "./home/ServicesBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAvatarUrl } from "@/lib/useAvatarUrl";
 import { fetchSegmentServices, fetchSegments, type Segment, type SegmentService } from "@/lib/segments";
+import { useT } from "@/i18n";
+import type { TranslationKey } from "@/i18n/en";
 
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
@@ -42,11 +44,36 @@ async function fetchSections(): Promise<HomepageSection[]> {
   return (data ?? []) as HomepageSection[];
 }
 
-const EXPERT_TILES = [
-  { image: expertHouse, label: "House Cleaning" },
-  { image: expertDusting, label: "Dusting & Wiping" },
-  { image: expertDishes, label: "Cleaning Dishes" },
+const EXPERT_TILES: { image: string; labelKey: TranslationKey }[] = [
+  { image: expertHouse, labelKey: "home.tile.houseCleaning" },
+  { image: expertDusting, labelKey: "home.tile.dusting" },
+  { image: expertDishes, labelKey: "home.tile.dishes" },
 ];
+
+function ExpertTiles() {
+  const t = useT();
+  return (
+    <div className="mt-5 grid grid-cols-3 gap-4">
+      {EXPERT_TILES.map((tile) => (
+        <div key={tile.labelKey} className="flex flex-col">
+          <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
+            <img
+              src={tile.image}
+              alt={t(tile.labelKey)}
+              width={512}
+              height={512}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
+            {t(tile.labelKey)}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export type BookServicePayload = {
   duration_label: string;
@@ -68,6 +95,7 @@ function toPayload(s: SegmentService): BookServicePayload {
 
 /** Full-width booking card used by the existing Home Cleaning flow. */
 function ServiceCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
+  const t = useT();
   return (
     <article className="flex items-center gap-4 rounded-[18px] border border-border bg-card p-4 shadow-sm">
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -76,13 +104,15 @@ function ServiceCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="text-base font-bold text-foreground">{s.duration_label}</div>
         {s.subtitle && <div className="text-xs text-muted-foreground">{s.subtitle}</div>}
-        <div className="text-sm font-bold text-primary">Rs {Number(s.price)}</div>
+        <div className="text-sm font-bold text-primary">
+          {t("common.rupees", { amount: Number(s.price) })}
+        </div>
       </div>
       <button
         onClick={onBook}
         className="shrink-0 rounded-[12px] bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition active:scale-[0.98]"
       >
-        Book Now
+        {t("home.bookNow")}
       </button>
     </article>
   );
@@ -90,6 +120,7 @@ function ServiceCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
 
 /** Compact card used inside the horizontal rows of the "All" tab. */
 function ServiceMiniCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
+  const t = useT();
   return (
     <article className="flex w-[150px] shrink-0 flex-col rounded-[18px] border border-border bg-card p-4 shadow-sm">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -99,12 +130,14 @@ function ServiceMiniCard({ s, onBook }: { s: SegmentService; onBook: () => void 
       {s.subtitle && (
         <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{s.subtitle}</div>
       )}
-      <div className="mt-1 text-sm font-bold text-primary">Rs {Number(s.price)}</div>
+      <div className="mt-1 text-sm font-bold text-primary">
+        {t("common.rupees", { amount: Number(s.price) })}
+      </div>
       <button
         onClick={onBook}
         className="mt-3 rounded-[12px] bg-primary px-3 py-2 text-xs font-bold text-primary-foreground transition active:scale-[0.98]"
       >
-        Book Now
+        {t("home.bookNow")}
       </button>
     </article>
   );
@@ -133,12 +166,13 @@ export function HomeScreen({
     queryFn: fetchSections,
   });
   const { data: avatarUrl } = useAvatarUrl();
+  const t = useT();
 
   const searchBar = sections.find((s) => s.section_type === "search_bar");
   const promo = sections.find((s) => s.section_type === "promo_banner");
 
   const searchPlaceholder =
-    searchBar?.payload?.placeholder ?? "Search for cleaning services…";
+    searchBar?.payload?.placeholder ?? t("home.searchPlaceholder");
 
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
   const [activeAddress, setActiveAddress] = useState<SavedAddress | null>(null);
@@ -189,13 +223,13 @@ export function HomeScreen({
           </button>
           <button
             onClick={onOpenProfile}
-            aria-label="Profile"
+            aria-label={t("common.profile")}
             className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary/60 bg-card"
           >
             {avatarUrl ? (
               <img
                 src={avatarUrl}
-                alt="Profile"
+                alt={t("common.profile")}
                 className="h-full w-full object-cover"
                 loading="eager"
                 decoding="async"
@@ -221,7 +255,7 @@ export function HomeScreen({
             className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/80"
             placeholder={searchPlaceholder}
           />
-          <button type="button" aria-label="Voice search">
+          <button type="button" aria-label={t("home.voiceSearch")}>
             <Mic className="h-5 w-5 text-muted-foreground" />
           </button>
         </form>
@@ -254,7 +288,7 @@ export function HomeScreen({
                       onClick={() => setActiveSegmentId(segment.id)}
                       className="flex items-center gap-0.5 text-sm font-bold text-primary"
                     >
-                      See all
+                      {t("home.seeAll")}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
@@ -275,27 +309,9 @@ export function HomeScreen({
 
             {/* Expert tiles */}
             <h2 className="mt-8 text-xl font-extrabold tracking-tight text-foreground">
-              One Expert who can do it all
+              {t("home.oneExpert")}
             </h2>
-            <div className="mt-5 grid grid-cols-3 gap-4">
-              {EXPERT_TILES.map((tile) => (
-                <div key={tile.label} className="flex flex-col">
-                  <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
-                    <img
-                      src={tile.image}
-                      alt={tile.label}
-                      width={512}
-                      height={512}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
-                    {tile.label}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <ExpertTiles />
           </div>
         )}
 
@@ -355,13 +371,14 @@ function SegmentView({
   services: SegmentService[];
   onBookService?: (s: BookServicePayload) => void;
 }) {
+  const t = useT();
   if (segment.display_template !== "CATEGORY_FIRST") {
     return (
       <div className="mt-8 rounded-[18px] border border-dashed border-border bg-card px-6 py-12 text-center">
-        <p className="text-base font-bold text-foreground">{segment.name} is coming soon</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          We're getting this section ready for you.
+        <p className="text-base font-bold text-foreground">
+          {t("home.comingSoon", { segment: segment.name })}
         </p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("home.comingSoonSub")}</p>
       </div>
     );
   }
@@ -369,7 +386,7 @@ function SegmentView({
   return (
     <>
       <h2 className="mt-5 text-lg font-extrabold tracking-tight text-foreground">
-        Book {segment.name}
+        {t("home.bookSegment", { segment: segment.name })}
       </h2>
 
       <div className="mt-4 flex flex-col gap-3">
@@ -379,31 +396,13 @@ function SegmentView({
       </div>
 
       <p className="mt-4 text-center text-xs text-muted-foreground">
-        Need it later? Schedule a time inside booking
+        {t("home.scheduleHint")}
       </p>
 
       <h2 className="mt-6 text-xl font-extrabold tracking-tight text-foreground">
-        One Expert who can do it all
+        {t("home.oneExpert")}
       </h2>
-      <div className="mt-5 grid grid-cols-3 gap-4">
-        {EXPERT_TILES.map((tile) => (
-          <div key={tile.label} className="flex flex-col">
-            <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
-              <img
-                src={tile.image}
-                alt={tile.label}
-                width={512}
-                height={512}
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
-              {tile.label}
-            </p>
-          </div>
-        ))}
-      </div>
+      <ExpertTiles />
     </>
   );
 }

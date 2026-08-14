@@ -1,5 +1,6 @@
 import { ArrowLeft, Clock, Calendar, Home as HomeIcon } from "lucide-react";
 import type { SelectedService, SelectedSlot } from "./SlotSelectionScreen";
+import { useT, type TFunction } from "@/i18n";
 
 export type SelectedAddress = {
   id: string;
@@ -12,11 +13,11 @@ export type SelectedAddress = {
   longitude?: number | null;
 };
 
-function formatSlot(slot: SelectedSlot): { title: string; subtitle: string } {
+function formatSlot(slot: SelectedSlot, t: TFunction): { title: string; subtitle: string } {
   if (slot.mode === "now") {
     return {
-      title: "Now",
-      subtitle: "Expert arriving in 30 – 45 mins",
+      title: t("summary.now"),
+      subtitle: t("summary.nowSub"),
     };
   }
   const date = new Date(slot.day);
@@ -27,7 +28,7 @@ function formatSlot(slot: SelectedSlot): { title: string; subtitle: string } {
   });
   return {
     title: `${dateLabel} · ${slot.slotLabel}`,
-    subtitle: `Between ${slot.slotRange}`,
+    subtitle: t("summary.between", { range: slot.slotRange }),
   };
 }
 
@@ -46,7 +47,8 @@ export function BookingSummaryScreen({
   onEditAddress: () => void;
   onProceedToPay: () => void;
 }) {
-  const slotInfo = formatSlot(slot);
+  const t = useT();
+  const slotInfo = formatSlot(slot, t);
 
   return (
     <main className="min-h-screen w-full bg-background pb-28">
@@ -55,13 +57,13 @@ export function BookingSummaryScreen({
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            aria-label="Back"
+            aria-label={t("common.back")}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card"
           >
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
           <h1 className="text-base font-bold text-foreground">
-            Booking Summary
+            {t("summary.title")}
           </h1>
         </div>
 
@@ -80,7 +82,7 @@ export function BookingSummaryScreen({
               </div>
             )}
             <div className="mt-1 text-sm font-bold text-primary">
-              Rs {service.price}
+              {t("common.rupees", { amount: service.price })}
             </div>
           </div>
         </section>
@@ -92,7 +94,7 @@ export function BookingSummaryScreen({
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-              When
+              {t("common.when")}
             </div>
             <div className="mt-1 text-base font-bold text-foreground">
               {slotInfo.title}
@@ -111,17 +113,17 @@ export function BookingSummaryScreen({
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-3">
               <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                Address
+                {t("common.address")}
               </div>
               <button
                 onClick={onEditAddress}
                 className="text-xs font-bold text-primary"
               >
-                Edit
+                {t("common.edit")}
               </button>
             </div>
             <div className="mt-1 text-base font-bold text-foreground">
-              {address.label || "Address"}
+              {address.label || t("address.fallbackLabel")}
             </div>
             <div className="mt-0.5 text-sm text-muted-foreground">
               {address.full_address}
@@ -132,17 +134,19 @@ export function BookingSummaryScreen({
         {/* Price breakdown */}
         <section className="mt-6 rounded-[18px] border border-border bg-card p-5">
           <div className="text-sm font-bold text-foreground">
-            Price details
+            {t("summary.priceDetails")}
           </div>
           <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-            <span>Service price</span>
-            <span className="text-foreground">Rs {service.price}</span>
+            <span>{t("summary.servicePrice")}</span>
+            <span className="text-foreground">
+              {t("common.rupees", { amount: service.price })}
+            </span>
           </div>
           <div className="my-4 h-px bg-border" />
           <div className="flex items-center justify-between">
-            <span className="text-base font-bold text-foreground">Total</span>
+            <span className="text-base font-bold text-foreground">{t("common.total")}</span>
             <span className="text-base font-bold text-foreground">
-              Rs {service.price}
+              {t("common.rupees", { amount: service.price })}
             </span>
           </div>
         </section>
@@ -152,16 +156,16 @@ export function BookingSummaryScreen({
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card">
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-4 px-5 py-4">
           <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">Total</span>
+            <span className="text-xs text-muted-foreground">{t("common.total")}</span>
             <span className="text-base font-bold text-foreground">
-              Rs {service.price}
+              {t("common.rupees", { amount: service.price })}
             </span>
           </div>
           <button
             onClick={onProceedToPay}
             className="flex-1 rounded-[14px] bg-primary px-4 py-3.5 text-sm font-bold text-primary-foreground transition active:scale-[0.99]"
           >
-            Proceed to Pay
+            {t("summary.proceedToPay")}
           </button>
         </div>
       </div>

@@ -1,0 +1,170 @@
+import type { en } from "./en";
+
+/**
+ * Marathi dictionary. Digits stay Latin (0-9) — never Devanagari numerals.
+ * Missing keys automatically fall back to English.
+ */
+export const mr: Partial<Record<keyof typeof en, string>> = {
+  // ── Common ───────────────────────────────────────────────
+  "common.continue": "पुढे चला",
+  "common.back": "मागे",
+  "common.close": "बंद करा",
+  "common.cancel": "रद्द करा",
+  "common.done": "झाले",
+  "common.edit": "बदला",
+  "common.total": "एकूण",
+  "common.address": "पत्ता",
+  "common.when": "कधी",
+  "common.rupees": "रु. {amount}",
+  "common.profile": "प्रोफाइल",
+  "common.loading": "लोड होत आहे…",
+
+  // ── Bottom navigation ────────────────────────────────────
+  "nav.home": "होम",
+  "nav.orders": "ऑर्डर्स",
+  "nav.rewards": "बक्षिसे",
+
+  // ── Home ─────────────────────────────────────────────────
+  "home.searchPlaceholder": "साफसफाईच्या सेवा शोधा…",
+  "home.voiceSearch": "आवाजाने शोधा",
+  "home.seeAll": "सर्व पहा",
+  "home.oneExpert": "सर्व कामे करणारा एकच एक्सपर्ट",
+  "home.tile.houseCleaning": "घराची साफसफाई",
+  "home.tile.dusting": "धूळ व पुसणे",
+  "home.tile.dishes": "भांडी घासणे",
+  "home.bookNow": "आत्ताच बुक करा",
+  "home.bookSegment": "{segment} बुक करा",
+  "home.comingSoon": "{segment} लवकरच येत आहे",
+  "home.comingSoonSub": "हा विभाग आम्ही तयार करत आहोत.",
+  "home.scheduleHint": "नंतर हवे आहे? बुकिंगमध्ये वेळ निवडा",
+  "home.servicesBar": "सेवा",
+  "home.tabAll": "सर्व",
+
+  // ── Slot selection ───────────────────────────────────────
+  "slot.bookNow": "आत्ताच बुक करा",
+  "slot.scheduleLater": "नंतरसाठी ठरवा",
+  "slot.arriveTitle": "एक्सपर्ट लवकरच पोहोचेल",
+  "slot.arriveSub": "तुमच्या पत्त्यावर 30 – 45 मिनिटांत",
+  "slot.chooseDay": "दिवस निवडा",
+  "slot.chooseTime": "वेळ निवडा",
+  "slot.noSlots": "आजसाठी वेळ शिल्लक नाही. कृपया दुसरा दिवस निवडा.",
+
+  // ── Address ──────────────────────────────────────────────
+  "address.title": "पत्ता निवडा",
+  "address.loading": "पत्ते लोड होत आहेत…",
+  "address.emptyTitle": "अजून कोणताही पत्ता सेव्ह केलेला नाही",
+  "address.emptySub": "बुकिंग पुढे नेण्यासाठी पत्ता जोडा",
+  "address.addNew": "नवीन पत्ता जोडा",
+  "address.addNewPlus": "+ नवीन पत्ता जोडा",
+  "address.fallbackLabel": "पत्ता",
+
+  // ── Booking summary ──────────────────────────────────────
+  "summary.title": "बुकिंग सारांश",
+  "summary.priceDetails": "किंमत तपशील",
+  "summary.servicePrice": "सेवेची किंमत",
+  "summary.proceedToPay": "पैसे भरा",
+  "summary.now": "आत्ता",
+  "summary.nowSub": "एक्सपर्ट 30 – 45 मिनिटांत पोहोचेल",
+  "summary.between": "{range} दरम्यान",
+
+  // ── Payment ──────────────────────────────────────────────
+  "payment.title": "पेमेंट",
+  "payment.opening": "सुरक्षित पेमेंट उघडत आहे…",
+  "payment.confirmed": "बुकिंग निश्चित झाले",
+  "payment.success": "तुमचे पेमेंट यशस्वी झाले.",
+  "payment.paymentId": "पेमेंट आयडी: {id}",
+  "payment.bookingId": "बुकिंग आयडी: {id}",
+  "payment.service": "सेवा",
+  "payment.totalPaid": "एकूण भरलेले",
+  "payment.failed": "पेमेंट अयशस्वी",
+  "payment.failedSub": "तुमचे पेमेंट पूर्ण होऊ शकले नाही.",
+  "payment.tryAgain": "पुन्हा प्रयत्न करा",
+  "payment.backToSummary": "सारांशाकडे परत",
+  "payment.nowArriving": "आत्ता · 30–45 मिनिटांत पोहोचेल",
+
+  // ── Tracking: stages ─────────────────────────────────────
+  "stage.placed": "नोंदवले",
+  "stage.confirming": "निश्चित होत आहे",
+  "stage.assigned": "नेमले",
+  "stage.started": "सुरू",
+  "stage.completed": "पूर्ण",
+
+  // ── Tracking: searching ──────────────────────────────────
+  "track.finding": "तुमचा एक्सपर्ट शोधत आहोत…",
+  "track.bookingNo": "बुकिंग #{id}",
+  "track.searchingTitle": "जवळचा उपलब्ध एक्सपर्ट शोधत आहोत",
+  "track.searchingSub": "यासाठी साधारण एक मिनिट लागतो",
+  "track.summary": "बुकिंग सारांश",
+  "track.asap": "शक्य तितक्या लवकर",
+
+  // ── Tracking: expert assigned ────────────────────────────
+  "track.assigning": "एक्सपर्ट नेमला जात आहे…",
+  "track.assignedTitle": "एक्सपर्ट नेमला",
+  "track.yourExpert": "तुमचा एक्सपर्ट",
+  "track.verifiedExpert": "पडताळणी केलेला एक्सपर्ट",
+  "track.callExpert": "एक्सपर्टला कॉल करा",
+  "track.startCode": "सुरुवातीचा कोड",
+  "track.preparingCode": "कोड तयार होत आहे…",
+  "track.showToExpert": "एक्सपर्ट आल्यावर हा कोड त्याला दाखवा.",
+  "track.openFullScreen": "पूर्ण स्क्रीनवर पहा",
+  "track.findingExpert": "तुमचा एक्सपर्ट शोधत आहोत",
+  "track.assigningExpert": "एक्सपर्ट नेमत आहोत",
+  "track.notifyingNearby": "आम्ही जवळच्या एक्सपर्टना कळवत आहोत. यास थोडाच वेळ लागेल.",
+  "track.pickingBest": "आमच्या टीमने तुमचे बुकिंग स्वीकारले असून सर्वोत्तम एक्सपर्ट निवडत आहे.",
+
+  // ── Tracking: OTP ────────────────────────────────────────
+  "otp.startTitle": "सेवा सुरू करण्यासाठी हा कोड एक्सपर्टला सांगा",
+  "otp.endTitle": "काम पूर्ण झाल्याचे निश्चित करण्यासाठी हा कोड सांगा",
+  "otp.startSub": "हा 4 अंकी कोड एक्सपर्टला मोठ्याने वाचून सांगा. तो हा कोड टाकून सेवा सुरू करेल.",
+  "otp.endSub": "हा 4 अंकी कोड एक्सपर्टला मोठ्याने वाचून सांगा. तो हा कोड टाकून सेवा पूर्ण झाल्याचे नोंदवेल.",
+  "otp.generating": "कोड तयार होत आहे…",
+  "otp.doNotShare": "हा कोड तुमच्या एक्सपर्टशिवाय कोणालाही सांगू नका",
+  "otp.waiting": "एक्सपर्ट कोड टाकण्याची वाट पाहत आहोत…",
+
+  // ── Tracking: in progress ────────────────────────────────
+  "progress.title": "तुमच्या घराची सफाई सुरू आहे",
+  "progress.sub": "निवांत रहा — काम पूर्ण झाल्यावर आम्ही कळवू.",
+  "progress.timeRemaining": "उरलेला वेळ",
+  "progress.waitingStart": "सेवा सुरू होण्याची वाट पाहत आहोत…",
+  "progress.serviceLocation": "सेवेचे ठिकाण",
+  "progress.liveSoon": "लाइव्ह एक्सपर्ट ट्रॅकिंग लवकरच येत आहे.",
+  "progress.extendTime": "वेळ वाढवा",
+  "progress.showEndCode": "पूर्णत्वाचा कोड दाखवा",
+  "progress.endCodeHint": "सेवा संपवण्यासाठी एक्सपर्ट तुमच्याकडे पूर्णत्वाचा कोड मागेल.",
+  "progress.fiveLeft": "5 मिनिटे बाकी",
+  "progress.timesUp": "वेळ संपली",
+  "progress.extendNow": "एक्सपर्टला थांबवण्यासाठी आत्ताच वेळ वाढवा.",
+  "progress.needMore": "अजून वेळ हवा आहे? सेवा संपण्याआधी वेळ वाढवा.",
+  "progress.dismiss": "बंद करा",
+  "progress.extendTitle": "सेवेचा वेळ वाढवा",
+  "progress.extendSub": "सुरू असलेल्या बुकिंगमध्ये अधिक वेळ जोडा.",
+  "progress.loadingOptions": "पर्याय लोड होत आहेत…",
+  "progress.addsMinutes": "तुमच्या टाइमरमध्ये {minutes} मिनिटे वाढतील",
+
+  // ── Tracking: cancel ─────────────────────────────────────
+  "cancel.confirmFree": "हे बुकिंग रद्द करायचे?",
+  "cancel.confirmFee": "रद्द करण्याच्या शुल्कासह रद्द करायचे?",
+  "cancel.fullRefund": "तुम्हाला पूर्ण परतावा मिळेल.",
+  "cancel.yes": "होय, रद्द करा",
+  "cancel.cancelled": "बुकिंग रद्द झाले.",
+
+  // ── Rate & review ────────────────────────────────────────
+  "review.title": "सेवा कशी वाटली?",
+  "review.sub": "तुमच्या अभिप्रायामुळे आम्ही सुधारतो.",
+  "review.placeholder": "तुमचा अनुभव लिहा (ऐच्छिक)",
+  "review.submit": "अभिप्राय पाठवा",
+  "review.submitting": "पाठवत आहोत…",
+
+  // ── Settings / language ──────────────────────────────────
+  "settings.title": "सेटिंग्ज",
+  "settings.language": "भाषा",
+  "settings.notifications": "सूचना प्राधान्ये",
+  "settings.devices": "सक्रिय डिव्हाइस",
+  "settings.privacy": "गोपनीयता धोरण",
+  "language.title": "भाषा",
+  "language.subtitle": "badiyo मध्ये तुम्हाला वापरायची भाषा निवडा.",
+  "language.english": "English",
+  "language.marathi": "मराठी",
+  "language.saved": "भाषा बदलली",
+  "language.saveFailed": "भाषा सेव्ह होऊ शकली नाही. कृपया पुन्हा प्रयत्न करा.",
+};

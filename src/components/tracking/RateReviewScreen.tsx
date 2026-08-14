@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/i18n";
 
 export function RateReviewScreen({
   bookingId,
@@ -9,6 +10,7 @@ export function RateReviewScreen({
   bookingId: string | null;
   onSubmit: () => void;
 }) {
+  const t = useT();
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -32,9 +34,9 @@ export function RateReviewScreen({
     <main className="min-h-screen w-full bg-background">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pt-10 pb-8">
         <div className="text-center">
-          <h1 className="text-xl font-bold text-foreground">How was your service?</h1>
+          <h1 className="text-xl font-bold text-foreground">{t("review.title")}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Your feedback helps us improve.
+            {t("review.sub")}
           </p>
         </div>
 
@@ -61,7 +63,7 @@ export function RateReviewScreen({
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Share your experience (optional)"
+          placeholder={t("review.placeholder")}
           rows={4}
           className="mt-8 w-full resize-none rounded-[14px] border border-border bg-card px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
         />
@@ -73,7 +75,7 @@ export function RateReviewScreen({
             disabled={submitting}
             className="w-full rounded-[14px] bg-primary px-4 py-3.5 text-sm font-bold text-primary-foreground transition active:scale-[0.99] disabled:opacity-60"
           >
-            {submitting ? "Submitting…" : "Submit Review"}
+            {submitting ? t("review.submitting") : t("review.submit")}
           </button>
         </div>
       </div>

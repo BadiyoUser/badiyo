@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sparkles, Plus, X, Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/i18n";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { StageTracker, stageFromStatus } from "./StageTracker";
 import { usePullToRefresh, PullToRefreshIndicator } from "@/lib/usePullToRefresh";
@@ -137,6 +138,7 @@ export function ServiceInProgressScreen({
   onAdvanceCompleted?: () => void;
   onCancelled?: () => void;
 }) {
+  const t = useT();
   const qc = useQueryClient();
 
 
@@ -331,7 +333,7 @@ export function ServiceInProgressScreen({
       return (
         <BannerCard
           tone="warn"
-          title="5 minutes left"
+          title={t("progress.fiveLeft")}
           onExtend={() => setSheetOpen(true)}
           onDismiss={() => setBanner("dismissed-warn")}
         />
@@ -341,7 +343,7 @@ export function ServiceInProgressScreen({
       return (
         <BannerCard
           tone="end"
-          title="Time's up"
+          title={t("progress.timesUp")}
           onExtend={canExtend ? () => setSheetOpen(true) : undefined}
           onDismiss={() => setBanner("none")}
         />
@@ -362,23 +364,23 @@ export function ServiceInProgressScreen({
             <Sparkles className="h-10 w-10 text-primary" />
           </div>
           <h1 className="mt-6 text-xl font-bold text-foreground">
-            Your home is being cleaned
+            {t("progress.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Sit back and relax — we'll notify you when it's done.
+            {t("progress.sub")}
           </p>
         </div>
 
         <div className="mt-10 rounded-[18px] border border-border bg-card p-6 text-center">
           <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-            Time remaining
+            {t("progress.timeRemaining")}
           </div>
           <div className="mt-2 font-mono text-4xl font-bold tabular-nums text-foreground">
             {formatRemaining(remainingSec)}
           </div>
           {endMs == null && (
             <div className="mt-2 text-[11px] text-muted-foreground">
-              Waiting for service to start…
+              {t("progress.waitingStart")}
             </div>
           )}
         </div>
@@ -387,12 +389,12 @@ export function ServiceInProgressScreen({
 
         {address && (
           <section className="mt-5 overflow-hidden rounded-[18px] border border-border bg-card p-4">
-            <div className="text-sm font-bold text-foreground">Service location</div>
+            <div className="text-sm font-bold text-foreground">{t("progress.serviceLocation")}</div>
             <div className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
               {address.full_address}
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">
-              Live expert tracking is coming soon.
+              {t("progress.liveSoon")}
             </div>
           </section>
         )}
@@ -451,6 +453,7 @@ function BannerCard({
   onExtend?: () => void;
   onDismiss: () => void;
 }) {
+  const t = useT();
   const isEnd = tone === "end";
   return (
     <div
@@ -472,8 +475,8 @@ function BannerCard({
           <div className="text-sm font-bold text-foreground">{title}</div>
           <div className="mt-0.5 text-xs text-muted-foreground">
             {isEnd
-              ? "Extend now to keep your expert on the job."
-              : "Need more time? Extend before your service wraps up."}
+              ? t("progress.extendNow")
+              : t("progress.needMore")}
           </div>
           <div className="mt-3 flex gap-2">
             {onExtend && (
@@ -484,7 +487,7 @@ function BannerCard({
                   isEnd ? "bg-destructive" : "bg-primary"
                 }`}
               >
-                Extend time
+                {t("progress.extendTime")}
               </button>
             )}
             <button
@@ -492,7 +495,7 @@ function BannerCard({
               onClick={onDismiss}
               className="rounded-[12px] border border-border bg-card px-3 py-2 text-xs font-bold text-foreground"
             >
-              Dismiss
+              {t("progress.dismiss")}
             </button>
           </div>
         </div>
@@ -514,19 +517,20 @@ function ExtensionSheet({
   onClose: () => void;
   onPick: (o: CatalogueItem) => void;
 }) {
+  const t = useT();
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center">
       <div className="w-full max-w-md rounded-t-[22px] bg-card p-5 shadow-xl sm:rounded-[22px]">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-foreground">Extend service time</h2>
+            <h2 className="text-base font-bold text-foreground">{t("progress.extendTitle")}</h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Add more time to your ongoing booking.
+              {t("progress.extendSub")}
             </p>
           </div>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-muted"
           >
             <X className="h-4 w-4 text-foreground" />
@@ -536,7 +540,7 @@ function ExtensionSheet({
         <div className="mt-4 space-y-2">
           {options.length === 0 && (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              Loading options…
+              {t("progress.loadingOptions")}
             </p>
           )}
           {options.map((o) => {
@@ -554,11 +558,11 @@ function ExtensionSheet({
                     +{o.duration_label}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Adds {o.duration_minutes} minutes to your timer
+                    {t("progress.addsMinutes", { minutes: o.duration_minutes })}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-primary">Rs {o.price}</span>
+                  <span className="text-sm font-bold text-primary">{t("common.rupees", { amount: o.price })}</span>
                   {busy && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
                 </div>
               </button>

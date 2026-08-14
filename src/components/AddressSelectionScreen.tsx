@@ -4,6 +4,7 @@ import { ArrowLeft, Home, MapPin, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { signAddressPhotoUrl } from "@/lib/storageUrl";
 import { AddAddressMapScreen, type PickedAddress } from "./AddAddressMapScreen";
+import { useT } from "@/i18n";
 
 type Address = {
   id: string;
@@ -43,6 +44,7 @@ export function AddressSelectionScreen({
   onBack: () => void;
   onContinue: (address: Address) => void;
 }) {
+  const t = useT();
   const qc = useQueryClient();
   const { data: addresses = [], isLoading } = useQuery({
     queryKey: ["addresses"],
@@ -129,13 +131,13 @@ export function AddressSelectionScreen({
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            aria-label="Back"
+            aria-label={t("common.back")}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card"
           >
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
           <h1 className="text-base font-bold text-foreground">
-            Select Address
+            {t("address.title")}
           </h1>
         </div>
 
@@ -143,7 +145,7 @@ export function AddressSelectionScreen({
         <div className="mt-6">
           {isLoading ? (
             <div className="py-16 text-center text-sm text-muted-foreground">
-              Loading addresses…
+              {t("address.loading")}
             </div>
           ) : addresses.length === 0 ? (
             <div className="mt-8 flex flex-col items-center rounded-[18px] border border-border bg-card px-6 py-12 text-center">
@@ -151,16 +153,16 @@ export function AddressSelectionScreen({
                 <MapPin className="h-7 w-7 text-primary" />
               </div>
               <p className="mt-4 text-base font-bold text-foreground">
-                No saved addresses yet
+                {t("address.emptyTitle")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Add one to continue with your booking
+                {t("address.emptySub")}
               </p>
               <button
                 onClick={() => setSheetOpen(true)}
                 className="mt-6 w-full rounded-[14px] bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition active:scale-[0.99]"
               >
-                + Add New Address
+                {t("address.addNewPlus")}
               </button>
             </div>
           ) : (
@@ -190,7 +192,7 @@ export function AddressSelectionScreen({
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-bold text-foreground">
-                        {a.label || "Address"}
+                        {a.label || t("address.fallbackLabel")}
                       </div>
                       <div className="mt-0.5 text-sm text-muted-foreground line-clamp-2">
                         {a.full_address}
@@ -220,7 +222,7 @@ export function AddressSelectionScreen({
                 className="flex w-full items-center justify-center gap-2 rounded-[18px] border-2 border-dashed border-border bg-transparent px-4 py-4 text-sm font-bold text-primary transition active:scale-[0.99]"
               >
                 <Plus className="h-4 w-4" />
-                Add New Address
+                {t("address.addNew")}
               </button>
             </div>
           )}
@@ -239,7 +241,7 @@ export function AddressSelectionScreen({
                 : "bg-primary/30 text-primary-foreground/70"
             }`}
           >
-            Continue
+            {t("common.continue")}
           </button>
         </div>
       </div>

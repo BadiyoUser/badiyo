@@ -5,6 +5,7 @@ import {
   isHourBookable,
   toDateKey,
 } from "@/lib/hourSlots";
+import { useT } from "@/i18n";
 
 export type SelectedService = {
   duration_label: string;
@@ -46,6 +47,7 @@ export function SlotSelectionScreen({
   onBack: () => void;
   onContinue: (slot: SelectedSlot) => void;
 }) {
+  const t = useT();
   const [mode, setMode] = useState<Mode>("now");
   const days = useMemo(getNext7Days, []);
   const allSlots = useMemo(getAllHourSlots, []);
@@ -66,13 +68,13 @@ export function SlotSelectionScreen({
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            aria-label="Back"
+            aria-label={t("common.back")}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card"
           >
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
           <h1 className="text-sm font-bold text-foreground">
-            {service.duration_label} · Rs {service.price}
+            {service.duration_label} · {t("common.rupees", { amount: service.price })}
           </h1>
         </div>
 
@@ -87,7 +89,7 @@ export function SlotSelectionScreen({
                   : "text-muted-foreground"
               }`}
             >
-              {m === "now" ? "Book Now" : "Schedule Later"}
+              {m === "now" ? t("slot.bookNow") : t("slot.scheduleLater")}
             </button>
           ))}
         </div>
@@ -99,11 +101,9 @@ export function SlotSelectionScreen({
             </div>
             <div>
               <div className="text-base font-bold text-foreground">
-                Expert will arrive shortly
+                {t("slot.arriveTitle")}
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Within 30 – 45 minutes at your location
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{t("slot.arriveSub")}</p>
             </div>
           </div>
         )}
@@ -111,7 +111,7 @@ export function SlotSelectionScreen({
         {mode === "later" && (
           <>
             <h2 className="mt-6 text-sm font-bold text-foreground">
-              Choose a day
+              {t("slot.chooseDay")}
             </h2>
             <div className="mt-3 -mx-5 overflow-x-auto px-5">
               <div className="flex gap-2 pb-1">
@@ -152,11 +152,11 @@ export function SlotSelectionScreen({
             </div>
 
             <h2 className="mt-6 text-sm font-bold text-foreground">
-              Choose a time
+              {t("slot.chooseTime")}
             </h2>
             {selectedDay && visibleSlots.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">
-                No time slots left for today. Please pick another day.
+                {t("slot.noSlots")}
               </p>
             ) : (
               <div className="mt-3 grid grid-cols-3 gap-2">
@@ -206,7 +206,7 @@ export function SlotSelectionScreen({
                 : "bg-primary/30 text-primary-foreground/70"
             }`}
           >
-            Continue
+            {t("common.continue")}
           </button>
         </div>
       </div>

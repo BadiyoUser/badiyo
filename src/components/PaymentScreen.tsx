@@ -6,6 +6,7 @@ import type { SelectedAddress } from "./BookingSummaryScreen";
 import { creditReferralForBooking } from "@/lib/referrals";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { getCurrentCoords } from "@/lib/nativeGeolocation";
+import { useT } from "@/i18n";
 
 type RazorpayOptions = {
   key: string;
@@ -81,6 +82,7 @@ export function PaymentScreen({
   onDone: () => void;
   onTrackBooking: (bookingId: string | null) => void;
 }) {
+  const t = useT();
   const [status, setStatus] = useState<Status>("loading");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
@@ -311,10 +313,10 @@ export function PaymentScreen({
   const displayPrice = booking?.price ?? service.price;
   const displayWhen = booking
     ? booking.slot_type === "now"
-      ? "Now · arriving in 30–45 mins"
+      ? t("payment.nowArriving")
       : `${booking.scheduled_date ?? ""} · ${booking.scheduled_time_slot ?? ""}`
     : slot.mode === "now"
-      ? "Now · arriving in 30–45 mins"
+      ? t("payment.nowArriving")
       : `${slot.day} · ${slot.slotLabel} (${slot.slotRange})`;
   const displayPaymentId = booking?.razorpay_payment_id ?? null;
 
@@ -325,12 +327,12 @@ export function PaymentScreen({
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              aria-label="Back"
+              aria-label={t("common.back")}
               className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card"
             >
               <ArrowLeft className="h-5 w-5 text-foreground" />
             </button>
-            <h1 className="text-base font-bold text-foreground">Payment</h1>
+            <h1 className="text-base font-bold text-foreground">{t("payment.title")}</h1>
           </div>
         )}
 
@@ -338,7 +340,7 @@ export function PaymentScreen({
           <div className="mt-24 flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-sm text-muted-foreground">
-              Opening secure checkout…
+              {t("payment.opening")}
             </p>
           </div>
         )}
@@ -349,19 +351,19 @@ export function PaymentScreen({
               <CheckCircle2 className="h-16 w-16 text-primary" />
             </div>
             <h2 className="mt-6 text-2xl font-bold text-foreground">
-              Booking Confirmed
+              {t("payment.confirmed")}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Your payment was successful.
+              {t("payment.success")}
             </p>
             {displayPaymentId && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Payment ID: {displayPaymentId}
+                {t("payment.paymentId", { id: displayPaymentId })}
               </p>
             )}
             {bookingId && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Booking ID: {bookingId.slice(0, 8)}
+                {t("payment.bookingId", { id: bookingId.slice(0, 8) })}
               </p>
             )}
 
@@ -376,7 +378,7 @@ export function PaymentScreen({
 
             <section className="mt-8 w-full rounded-[18px] border border-border bg-card p-5 text-left">
               <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                Service
+                {t("payment.service")}
               </div>
               <div className="mt-1 text-base font-bold text-foreground">
                 {displayLabel}
@@ -388,15 +390,15 @@ export function PaymentScreen({
               )}
 
               <div className="mt-4 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                When
+                {t("common.when")}
               </div>
               <div className="mt-1 text-sm text-foreground">{displayWhen}</div>
 
               <div className="mt-4 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                Address
+                {t("common.address")}
               </div>
               <div className="mt-1 text-sm text-foreground">
-                {address.label || "Address"}
+                {address.label || t("address.fallbackLabel")}
               </div>
               <div className="text-xs text-muted-foreground">
                 {address.full_address}
@@ -405,10 +407,10 @@ export function PaymentScreen({
               <div className="my-4 h-px bg-border" />
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-foreground">
-                  Total paid
+                  {t("payment.totalPaid")}
                 </span>
                 <span className="text-sm font-bold text-foreground">
-                  Rs {displayPrice}
+                  {t("common.rupees", { amount: displayPrice })}
                 </span>
               </div>
             </section>
@@ -417,7 +419,7 @@ export function PaymentScreen({
               onClick={onDone}
               className="mt-8 w-full rounded-[14px] bg-primary px-4 py-3.5 text-sm font-bold text-primary-foreground transition active:scale-[0.99]"
             >
-              Done
+              {t("common.done")}
             </button>
           </div>
         )}
@@ -428,22 +430,22 @@ export function PaymentScreen({
               <XCircle className="h-16 w-16 text-destructive" />
             </div>
             <h2 className="mt-6 text-2xl font-bold text-foreground">
-              Payment Failed
+              {t("payment.failed")}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              {errorMsg || "Your payment could not be completed."}
+              {errorMsg || t("payment.failedSub")}
             </p>
             <button
               onClick={startCheckout}
               className="mt-8 w-full rounded-[14px] bg-primary px-4 py-3.5 text-sm font-bold text-primary-foreground transition active:scale-[0.99]"
             >
-              Try Again
+              {t("payment.tryAgain")}
             </button>
             <button
               onClick={onBack}
               className="mt-3 w-full rounded-[14px] border border-border bg-card px-4 py-3.5 text-sm font-bold text-foreground"
             >
-              Back to Summary
+              {t("payment.backToSummary")}
             </button>
           </div>
         )}
