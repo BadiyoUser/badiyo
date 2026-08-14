@@ -1628,6 +1628,15 @@ export type Database = {
         }
         Returns: Json
       }
+      customer_list_devices: { Args: never; Returns: Json }
+      customer_register_device: {
+        Args: { _device_id: string; _device_label?: string }
+        Returns: Json
+      }
+      customer_revoke_device: {
+        Args: { _device_id: string }
+        Returns: undefined
+      }
       ensure_start_otp: { Args: { _booking_id: string }; Returns: string }
       expand_stale_broadcasts: { Args: never; Returns: number }
       expert_ensure_booking_codes: {
