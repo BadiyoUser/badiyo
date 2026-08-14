@@ -709,6 +709,11 @@ function Index() {
           />
         </div>
       )}
+      {phase === "language" && (
+        <div className="animate-fade-slide-in">
+          <LanguageScreen onBack={() => setPhase("settings")} />
+        </div>
+      )}
       {phase === "device-limit" && (
         <div className="animate-fade-slide-in">
           <DeviceLimitScreen
