@@ -47,7 +47,8 @@ export function BookingSummaryScreen({
   onEditAddress: () => void;
   onProceedToPay: () => void;
 }) {
-  const slotInfo = formatSlot(slot);
+  const t = useT();
+  const slotInfo = formatSlot(slot, t);
 
   return (
     <main className="min-h-screen w-full bg-background pb-28">
