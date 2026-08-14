@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Clock, Gift, Home, MapPin, Mic, Search, Sparkles, User, Wind, type LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, Clock, Gift, Home, MapPin, Mic, Search, Sparkles, User, Wind, type LucideIcon } from "lucide-react";
 import { BadiyoLogo } from "./BadiyoLogo";
 import { BottomNav } from "./BottomNav";
 import { LocationPickerSheet, type SavedAddress } from "./LocationPickerSheet";
+import { ServicesBar } from "./home/ServicesBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAvatarUrl } from "@/lib/useAvatarUrl";
+import { fetchSegmentServices, fetchSegments, type Segment, type SegmentService } from "@/lib/segments";
 
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
@@ -24,31 +26,11 @@ function Icon({ name, className }: { name?: string | null; className?: string })
   return <Cmp className={className} />;
 }
 
-type Service = {
-  id: string;
-  icon: string | null;
-  duration_label: string;
-  duration_minutes: number;
-  subtitle: string | null;
-  price: number;
-  display_order: number | null;
-};
-
 type HomepageSection = {
   section_type: string;
   display_order: number;
   payload: Record<string, any>;
 };
-
-async function fetchServices(): Promise<Service[]> {
-  const { data, error } = await supabase
-    .from("service_catalogue_config")
-    .select("id, icon, duration_label, duration_minutes, subtitle, price, display_order")
-    .eq("is_active", true)
-    .order("display_order", { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as Service[];
-}
 
 async function fetchSections(): Promise<HomepageSection[]> {
   const { data, error } = await supabase
@@ -66,6 +48,68 @@ const EXPERT_TILES = [
   { image: expertDishes, label: "Cleaning Dishes" },
 ];
 
+export type BookServicePayload = {
+  duration_label: string;
+  duration_minutes: number;
+  price: number;
+  subtitle: string | null;
+  icon: string | null;
+};
+
+function toPayload(s: SegmentService): BookServicePayload {
+  return {
+    duration_label: s.duration_label,
+    duration_minutes: Number(s.duration_minutes),
+    price: Number(s.price),
+    subtitle: s.subtitle,
+    icon: s.icon,
+  };
+}
+
+/** Full-width booking card used by the existing Home Cleaning flow. */
+function ServiceCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
+  return (
+    <article className="flex items-center gap-4 rounded-[18px] border border-border bg-card p-4 shadow-sm">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
+        <Icon name={s.icon} className="h-5 w-5 text-primary" />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="text-base font-bold text-foreground">{s.duration_label}</div>
+        {s.subtitle && <div className="text-xs text-muted-foreground">{s.subtitle}</div>}
+        <div className="text-sm font-bold text-primary">Rs {Number(s.price)}</div>
+      </div>
+      <button
+        onClick={onBook}
+        className="shrink-0 rounded-[12px] bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition active:scale-[0.98]"
+      >
+        Book Now
+      </button>
+    </article>
+  );
+}
+
+/** Compact card used inside the horizontal rows of the "All" tab. */
+function ServiceMiniCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
+  return (
+    <article className="flex w-[150px] shrink-0 flex-col rounded-[18px] border border-border bg-card p-4 shadow-sm">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+        <Icon name={s.icon} className="h-5 w-5 text-primary" />
+      </div>
+      <div className="mt-3 text-sm font-bold leading-tight text-foreground">{s.duration_label}</div>
+      {s.subtitle && (
+        <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{s.subtitle}</div>
+      )}
+      <div className="mt-1 text-sm font-bold text-primary">Rs {Number(s.price)}</div>
+      <button
+        onClick={onBook}
+        className="mt-3 rounded-[12px] bg-primary px-3 py-2 text-xs font-bold text-primary-foreground transition active:scale-[0.98]"
+      >
+        Book Now
+      </button>
+    </article>
+  );
+}
+
 export function HomeScreen({
   onBookService,
   onOpenProfile,
@@ -73,24 +117,22 @@ export function HomeScreen({
   onOpenOrders,
   onSearch,
 }: {
-  onBookService?: (service: { duration_label: string; duration_minutes: number; price: number; subtitle: string | null; icon: string | null }) => void;
+  onBookService?: (service: BookServicePayload) => void;
   onOpenProfile?: () => void;
   onOpenRewards?: () => void;
   onOpenOrders?: () => void;
   onSearch?: (query: string) => void;
 }) {
-
-
+  const { data: segments = [] } = useQuery({ queryKey: ["segments"], queryFn: fetchSegments });
   const { data: services = [] } = useQuery({
-    queryKey: ["services"],
-    queryFn: fetchServices,
+    queryKey: ["segment_services"],
+    queryFn: fetchSegmentServices,
   });
   const { data: sections = [] } = useQuery({
     queryKey: ["homepage_sections"],
     queryFn: fetchSections,
   });
   const { data: avatarUrl } = useAvatarUrl();
-
 
   const searchBar = sections.find((s) => s.section_type === "search_bar");
   const promo = sections.find((s) => s.section_type === "promo_banner");
@@ -101,7 +143,7 @@ export function HomeScreen({
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
   const [activeAddress, setActiveAddress] = useState<SavedAddress | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -126,6 +168,10 @@ export function HomeScreen({
   }, []);
 
   const locationLabel = activeAddress?.area ?? activeAddress?.label ?? "Lahoti Compound";
+
+  const activeSegment = segments.find((s) => s.id === activeSegmentId) ?? null;
+  const servicesFor = (segment: Segment) =>
+    services.filter((s) => s.segment_id === segment.id);
 
   return (
     <main className="min-h-screen w-full bg-background pb-28">
@@ -158,7 +204,6 @@ export function HomeScreen({
               <User className="h-5 w-5 text-primary" />
             )}
           </button>
-
         </header>
 
         {/* Search bar */}
@@ -181,79 +226,78 @@ export function HomeScreen({
           </button>
         </form>
 
+        {/* Services bar (segment tabs) */}
+        <ServicesBar
+          segments={segments}
+          activeSegmentId={activeSegmentId}
+          onSelect={setActiveSegmentId}
+        />
 
-        {/* Book Cleaning section */}
-        <h2 className="mt-3 text-lg font-extrabold tracking-tight text-foreground">
-          Book Cleaning
-        </h2>
-
-        <div className="mt-4 flex flex-col gap-3">
-          {services.map((s) => (
-            <article
-              key={s.id}
-              className="flex items-center gap-4 rounded-[18px] border border-border bg-card p-4 shadow-sm"
-            >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                <Icon name={s.icon} className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col">
-                <div className="text-base font-bold text-foreground">
-                  {s.duration_label}
-                </div>
-                {s.subtitle && (
-                  <div className="text-xs text-muted-foreground">
-                    {s.subtitle}
+        {activeSegment ? (
+          <SegmentView
+            segment={activeSegment}
+            services={servicesFor(activeSegment)}
+            onBookService={onBookService}
+          />
+        ) : (
+          <div className="mt-2">
+            {segments.map((segment) => {
+              const items = servicesFor(segment).slice(0, 3);
+              if (items.length === 0) return null;
+              return (
+                <section key={segment.id} className="mt-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-lg font-extrabold tracking-tight text-foreground">
+                      {segment.name}
+                    </h2>
+                    <button
+                      onClick={() => setActiveSegmentId(segment.id)}
+                      className="flex items-center gap-0.5 text-sm font-bold text-primary"
+                    >
+                      See all
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
                   </div>
-                )}
-                <div className="text-sm font-bold text-primary">
-                  Rs {Number(s.price)}
+                  <div className="-mx-5 mt-3 overflow-x-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <div className="flex w-max gap-3">
+                      {items.map((s) => (
+                        <ServiceMiniCard
+                          key={s.id}
+                          s={s}
+                          onBook={() => onBookService?.(toPayload(s))}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              );
+            })}
+
+            {/* Expert tiles */}
+            <h2 className="mt-8 text-xl font-extrabold tracking-tight text-foreground">
+              One Expert who can do it all
+            </h2>
+            <div className="mt-5 grid grid-cols-3 gap-4">
+              {EXPERT_TILES.map((tile) => (
+                <div key={tile.label} className="flex flex-col">
+                  <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
+                    <img
+                      src={tile.image}
+                      alt={tile.label}
+                      width={512}
+                      height={512}
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
+                    {tile.label}
+                  </p>
                 </div>
-              </div>
-              <button
-                onClick={() =>
-                  onBookService?.({
-                    duration_label: s.duration_label,
-                    duration_minutes: Number(s.duration_minutes),
-                    price: Number(s.price),
-                    subtitle: s.subtitle,
-                    icon: s.icon,
-                  })
-                }
-                className="shrink-0 rounded-[12px] bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition active:scale-[0.98]"
-              >
-                Book Now
-              </button>
-            </article>
-          ))}
-        </div>
-
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          Need it later? Schedule a time inside booking
-        </p>
-
-        {/* Expert tiles */}
-        <h2 className="mt-3 text-xl font-extrabold tracking-tight text-foreground">
-          One Expert who can do it all
-        </h2>
-        <div className="mt-5 grid grid-cols-3 gap-4">
-          {EXPERT_TILES.map((tile) => (
-            <div key={tile.label} className="flex flex-col">
-              <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
-                <img
-                  src={tile.image}
-                  alt={tile.label}
-                  width={512}
-                  height={512}
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
-                {tile.label}
-              </p>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
 
         {/* Promo banner */}
         {promo && (
@@ -279,11 +323,10 @@ export function HomeScreen({
 
       <BottomNav
         activeKey="home"
-        onHome={() => {}}
+        onHome={() => setActiveSegmentId(null)}
         onOrders={onOpenOrders ?? (() => {})}
         onRewards={onOpenRewards ?? (() => {})}
       />
-
 
       <LocationPickerSheet
         open={locationSheetOpen}
@@ -295,5 +338,72 @@ export function HomeScreen({
         }}
       />
     </main>
+  );
+}
+
+/**
+ * A segment's dedicated page. Only CATEGORY_FIRST is implemented today (the
+ * existing Home Cleaning booking list); STORE_FIRST / SEARCH_FIRST can be
+ * added as extra branches without touching the rest of Home.
+ */
+function SegmentView({
+  segment,
+  services,
+  onBookService,
+}: {
+  segment: Segment;
+  services: SegmentService[];
+  onBookService?: (s: BookServicePayload) => void;
+}) {
+  if (segment.display_template !== "CATEGORY_FIRST") {
+    return (
+      <div className="mt-8 rounded-[18px] border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-bold text-foreground">{segment.name} is coming soon</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          We're getting this section ready for you.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <h2 className="mt-5 text-lg font-extrabold tracking-tight text-foreground">
+        Book {segment.name}
+      </h2>
+
+      <div className="mt-4 flex flex-col gap-3">
+        {services.map((s) => (
+          <ServiceCard key={s.id} s={s} onBook={() => onBookService?.(toPayload(s))} />
+        ))}
+      </div>
+
+      <p className="mt-4 text-center text-xs text-muted-foreground">
+        Need it later? Schedule a time inside booking
+      </p>
+
+      <h2 className="mt-6 text-xl font-extrabold tracking-tight text-foreground">
+        One Expert who can do it all
+      </h2>
+      <div className="mt-5 grid grid-cols-3 gap-4">
+        {EXPERT_TILES.map((tile) => (
+          <div key={tile.label} className="flex flex-col">
+            <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
+              <img
+                src={tile.image}
+                alt={tile.label}
+                width={512}
+                height={512}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
+              {tile.label}
+            </p>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
