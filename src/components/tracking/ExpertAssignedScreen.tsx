@@ -174,10 +174,10 @@ export function ExpertAssignedScreen({
   const isAccepted = status === "accepted";
 
   const headline = isConfirmed
-    ? "Finding your expert…"
+    ? t("track.findingExpert")
     : isAccepted
-      ? "Expert being assigned…"
-      : "Expert assigned";
+      ? t("track.assigningExpert")
+      : t("track.assignedTitle");
 
   return (
     <main className="min-h-screen w-full bg-background pb-8">
@@ -185,7 +185,7 @@ export function ExpertAssignedScreen({
       <div className="mx-auto w-full max-w-md px-5 pt-6">
         <h1 className="text-lg font-bold text-foreground">{headline}</h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          Booking #{bookingId?.slice(0, 8) ?? "—"}
+          {t("track.bookingNo", { id: bookingId?.slice(0, 8) ?? "—" })}
         </p>
 
         {/* Stage progress */}
@@ -213,9 +213,9 @@ export function ExpertAssignedScreen({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="truncate text-base font-bold text-foreground">
-                  {expert?.name ?? "Your expert"}
+                  {expert?.name ?? t("track.yourExpert")}
                 </div>
-                <div className="mt-0.5 text-xs text-muted-foreground">Verified Expert</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">{t("track.verifiedExpert")}</div>
               </div>
             </div>
 
@@ -223,11 +223,11 @@ export function ExpertAssignedScreen({
               <div className="mt-4">
                 <a
                   href={`tel:${expert.phone}`}
-                  aria-label="Call expert"
+                  aria-label={t("track.callExpert")}
                   className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-primary px-4 py-3 text-sm font-bold text-primary-foreground active:scale-[0.99]"
                 >
                   <Phone className="h-4 w-4" />
-                  Call expert
+                  {t("track.callExpert")}
                 </a>
               </div>
             )}
@@ -235,7 +235,7 @@ export function ExpertAssignedScreen({
             {/* Start code shown directly — no hidden button */}
             <div className="mt-4 rounded-[14px] border border-primary/30 bg-primary/5 p-4 text-center">
               <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                Start Code
+                {t("track.startCode")}
               </div>
               <div className="mt-1 flex items-center justify-center gap-2 font-mono text-3xl font-bold tracking-[0.35em] text-primary">
                 {booking?.start_otp ? (
@@ -244,13 +244,13 @@ export function ExpertAssignedScreen({
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
                     <span className="text-sm font-medium text-muted-foreground">
-                      Preparing code…
+                      {t("track.preparingCode")}
                     </span>
                   </>
                 )}
               </div>
               <p className="mt-2 text-[11px] text-muted-foreground">
-                Show this to your expert once they arrive.
+                {t("track.showToExpert")}
               </p>
               {onShowStartOtp && (
                 <button
@@ -258,7 +258,7 @@ export function ExpertAssignedScreen({
                   onClick={onShowStartOtp}
                   className="mt-3 text-xs font-bold text-primary underline"
                 >
-                  Open full-screen
+                  {t("track.openFullScreen")}
                 </button>
               )}
             </div>
@@ -272,12 +272,12 @@ export function ExpertAssignedScreen({
               </div>
               <div className="flex-1">
                 <div className="text-base font-bold text-foreground">
-                  {isConfirmed ? "Finding your expert" : "Assigning your expert"}
+                  {isConfirmed ? t("track.finding") : t("track.assigning")}
                 </div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
                   {isConfirmed
-                    ? "We're notifying nearby experts. This usually takes just a moment."
-                    : "Our team has accepted your booking and is picking the best expert for you."}
+                    ? t("track.notifyingNearby")
+                    : t("track.pickingBest")}
                 </div>
               </div>
             </div>
