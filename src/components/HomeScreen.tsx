@@ -393,11 +393,12 @@ function SegmentView({
         {t("home.bookSegment", { segment: segment.name })}
       </h2>
 
-      <div className="mt-4 flex flex-col gap-3">
+      <div className="mt-4 grid grid-cols-3 gap-2.5">
         {services.map((s) => (
-          <ServiceCard key={s.id} s={s} onBook={() => onBookService?.(toPayload(s))} />
+          <ServiceMiniCard key={s.id} s={s} onBook={() => onBookService?.(toPayload(s))} />
         ))}
       </div>
+
 
       <p className="mt-4 text-center text-xs text-muted-foreground">
         {t("home.scheduleHint")}
