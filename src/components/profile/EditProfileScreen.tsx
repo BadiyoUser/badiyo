@@ -44,7 +44,7 @@ export function EditProfileScreen({ onBack }: { onBack: () => void }) {
         setFullName(data.full_name ?? "");
         const rawEmail = data.email ?? "";
         // Hide internal synthetic emails used for phone-OTP auth
-        const isSynthetic = /@badiyo\.phone\.local$/i.test(rawEmail);
+        const isSynthetic = /@badiyos?\.phone\.local$/i.test(rawEmail);
         setSyntheticEmail(isSynthetic ? rawEmail : null);
         setEmail(isSynthetic ? "" : rawEmail);
         setPhone(data.phone ?? "");
