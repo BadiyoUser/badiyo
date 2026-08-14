@@ -13,6 +13,8 @@ export type SelectedService = {
   price: number;
   subtitle: string | null;
   icon: string | null;
+  segment_id?: string | null;
+  segment_name?: string | null;
 };
 
 export type SelectedSlot =

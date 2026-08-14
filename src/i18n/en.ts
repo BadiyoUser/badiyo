@@ -165,6 +165,18 @@ export const en = {
   "language.marathi": "मराठी",
   "language.saved": "Language updated",
   "language.saveFailed": "Couldn't save your language. Please try again.",
+
+  // ── Not serviceable / waitlist ───────────────────────────
+  "notServiceable.title": "Service Area",
+  "notServiceable.heading": "We're not in your area yet",
+  "notServiceable.sub": "badiyo hasn't launched here yet — but we're expanding fast.",
+  "notServiceable.subSegment": "{segment} hasn't launched in your area yet — but we're expanding fast.",
+  "notServiceable.join": "Join Waitlist",
+  "notServiceable.joining": "Adding you…",
+  "notServiceable.joinFailed": "Couldn't add you to the waitlist. Please try again.",
+  "notServiceable.onTheList": "You're on the list!",
+  "notServiceable.confirmation": "We'll notify you the moment we launch in your area!",
+  "notServiceable.changeAddress": "Try another address",
 } as const;
 
 export type TranslationKey = keyof typeof en;

@@ -81,15 +81,19 @@ export type BookServicePayload = {
   price: number;
   subtitle: string | null;
   icon: string | null;
+  segment_id: string | null;
+  segment_name: string | null;
 };
 
-function toPayload(s: SegmentService): BookServicePayload {
+function toPayload(s: SegmentService, segment?: Segment | null): BookServicePayload {
   return {
     duration_label: s.duration_label,
     duration_minutes: Number(s.duration_minutes),
     price: Number(s.price),
     subtitle: s.subtitle,
     icon: s.icon,
+    segment_id: s.segment_id ?? segment?.id ?? null,
+    segment_name: segment?.name ?? null,
   };
 }
 
@@ -302,7 +306,7 @@ export function HomeScreen({
                       <ServiceMiniCard
                         key={s.id}
                         s={s}
-                        onBook={() => onBookService?.(toPayload(s))}
+                        onBook={() => onBookService?.(toPayload(s, segment))}
                       />
                     ))}
                   </div>
@@ -395,7 +399,7 @@ function SegmentView({
 
       <div className="mt-4 grid grid-cols-3 gap-2.5">
         {services.map((s) => (
-          <ServiceMiniCard key={s.id} s={s} onBook={() => onBookService?.(toPayload(s))} />
+          <ServiceMiniCard key={s.id} s={s} onBook={() => onBookService?.(toPayload(s, segment))} />
         ))}
       </div>
 

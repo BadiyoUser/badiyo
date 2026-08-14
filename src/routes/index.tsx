@@ -4,6 +4,11 @@ import { toast } from "sonner";
 import { initNativeBackButton, setRootBackHandler } from "@/lib/backHandler";
 
 import { BadiyoLogo } from "@/components/BadiyoLogo";
+import {
+  NotServiceableScreen,
+  type NotServiceableLocation,
+} from "@/components/NotServiceableScreen";
+import { checkServiceability } from "@/lib/serviceability";
 import { LoginScreen } from "@/components/LoginScreen";
 import { OtpVerifyScreen } from "@/components/OtpVerifyScreen";
 import { PinLoginScreen } from "@/components/PinLoginScreen";
@@ -99,7 +104,8 @@ type Phase =
   | "orders"
   | "active-devices"
   | "language"
-  | "device-limit";
+  | "device-limit"
+  | "not-serviceable";
 
 
 
@@ -126,6 +132,7 @@ function Index() {
   const [selectedService, setSelectedService] = useState<SelectedService | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<SelectedAddress | null>(null);
+  const [notServiceable, setNotServiceable] = useState<NotServiceableLocation | null>(null);
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
   const [activeBookingStatus, setActiveBookingStatus] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null);
@@ -417,10 +424,42 @@ function Index() {
         <div className="animate-fade-slide-in">
           <AddressSelectionScreen
             onBack={() => setPhase("slot")}
-            onContinue={(addr) => {
+            onContinue={async (addr) => {
+              const segmentId = selectedService?.segment_id ?? null;
+              try {
+                const res = await checkServiceability(
+                  addr.latitude,
+                  addr.longitude,
+                  segmentId,
+                );
+                if (!res.serviceable) {
+                  setNotServiceable({
+                    segmentId,
+                    latitude: Number(addr.latitude ?? 0),
+                    longitude: Number(addr.longitude ?? 0),
+                    addressText: addr.full_address,
+                    area: addr.area,
+                    city: addr.city,
+                  });
+                  setPhase("not-serviceable");
+                  return;
+                }
+              } catch {
+                // If the check itself fails, don't block the booking.
+              }
               setSelectedAddress(addr);
               setPhase("summary");
             }}
+          />
+        </div>
+      )}
+      {phase === "not-serviceable" && notServiceable && (
+        <div className="animate-fade-slide-in">
+          <NotServiceableScreen
+            location={notServiceable}
+            segmentName={selectedService?.segment_name ?? null}
+            onBack={() => setPhase("address")}
+            onChangeAddress={() => setPhase("address")}
           />
         </div>
       )}
