@@ -5,6 +5,7 @@ export type DisplayTemplate = "CATEGORY_FIRST" | "STORE_FIRST" | "SEARCH_FIRST" 
 export type Segment = {
   id: string;
   name: string;
+  short_name: string | null;
   slug: string;
   vertical_type: string;
   display_template: DisplayTemplate;
@@ -25,7 +26,7 @@ export type SegmentService = {
 export async function fetchSegments(): Promise<Segment[]> {
   const { data, error } = await supabase
     .from("segments")
-    .select("id, name, slug, vertical_type, display_template, rank")
+    .select("id, name, short_name, slug, vertical_type, display_template, rank")
     .eq("is_active", true)
     .order("rank", { ascending: true });
   if (error) throw error;
