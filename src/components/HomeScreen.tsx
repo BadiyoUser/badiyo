@@ -50,6 +50,31 @@ const EXPERT_TILES: { image: string; labelKey: TranslationKey }[] = [
   { image: expertDishes, labelKey: "home.tile.dishes" },
 ];
 
+function ExpertTiles() {
+  const t = useT();
+  return (
+    <div className="mt-5 grid grid-cols-3 gap-4">
+      {EXPERT_TILES.map((tile) => (
+        <div key={tile.labelKey} className="flex flex-col">
+          <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
+            <img
+              src={tile.image}
+              alt={t(tile.labelKey)}
+              width={512}
+              height={512}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
+            {t(tile.labelKey)}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export type BookServicePayload = {
   duration_label: string;
   duration_minutes: number;
