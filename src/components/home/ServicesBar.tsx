@@ -1,0 +1,44 @@
+import type { Segment } from "@/lib/segments";
+
+export function ServicesBar({
+  segments,
+  activeSegmentId,
+  onSelect,
+}: {
+  segments: Segment[];
+  activeSegmentId: string | null;
+  onSelect: (segmentId: string | null) => void;
+}) {
+  const tabs: { id: string | null; label: string }[] = [
+    { id: null, label: "All" },
+    ...segments.map((s) => ({ id: s.id, label: s.name })),
+  ];
+
+  return (
+    <nav
+      aria-label="Services"
+      className="-mx-5 mt-4 overflow-x-auto px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      <div className="flex w-max items-center gap-2">
+        {tabs.map((t) => {
+          const active = t.id === activeSegmentId;
+          return (
+            <button
+              key={t.id ?? "all"}
+              onClick={() => onSelect(t.id)}
+              aria-current={active ? "page" : undefined}
+              className={
+                "shrink-0 rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.98] " +
+                (active
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-card text-foreground")
+              }
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
