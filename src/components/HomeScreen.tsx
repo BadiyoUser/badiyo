@@ -141,12 +141,13 @@ export function HomeScreen({
     queryFn: fetchSections,
   });
   const { data: avatarUrl } = useAvatarUrl();
+  const t = useT();
 
   const searchBar = sections.find((s) => s.section_type === "search_bar");
   const promo = sections.find((s) => s.section_type === "promo_banner");
 
   const searchPlaceholder =
-    searchBar?.payload?.placeholder ?? "Search for cleaning services…";
+    searchBar?.payload?.placeholder ?? t("home.searchPlaceholder");
 
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
   const [activeAddress, setActiveAddress] = useState<SavedAddress | null>(null);
@@ -197,13 +198,13 @@ export function HomeScreen({
           </button>
           <button
             onClick={onOpenProfile}
-            aria-label="Profile"
+            aria-label={t("common.profile")}
             className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary/60 bg-card"
           >
             {avatarUrl ? (
               <img
                 src={avatarUrl}
-                alt="Profile"
+                alt={t("common.profile")}
                 className="h-full w-full object-cover"
                 loading="eager"
                 decoding="async"
@@ -229,7 +230,7 @@ export function HomeScreen({
             className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/80"
             placeholder={searchPlaceholder}
           />
-          <button type="button" aria-label="Voice search">
+          <button type="button" aria-label={t("home.voiceSearch")}>
             <Mic className="h-5 w-5 text-muted-foreground" />
           </button>
         </form>
@@ -262,7 +263,7 @@ export function HomeScreen({
                       onClick={() => setActiveSegmentId(segment.id)}
                       className="flex items-center gap-0.5 text-sm font-bold text-primary"
                     >
-                      See all
+                      {t("home.seeAll")}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
@@ -283,27 +284,9 @@ export function HomeScreen({
 
             {/* Expert tiles */}
             <h2 className="mt-8 text-xl font-extrabold tracking-tight text-foreground">
-              One Expert who can do it all
+              {t("home.oneExpert")}
             </h2>
-            <div className="mt-5 grid grid-cols-3 gap-4">
-              {EXPERT_TILES.map((tile) => (
-                <div key={tile.label} className="flex flex-col">
-                  <div className="aspect-square overflow-hidden rounded-[16px] bg-muted">
-                    <img
-                      src={tile.image}
-                      alt={tile.label}
-                      width={512}
-                      height={512}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <p className="mt-2 text-center text-xs font-semibold text-foreground leading-tight">
-                    {tile.label}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <ExpertTiles />
           </div>
         )}
 
