@@ -77,7 +77,7 @@ export function StageTracker({ stage }: { stage: TrackingStage }) {
                   active ? "text-primary" : done ? "text-foreground" : "text-muted-foreground"
                 }`}
               >
-                {s.label}
+                {t(s.labelKey)}
               </div>
             </div>
           );
