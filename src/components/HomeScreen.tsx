@@ -8,6 +8,8 @@ import { ServicesBar } from "./home/ServicesBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAvatarUrl } from "@/lib/useAvatarUrl";
 import { fetchSegmentServices, fetchSegments, type Segment, type SegmentService } from "@/lib/segments";
+import { useT } from "@/i18n";
+import type { TranslationKey } from "@/i18n/en";
 
 import expertHouse from "@/assets/expert-house-cleaning.jpg";
 import expertDusting from "@/assets/expert-dusting.jpg";
@@ -42,10 +44,10 @@ async function fetchSections(): Promise<HomepageSection[]> {
   return (data ?? []) as HomepageSection[];
 }
 
-const EXPERT_TILES = [
-  { image: expertHouse, label: "House Cleaning" },
-  { image: expertDusting, label: "Dusting & Wiping" },
-  { image: expertDishes, label: "Cleaning Dishes" },
+const EXPERT_TILES: { image: string; labelKey: TranslationKey }[] = [
+  { image: expertHouse, labelKey: "home.tile.houseCleaning" },
+  { image: expertDusting, labelKey: "home.tile.dusting" },
+  { image: expertDishes, labelKey: "home.tile.dishes" },
 ];
 
 export type BookServicePayload = {
@@ -68,6 +70,7 @@ function toPayload(s: SegmentService): BookServicePayload {
 
 /** Full-width booking card used by the existing Home Cleaning flow. */
 function ServiceCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
+  const t = useT();
   return (
     <article className="flex items-center gap-4 rounded-[18px] border border-border bg-card p-4 shadow-sm">
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -76,13 +79,15 @@ function ServiceCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="text-base font-bold text-foreground">{s.duration_label}</div>
         {s.subtitle && <div className="text-xs text-muted-foreground">{s.subtitle}</div>}
-        <div className="text-sm font-bold text-primary">Rs {Number(s.price)}</div>
+        <div className="text-sm font-bold text-primary">
+          {t("common.rupees", { amount: Number(s.price) })}
+        </div>
       </div>
       <button
         onClick={onBook}
         className="shrink-0 rounded-[12px] bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition active:scale-[0.98]"
       >
-        Book Now
+        {t("home.bookNow")}
       </button>
     </article>
   );
@@ -90,6 +95,7 @@ function ServiceCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
 
 /** Compact card used inside the horizontal rows of the "All" tab. */
 function ServiceMiniCard({ s, onBook }: { s: SegmentService; onBook: () => void }) {
+  const t = useT();
   return (
     <article className="flex w-[150px] shrink-0 flex-col rounded-[18px] border border-border bg-card p-4 shadow-sm">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -99,12 +105,14 @@ function ServiceMiniCard({ s, onBook }: { s: SegmentService; onBook: () => void 
       {s.subtitle && (
         <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{s.subtitle}</div>
       )}
-      <div className="mt-1 text-sm font-bold text-primary">Rs {Number(s.price)}</div>
+      <div className="mt-1 text-sm font-bold text-primary">
+        {t("common.rupees", { amount: Number(s.price) })}
+      </div>
       <button
         onClick={onBook}
         className="mt-3 rounded-[12px] bg-primary px-3 py-2 text-xs font-bold text-primary-foreground transition active:scale-[0.98]"
       >
-        Book Now
+        {t("home.bookNow")}
       </button>
     </article>
   );
