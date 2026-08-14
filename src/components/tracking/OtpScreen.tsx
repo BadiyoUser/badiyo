@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { useT } from "@/i18n";
 
 type Kind = "start" | "end";
 
@@ -20,14 +21,9 @@ export function OtpScreen({
   kind: Kind;
   onVerified: () => void;
 }) {
-  const title =
-    kind === "start"
-      ? "Share this code with your expert to start"
-      : "Share this code to confirm completion";
-  const subtitle =
-    kind === "start"
-      ? "Read this 4-digit code aloud to your expert. They'll enter it to begin the service."
-      : "Read this 4-digit code aloud to your expert. They'll enter it to mark the service complete.";
+  const t = useT();
+  const title = kind === "start" ? t("otp.startTitle") : t("otp.endTitle");
+  const subtitle = kind === "start" ? t("otp.startSub") : t("otp.endSub");
   const targetStatus = kind === "start" ? "in_progress" : "completed";
 
   const [code, setCode] = useState<string | null>(null);

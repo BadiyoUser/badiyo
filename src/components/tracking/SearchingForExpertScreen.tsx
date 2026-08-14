@@ -123,9 +123,9 @@ export function SearchingForExpertScreen({
   return (
     <main className="min-h-screen w-full bg-background pb-8">
       <div className="mx-auto w-full max-w-md px-5 pt-6">
-        <h1 className="text-lg font-bold text-foreground">Finding your expert…</h1>
+        <h1 className="text-lg font-bold text-foreground">{t("track.findingExpert")}</h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          Booking #{bookingId?.slice(0, 8) ?? "—"}
+          {t("track.bookingNo", { id: bookingId?.slice(0, 8) ?? "—" })}
         </p>
 
         <div className="mt-5">
@@ -147,11 +147,11 @@ export function SearchingForExpertScreen({
               </div>
             </div>
             <h2 className="mt-5 text-base font-bold text-foreground">
-              Searching for the nearest available expert
+              {t("track.searchingTitle")}
             </h2>
             <p className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
-              This usually takes a minute
+              {t("track.searchingSub")}
             </p>
           </div>
         </section>
@@ -159,7 +159,7 @@ export function SearchingForExpertScreen({
         {/* Booking summary */}
         <section className="mt-5 rounded-[18px] border border-border bg-card p-4">
           <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-            Booking Summary
+            {t("track.summary")}
           </div>
           {service && (
             <div className="mt-2 flex items-start justify-between gap-3">
@@ -167,13 +167,13 @@ export function SearchingForExpertScreen({
                 {service.duration_label}
                 {service.subtitle ? ` · ${service.subtitle}` : ""}
               </div>
-              <div className="text-sm font-bold text-primary">Rs {service.price}</div>
+              <div className="text-sm font-bold text-primary">{t("common.rupees", { amount: service.price })}</div>
             </div>
           )}
           {slot && (
             <div className="mt-1 text-xs text-muted-foreground">
               {slot.mode === "now"
-                ? "As soon as possible"
+                ? t("track.asap")
                 : `${slot.day} · ${slot.slotLabel} (${slot.slotRange})`}
             </div>
           )}
